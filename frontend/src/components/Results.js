@@ -1,22 +1,31 @@
+// src/components/Results.js
 import React from 'react';
+import './Results.css'; 
 
 function Results({ result }) {
   return (
-    <div>
-      <h2>Recommended Stream(s):</h2>
-      <ul>
-        {result.recommended_streams.map((stream) => (
-          <li key={stream}>{stream}</li>
+    <div className="Results-container">
+      <h1>Your Recommended Stream(s)</h1>
+      <ul className="stream-list">
+        {result.recommended_streams.map((stream, index) => (
+          <li key={index} className="stream-item">{stream}</li>
         ))}
       </ul>
-      <h3>Recommended Maths Option: {result.maths_recommendation}</h3>
-      <h4>Scores:</h4>
-      <ul>
+
+      <h2>Maths Recommendation</h2>
+      <p className="maths-recommendation">{result.maths_recommendation}</p>
+
+      <h2>Category Scores</h2>
+      <div className="score-grid">
         {Object.entries(result.scores).map(([category, score]) => (
-          <li key={category}>{category}: {score}</li>
+          <div key={category} className="score-card">
+            <h3>{category}</h3>
+            <p>{score} / 25</p>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
+
 export default Results;
