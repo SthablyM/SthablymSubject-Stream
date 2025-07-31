@@ -1,10 +1,10 @@
-// src/components/Quiz.js
 import React, { useState } from 'react';
 import Questions from './Questions';
 import axios from 'axios';
 import Results from './Results';
 
 const questionsData  = [
+
   {
     category: 'Scientific Curiosity',
     questions: [

@@ -1,4 +1,3 @@
-// src/components/Question.js
 import React from 'react';
 
 function Question({ question, options, selectedOption, onSelectOption }) {
