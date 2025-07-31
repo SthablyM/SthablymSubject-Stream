@@ -1,10 +1,18 @@
-// src/components/Results.js
 import React from 'react';
 import './Results.css'; 
 
 function Results({ result }) {
   return (
-    <div className="Results-container">
+    <div
+  className="results-container"
+  style={{
+    backgroundImage: "url('/studentimage.png')",
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center center',
+  }}
+>
+
       <h1>Your Recommended Stream(s)</h1>
       <ul className="stream-list">
         {result.recommended_streams.map((stream, index) => (
@@ -24,6 +32,10 @@ function Results({ result }) {
           </div>
         ))}
       </div>
+
+      <button className="retake-button" onClick={() => window.location.reload()}>
+        Retake Quiz
+      </button>
     </div>
   );
 }
