@@ -4,7 +4,6 @@ import axios from 'axios';
 import Results from './Results';
 
 const questionsData  = [
-
   {
     category: 'Scientific Curiosity',
     questions: [
@@ -88,17 +87,30 @@ const questionsData  = [
 ];
 
 
+const extraMathQuestions = [
+  { question: "What is 12 × 8?", answer: "96" },
+  { question: "Solve for x: 2x + 3 = 11", answer: "4" },
+  { question: "If a triangle has angles 50° and 60°, what is the third angle?", answer: "70" },
+  { question:  "what is the square root of 144?", answer: "12"},
+  { question:   "what is 15% of 200?", answer: "30"}
+];
 const options = ["Strongly Agree", "Agree", "Neutral", "Disagree", "Strongly Disagree"];
 
 function Quiz() {
   const [answers, setAnswers] = useState({});
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [showExtraMath, setShowExtraMath] = useState(false);
+  const [extraMathIndex, setExtraMathIndex] = useState(0);
+  const [extraMathAnswer, setExtraMathAnswer] = useState("");
+  const [extraMathCorrectCount, setExtraMathCorrectCount] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [resultData, setResultData] = useState(null);
 
   const currentCategory = questionsData[currentCategoryIndex];
-  const currentQuestion = currentCategory.questions[currentQuestionIndex];
+  const currentQuestionText = showExtraMath
+    ? extraMathQuestions[extraMathIndex].question
+    : currentCategory.questions[currentQuestionIndex];
 
   const handleAnswer = (option) => {
     const key = `${currentCategory.category}-${currentQuestionIndex}`;
@@ -106,6 +118,23 @@ function Quiz() {
 
     if (currentQuestionIndex < currentCategory.questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else if (currentCategory.category === "Maths Aptitude & Interest") {
+      const mathsAnswers = [
+        ...Object.keys(answers)
+          .filter(k => k.startsWith("Maths Aptitude & Interest"))
+          .map(k => answers[k]),
+        option
+      ];
+
+      const strongMath = mathsAnswers.some(ans => ans === "Strongly Agree" || ans === "Agree");
+
+      if (strongMath) {
+        setShowExtraMath(true);
+        setExtraMathIndex(0);
+      } else {
+        // They are weak in math → skip extra math → no need to force Pure Maths
+        submitQuiz();
+      }
     } else if (currentCategoryIndex < questionsData.length - 1) {
       setCurrentCategoryIndex(currentCategoryIndex + 1);
       setCurrentQuestionIndex(0);
@@ -114,17 +143,54 @@ function Quiz() {
     }
   };
 
+  const handleExtraMathSubmit = () => {
+    const key = `ExtraMath-${extraMathIndex}`;
+    setAnswers({ ...answers, [key]: extraMathAnswer });
+
+    if (extraMathAnswer === extraMathQuestions[extraMathIndex].answer) {
+      setExtraMathCorrectCount(extraMathCorrectCount + 1);
+    }
+
+    setExtraMathAnswer("");
+
+    if (extraMathIndex < extraMathQuestions.length - 1) {
+      setExtraMathIndex(extraMathIndex + 1);
+    } else {
+      submitQuiz();
+    }
+  };
+
   const submitQuiz = async () => {
     const groupedAnswers = {};
     Object.keys(answers).forEach((key) => {
-      const [category, qIndex] = key.split('-');
-      if (!groupedAnswers[category]) groupedAnswers[category] = [];
-      groupedAnswers[category].push(answers[key]);
+      if (key.startsWith("ExtraMath")) {
+        if (!groupedAnswers["ExtraMath"]) groupedAnswers["ExtraMath"] = [];
+        groupedAnswers["ExtraMath"].push(answers[key]);
+      } else {
+        const [category] = key.split('-');
+        if (!groupedAnswers[category]) groupedAnswers[category] = [];
+        groupedAnswers[category].push(answers[key]);
+      }
     });
 
     try {
       const res = await axios.post('http://localhost:5000/api/submit-quiz', { answers: groupedAnswers });
-      setResultData(res.data);
+      const finalData = res.data;
+
+      // Extra math grading logic
+      if (showExtraMath) {
+        const total = extraMathQuestions.length;
+        const scorePercent = (extraMathCorrectCount / total) * 100;
+
+        // ✅ Vice versa: ≥50% correct → Maths Literacy, <50% → Pure Maths
+        if (scorePercent != 100) {
+          finalData.maths_recommendation = "MATHS LITARACY OR TECHNICAL MATHS";
+        } else {
+          finalData.maths_recommendation = "PURE MATHS";
+        }
+      }
+
+      setResultData(finalData);
       setShowResult(true);
     } catch (error) {
       console.error("Error submitting quiz:", error);
@@ -135,13 +201,27 @@ function Quiz() {
 
   return (
     <div className="quiz-container">
-      <h2>{currentCategory.category}</h2>
-      <Questions
-        question={currentQuestion}
-        options={options}
-        selectedOption={answers[`${currentCategory.category}-${currentQuestionIndex}`] || ""}
-        onSelectOption={handleAnswer}
-      />
+      <h2>{showExtraMath ? "Math Challenge" : currentCategory.category}</h2>
+
+      {showExtraMath ? (
+        <div className="numeric-question">
+          <p>{currentQuestionText}</p>
+          <input
+            type="text"
+            value={extraMathAnswer}
+            onChange={(e) => setExtraMathAnswer(e.target.value)}
+            placeholder="Type your answer"
+          />
+          <button onClick={handleExtraMathSubmit}>Next</button>
+        </div>
+      ) : (
+        <Questions
+          question={currentQuestionText}
+          options={options}
+          selectedOption={answers[`${currentCategory.category}-${currentQuestionIndex}`] || ""}
+          onSelectOption={handleAnswer}
+        />
+      )}
     </div>
   );
 }

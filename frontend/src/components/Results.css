@@ -8,7 +8,7 @@
 }
 
 h1, h2 {
-  color: #2c3e50;
+  color: black
 }
 
 .stream-list {
@@ -32,7 +32,7 @@ h1, h2 {
 
 .maths-recommendation {
   font-size: 1.2rem;
-  color: #16a085;
+  color: white;
   margin-bottom: 1.5rem;
 }
 

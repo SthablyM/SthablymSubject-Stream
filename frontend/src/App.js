@@ -1,12 +1,13 @@
 import React from 'react';
 import Quiz from './components/Quiz';
+import './App.css';
 
 function App() {
   return (
     <div
       className="App"
       style={{
-        backgroundImage: "url('/student2.png')",
+        backgroundImage: "url('/studentimage.png')",
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
