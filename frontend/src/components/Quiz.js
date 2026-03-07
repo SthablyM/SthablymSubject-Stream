@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import Questions from './Questions';
-import axios from 'axios';
-import Results from './Results';
+// src/components/Quiz.js
 
-const questionsData  = [
+import React, { useState } from "react";
+import Questions from "./Questions";
+import Results from "./Results";
+import axios from "axios";
+
+const questionsData = [
   {
-    category: 'Scientific Curiosity',
+    category: "Scientific Curiosity",
     questions: [
       "I enjoy doing experiments or investigations.",
       "I’m curious about how natural things work.",
@@ -15,7 +17,7 @@ const questionsData  = [
     ]
   },
   {
-    category: 'Numerical & Analytical Skills',
+    category: "Numerical & Analytical Skills",
     questions: [
       "I enjoy solving math problems and number puzzles.",
       "I like analyzing data and finding patterns.",
@@ -25,201 +27,217 @@ const questionsData  = [
     ]
   },
   {
-    category: 'Business & Financial Interest',
+    category: "Business & Financial Interest",
     questions: [
-      "I’m interested in how money, trade, and business work.",
-      "I want to learn about entrepreneurship and investments.",
-      "I like thinking of ways to make or manage money.",
-      "I enjoy business studies or economics.",
-      "I’m curious about how companies grow and succeed."
+      "I’m interested in how money and business work.",
+      "I want to learn about entrepreneurship.",
+      "I enjoy thinking about investments.",
+      "I like business studies or economics.",
+      "I’m curious how companies grow."
     ]
   },
   {
-    category: 'Creativity & Expression',
+    category: "Creativity & Expression",
     questions: [
-      "I enjoy drawing, painting, writing, or performing.",
-      "I love expressing my ideas creatively.",
-      "I often think of creative ways to solve problems.",
-      "I feel confident when I create art or stories.",
-      "I’m passionate about creative subjects like art, design, or drama."
+      "I enjoy drawing or writing.",
+      "I like expressing ideas creatively.",
+      "I think of creative ways to solve problems.",
+      "I enjoy art or design subjects.",
+      "I like storytelling."
     ]
   },
   {
-    category: 'Social Awareness & Communication',
+    category: "Social Awareness & Communication",
     questions: [
-      "I like helping people and making a difference.",
-      "I’m interested in social issues and community work.",
-      "I’m good at expressing myself and communicating with others.",
-      "I enjoy working with different kinds of people.",
-      "I feel comfortable leading group discussions or projects."
+      "I enjoy helping people.",
+      "I’m interested in social issues.",
+      "I communicate my ideas easily.",
+      "I like working in groups.",
+      "I enjoy leading discussions."
     ]
   },
   {
-    category: 'Technical & Practical Skills',
+    category: "Technical & Practical Skills",
     questions: [
-      "I like working with tools, machines, or hands-on projects.",
-      "I enjoy fixing things or building models.",
-      "I’m interested in technical subjects like Engineering or IT.",
-      "I prefer practical tasks over theoretical ones.",
-      "I’m curious about how things are built or made."
+      "I enjoy building or fixing things.",
+      "I like working with tools.",
+      "I enjoy practical tasks.",
+      "I’m interested in engineering or IT.",
+      "I like hands-on learning."
     ]
   },
   {
-    category: 'History & Critical Thinking',
+    category: "History & Critical Thinking",
     questions: [
-      "I enjoy learning about past events and history.",
-      "I like discussing how history affects the present.",
-      "I’m interested in analyzing situations from different angles.",
-      "I enjoy debating social or historical topics.",
-      "I’m curious about different cultures and historical events."
+      "I enjoy learning about history.",
+      "I like discussing historical events.",
+      "I enjoy debating topics.",
+      "I analyze situations deeply.",
+      "I’m curious about cultures."
     ]
   },
   {
-    category: 'Maths Aptitude & Interest',
+    category: "Maths Aptitude & Interest",
     questions: [
-      "I enjoy solving complex math problems.",
-      "I feel confident when working with numbers.",
-      "I like abstract math topics like algebra and geometry.",
-      "I enjoy applying math in real-life situations.",
-      "I’m interested in improving my math skills."
+      "I enjoy solving complex maths problems.",
+      "I feel confident with numbers.",
+      "I like algebra and geometry.",
+      "I apply maths in real life.",
+      "I want to improve my maths skills."
     ]
   }
 ];
 
-
 const extraMathQuestions = [
   { question: "What is 12 × 8?", answer: "96" },
-  { question: "Solve for x: 2x + 3 = 11", answer: "4" },
-  { question: "If a triangle has angles 50° and 60°, what is the third angle?", answer: "70" },
-  { question:  "what is the square root of 144?", answer: "12"},
-  { question:   "what is 15% of 200?", answer: "30"}
+  { question: "Solve: 2x + 3 = 11", answer: "4" },
+  { question: "Third angle of triangle with 50° and 60°?", answer: "70" },
+  { question: "Square root of 144?", answer: "12" },
+  { question: "15% of 200?", answer: "30" }
 ];
+
 const options = ["Strongly Agree", "Agree", "Neutral", "Disagree", "Strongly Disagree"];
 
 function Quiz() {
   const [answers, setAnswers] = useState({});
-  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [showExtraMath, setShowExtraMath] = useState(false);
-  const [extraMathIndex, setExtraMathIndex] = useState(0);
-  const [extraMathAnswer, setExtraMathAnswer] = useState("");
-  const [extraMathCorrectCount, setExtraMathCorrectCount] = useState(0);
-  const [showResult, setShowResult] = useState(false);
+  const [categoryIndex, setCategoryIndex] = useState(0);
+  const [questionIndex, setQuestionIndex] = useState(0);
+
+  const [showMathChallenge, setShowMathChallenge] = useState(false);
+  const [mathIndex, setMathIndex] = useState(0);
+  const [mathAnswer, setMathAnswer] = useState("");
+  const [mathCorrectCount, setMathCorrectCount] = useState(0);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+
+  const [showResults, setShowResults] = useState(false);
   const [resultData, setResultData] = useState(null);
 
-  const currentCategory = questionsData[currentCategoryIndex];
-  const currentQuestionText = showExtraMath
-    ? extraMathQuestions[extraMathIndex].question
-    : currentCategory.questions[currentQuestionIndex];
+  const currentCategory = questionsData[categoryIndex];
+  const currentQuestion = currentCategory.questions[questionIndex];
 
+  // Handle normal questionnaire answers
   const handleAnswer = (option) => {
-    const key = `${currentCategory.category}-${currentQuestionIndex}`;
-    setAnswers({ ...answers, [key]: option });
+    const key = `${currentCategory.category}-${questionIndex}`;
+    const newAnswers = { ...answers, [key]: option };
+    setAnswers(newAnswers);
 
-    if (currentQuestionIndex < currentCategory.questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    if (questionIndex < currentCategory.questions.length - 1) {
+      setQuestionIndex(questionIndex + 1);
     } else if (currentCategory.category === "Maths Aptitude & Interest") {
-      const mathsAnswers = [
-        ...Object.keys(answers)
-          .filter(k => k.startsWith("Maths Aptitude & Interest"))
-          .map(k => answers[k]),
-        option
-      ];
+      // Check if student likes math
+      const mathAnswers = Object.keys(newAnswers)
+        .filter(k => k.startsWith("Maths Aptitude"))
+        .map(k => newAnswers[k]);
+      const likesMath = mathAnswers.some(a => a === "Agree" || a === "Strongly Agree");
 
-      const strongMath = mathsAnswers.some(ans => ans === "Strongly Agree" || ans === "Agree");
-
-      if (strongMath) {
-        setShowExtraMath(true);
-        setExtraMathIndex(0);
+      if (likesMath) {
+        setShowMathChallenge(true);
       } else {
-        // They are weak in math → skip extra math → no need to force Pure Maths
-        submitQuiz();
+        submitQuiz(newAnswers, 0);
       }
-    } else if (currentCategoryIndex < questionsData.length - 1) {
-      setCurrentCategoryIndex(currentCategoryIndex + 1);
-      setCurrentQuestionIndex(0);
     } else {
-      submitQuiz();
+      // Move to next category
+      setCategoryIndex(categoryIndex + 1);
+      setQuestionIndex(0);
     }
   };
 
-  const handleExtraMathSubmit = () => {
-    const key = `ExtraMath-${extraMathIndex}`;
-    setAnswers({ ...answers, [key]: extraMathAnswer });
-
-    if (extraMathAnswer === extraMathQuestions[extraMathIndex].answer) {
-      setExtraMathCorrectCount(extraMathCorrectCount + 1);
+  // Handle Math Challenge answer
+  const submitMathAnswer = () => {
+    if (mathAnswer.trim() === "") {
+      alert("Please enter an answer");
+      return;
     }
 
-    setExtraMathAnswer("");
+    const correct = extraMathQuestions[mathIndex].answer;
+    const isRight = mathAnswer.trim() === correct;
 
-    if (extraMathIndex < extraMathQuestions.length - 1) {
-      setExtraMathIndex(extraMathIndex + 1);
-    } else {
-      submitQuiz();
-    }
+    if (isRight) setMathCorrectCount(mathCorrectCount + 1);
+
+    setIsCorrect(isRight);
+    setShowFeedback(true);
+
+    // Show feedback for 1.5s, then move next
+    setTimeout(() => {
+      setShowFeedback(false);
+      setMathAnswer("");
+
+      if (mathIndex < extraMathQuestions.length - 1) {
+        setMathIndex(mathIndex + 1);
+      } else {
+        // Last math question → submit all quiz
+        submitQuiz(answers, mathCorrectCount + (isRight ? 1 : 0));
+      }
+    }, 1500);
   };
 
-  const submitQuiz = async () => {
-    const groupedAnswers = {};
-    Object.keys(answers).forEach((key) => {
-      if (key.startsWith("ExtraMath")) {
-        if (!groupedAnswers["ExtraMath"]) groupedAnswers["ExtraMath"] = [];
-        groupedAnswers["ExtraMath"].push(answers[key]);
-      } else {
-        const [category] = key.split('-');
-        if (!groupedAnswers[category]) groupedAnswers[category] = [];
-        groupedAnswers[category].push(answers[key]);
-      }
-    });
-
+  // Submit quiz to backend
+  const submitQuiz = async (finalAnswers, finalMathScore) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/submit-quiz', { answers: groupedAnswers });
-      const finalData = res.data;
+      const groupedAnswers = {};
+      Object.keys(finalAnswers).forEach(key => {
+        const [category] = key.split("-");
+        if (!groupedAnswers[category]) groupedAnswers[category] = [];
+        groupedAnswers[category].push(finalAnswers[key]);
+      });
 
-      // Extra math grading logic
-      if (showExtraMath) {
-        const total = extraMathQuestions.length;
-        const scorePercent = (extraMathCorrectCount / total) * 100;
+      const res = await axios.post("http://127.0.0.1:5000/api/submit-quiz", {
+        answers: groupedAnswers
+      });
 
-        // ✅ Vice versa: ≥50% correct → Maths Literacy, <50% → Pure Maths
-        if (scorePercent != 100) {
-          finalData.maths_recommendation = "MATHS LITARACY OR TECHNICAL MATHS";
-        } else {
-          finalData.maths_recommendation = "PURE MATHS";
-        }
+      const data = res.data;
+
+      // Add math challenge results
+      if (showMathChallenge) {
+        const percent = (finalMathScore / extraMathQuestions.length) * 100;
+        data.maths_recommendation =
+          percent >= 60
+            ? "PURE MATHS"
+            : "TECHNICAL MATHS OR MATHS LITERACY";
       }
 
-      setResultData(finalData);
-      setShowResult(true);
-    } catch (error) {
-      console.error("Error submitting quiz:", error);
+      setResultData(data);
+      setShowResults(true);
+    } catch (err) {
+      console.error("Error submitting quiz:", err);
+      alert("Failed to submit quiz. Check backend is running.");
     }
   };
 
-  if (showResult) return <Results result={resultData} />;
+  if (showResults) return <Results result={resultData} />;
 
   return (
     <div className="quiz-container">
-      <h2>{showExtraMath ? "Math Challenge" : currentCategory.category}</h2>
+      <h2>{showMathChallenge ? "Math Challenge" : currentCategory.category}</h2>
 
-      {showExtraMath ? (
-        <div className="numeric-question">
-          <p>{currentQuestionText}</p>
-          <input
-            type="text"
-            value={extraMathAnswer}
-            onChange={(e) => setExtraMathAnswer(e.target.value)}
-            placeholder="Type your answer"
-          />
-          <button onClick={handleExtraMathSubmit}>Next</button>
+      {showMathChallenge ? (
+        <div>
+          <p>{extraMathQuestions[mathIndex].question}</p>
+
+          {!showFeedback ? (
+            <>
+              <input
+                type="text"
+                value={mathAnswer}
+                onChange={(e) => setMathAnswer(e.target.value)}
+                placeholder="Type your answer"
+              />
+              <button onClick={submitMathAnswer}>Submit</button>
+            </>
+          ) : (
+            <>
+              <p>{isCorrect ? "✅ Correct!" : "❌ Incorrect"}</p>
+              <p>Correct Answer: {extraMathQuestions[mathIndex].answer}</p>
+            </>
+          )}
         </div>
       ) : (
         <Questions
-          question={currentQuestionText}
+          question={currentQuestion}
           options={options}
-          selectedOption={answers[`${currentCategory.category}-${currentQuestionIndex}`] || ""}
           onSelectOption={handleAnswer}
+          selectedOption={answers[`${currentCategory.category}-${questionIndex}`] || ""}
         />
       )}
     </div>

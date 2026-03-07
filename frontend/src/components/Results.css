@@ -1,51 +1,97 @@
 .results-container {
   max-width: 900px;
   margin: auto;
-  padding: 2rem;
-  font-family: 'Segoe UI', sans-serif;
+  padding: 40px;
   text-align: center;
-  color: #3498db;
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
 }
 
-h1, h2 {
-  color: black
+h1 {
+  color: #1e3a8a;
+}
+
+.intro-text {
+  margin-bottom: 30px;
+  font-size: 16px;
+}
+
+.recommendation-section {
+  margin-bottom: 30px;
 }
 
 .stream-list {
   list-style: none;
   padding: 0;
-  margin: 1rem 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
 }
 
 .stream-item {
-  background-color: #3498db;
+  background: #2563eb;
   color: white;
-  padding: 0.7rem 1.5rem;
-  margin: 0.5rem;
-  border-radius: 20px;
+  padding: 12px;
+  margin: 10px;
+  border-radius: 8px;
   font-weight: bold;
-  font-size: 1rem;
+}
+
+.maths-section {
+  margin: 30px 0;
 }
 
 .maths-recommendation {
-  font-size: 1.2rem;
-  color: white;
-  margin-bottom: 1.5rem;
+  font-size: 20px;
+  font-weight: bold;
+  color: #16a34a;
+}
+
+.scores-section {
+  margin-top: 30px;
 }
 
 .score-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  gap: 20px;
 }
 
 .score-card {
-  background-color: #ffff;
-  padding: 1rem;
+  background: #f8fafc;
+  padding: 15px;
   border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(225, 225, 225);
+}
+
+.score-number {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.score-bar {
+  width: 100%;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.score-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 10px;
+}
+
+.action-section {
+  margin-top: 40px;
+}
+
+.retake-button {
+  background: #1e40af;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.retake-button:hover {
+  background: #1d4ed8;
 }

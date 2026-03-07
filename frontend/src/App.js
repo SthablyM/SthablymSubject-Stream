@@ -1,22 +1,21 @@
-import React from 'react';
-import Quiz from './components/Quiz';
-import './App.css';
+import React, { useState } from "react";
+import Quiz from "./components/Quiz";
+import Results from "./components/Results";
+import questions from "./components/Questions";
 
 function App() {
+
+  const [result, setResult] = useState(null);
+
   return (
-    <div
-      className="App"
-      style={{
-        backgroundImage: "url('/studentimage.png')",
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center center',
-        minHeight: '100vh',
-        padding: '2rem'
-      }}
-    >
-      <h1>Subject Stream Self-Assessment Quiz</h1>
-      <Quiz />
+    <div>
+
+      {!result ? (
+        <Quiz questions={questions} onFinish={setResult} />
+      ) : (
+        <Results result={result} />
+      )}
+
     </div>
   );
 }
