@@ -285,7 +285,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
 
   const NAV = [
     { id:"results",      label:"📊 Results"      },
-    { id:"universities", label:"🏫 Universities"  },
+    { id:"universities", label:"🏫 What Can I Study?"  },
     { id:"bursaries",    label:"💰 Bursaries"     },
     { id:"advice",       label:"💡 Advice"        },
   ];
@@ -434,7 +434,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
 
         {/* ══ UNIVERSITIES TAB ═════════════════════════════════════════════════ */}
         {activeSection === "universities" && (
-          <UniversityFinder stream={topStream} aps={student?.aps || 0} />
+          <UniversityFinder stream={topStream} aps={student?.aps || 0} marks={student?.marks || {}} />
         )}
 
         {/* ══ BURSARIES TAB ════════════════════════════════════════════════════ */}
@@ -450,7 +450,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
               </div>
             </div>
 
-            <UniversityFinder stream={topStream} aps={student?.aps || 0} />
+            <UniversityFinder stream={topStream} aps={student?.aps || 0} marks={student?.marks || {}} />
 
             <div style={{ ...s.card, marginTop:16 }}>
               <h3 style={s.cardTitle}>📋 Bursary Application Tips</h3>
