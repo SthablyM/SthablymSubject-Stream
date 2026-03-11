@@ -1,5 +1,6 @@
 // src/components/StudentProfile.js
 import React, { useState } from "react";
+import StablymLogo from "./StablymLogoComponent";
 
 // ─── APS CONVERSION ───────────────────────────────────────────────────────────
 const markToAPS = (mark) => {
@@ -262,7 +263,9 @@ export default function StudentProfile({ onComplete }) {
 
         {/* Header */}
         <div style={s.cardHeader}>
-          <div style={{ fontSize: 52, marginBottom: 8 }}>👤</div>
+          <div style={{ display:"flex", justifyContent:"center", marginBottom:16 }}>
+            <StablymLogo variant="dark" size="md" />
+          </div>
           <h2 style={s.cardTitle}>Student Profile</h2>
           <p style={s.cardSub}>Fill in your details and current marks to personalise your stream recommendation</p>
         </div>

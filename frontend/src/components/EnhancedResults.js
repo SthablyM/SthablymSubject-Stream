@@ -5,7 +5,7 @@
 
 import React, { useState } from "react";
 import UniversityFinder from "./UniversityFinder";
-import axios from "axios";
+import StablymLogo from "./StablymLogoComponent";
 
 const SA_STREAMS = {
   "Science Stream":                 { subjects:["Mathematics","Physical Sciences","Life Sciences","Geography / Agricultural Sciences"],    careers:["Doctor","Engineer","Pharmacist","Environmental Scientist","Veterinarian","Biotechnologist"],                        color:"#2563eb", icon:"🔬", bg:"#eff6ff" },
@@ -51,25 +51,233 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
     : mathPct >= 40 ? "⚡ Moderate — Technical Mathematics may suit you."
     :                 "📘 Consider Mathematical Literacy to build your foundation.";
 
-  // Download PDF via backend
+  // ── CLIENT-SIDE PDF — no backend needed ──────────────────────────────────────
   const downloadPDF = async () => {
     setDownloading(true);
     setDlError("");
     try {
-      const res = await axios.post(
-        "http://127.0.0.1:5000/api/generate-report",
-        { student, streamScores, mathResults: mathResults ? { ...mathResults, pct: mathPct } : null },
-        { responseType: "blob" }
-      );
-      const url  = window.URL.createObjectURL(new Blob([res.data], { type:"application/pdf" }));
-      const link = document.createElement("a");
-      link.href  = url;
-      link.setAttribute("download", `Stablym_Report_${student?.name || "Student"}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      setDlError("PDF download requires the backend to be running. Start Flask and try again.");
+      // Dynamically load jsPDF from CDN
+      if (!window.jspdf) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement("script");
+          s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+          s.onload = resolve; s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation:"portrait", unit:"mm", format:"a4" });
+      const W = 210; // A4 width mm
+      const STREAM_COLORS_HEX = {
+        "Science Stream":                 [37,99,235],
+        "Commerce Stream":                [22,163,74],
+        "Humanities Stream":              [147,51,234],
+        "Engineering / Technical Stream": [234,88,12],
+      };
+      const SUBJECT_LABELS = {
+        english:"English HL/FAL", puremaths:"Pure Mathematics", techmaths:"Technical Mathematics",
+        mathslit:"Maths Literacy", physscience:"Physical Sciences", lifescience:"Life Sciences",
+        geography:"Geography", agroscience:"Agricultural Sciences", accounting:"Accounting",
+        business:"Business Studies", economics:"Economics", history:"History",
+        tourism:"Tourism", consumer:"Consumer Studies", techscience:"Technical Sciences",
+        civiltech:"Civil Technology", electricaltech:"Electrical Technology",
+        mechanicaltech:"Mechanical Technology", egd:"EGD", itcs:"IT / CAT",
+        lifeorien:"Life Orientation",
+      };
+      const markToAPS = m => m>=80?7:m>=70?6:m>=60?5:m>=50?4:m>=40?3:m>=30?2:1;
+      const symbolFor = m => m>=80?"A":m>=70?"B":m>=60?"C":m>=50?"D":m>=40?"E":m>=30?"F":"G";
+
+      let y = 0;
+
+      // ── HEADER BANNER ──
+      const [r,g,b] = STREAM_COLORS_HEX[topStream] || [37,99,235];
+      doc.setFillColor(15,23,42);
+      doc.roundedRect(0, 0, W, 36, 0, 0, "F");
+      // Accent stripe
+      doc.setFillColor(r,g,b);
+      doc.rect(0, 33, W, 3, "F");
+      // STABLYM
+      doc.setTextColor(255,255,255);
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(22);
+      doc.text("STABLYM", 14, 16);
+      // Tagline
+      doc.setFontSize(7);
+      doc.setTextColor(148,163,184);
+      doc.text("SUBJECT STREAM SELECTOR", 14, 23);
+      // Date
+      doc.setFontSize(8);
+      doc.setTextColor(100,116,139);
+      const now = new Date().toLocaleDateString("en-ZA",{day:"2-digit",month:"long",year:"numeric"});
+      doc.text(`Report generated: ${now}`, W-14, 16, { align:"right" });
+      doc.text("South Africa", W-14, 23, { align:"right" });
+      y = 44;
+
+      // ── STUDENT INFO ──
+      doc.setFillColor(248,250,252);
+      doc.roundedRect(10, y, W-20, 28, 3, 3, "F");
+      doc.setDrawColor(226,232,240);
+      doc.roundedRect(10, y, W-20, 28, 3, 3, "S");
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(100,116,139);
+      const infoItems = [
+        ["Name", `${student?.name||""} ${student?.surname||""}`],
+        ["School", student?.school||"—"],
+        ["Grade", `Grade ${student?.grade||"—"}`],
+        ["Province", student?.province||"—"],
+        ["APS Score", student?.aps ? `${student.aps} / 42` : "—"],
+        ["Maths Level", student?.mathsLevel||"—"],
+      ];
+      infoItems.forEach(([label, val], i) => {
+        const col = i < 3 ? 14 : 115;
+        const row = i < 3 ? y+7+(i*7) : y+7+((i-3)*7);
+        doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(148,163,184);
+        doc.text(label.toUpperCase(), col, row);
+        doc.setFont("helvetica","normal"); doc.setTextColor(30,41,59);
+        doc.text(String(val), col+30, row);
+      });
+      y += 36;
+
+      // ── RECOMMENDED STREAM BANNER ──
+      doc.setFillColor(r,g,b);
+      doc.roundedRect(10, y, W-20, 20, 4, 4, "F");
+      doc.setFont("helvetica","bold"); doc.setFontSize(14); doc.setTextColor(255,255,255);
+      doc.text(topStream, W/2, y+9, { align:"center" });
+      doc.setFont("helvetica","normal"); doc.setFontSize(8);
+      doc.text("Your recommended subject stream based on quiz results", W/2, y+16, { align:"center" });
+      y += 28;
+
+      // ── STREAM SCORES ──
+      doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,41,59);
+      doc.text("Stream Compatibility Scores", 14, y); y += 6;
+      doc.setDrawColor(226,232,240); doc.line(14, y, W-14, y); y += 5;
+      const sortedStreams = Object.entries(streamScores).sort((a,b)=>b[1]-a[1]);
+      sortedStreams.forEach(([stream, pct]) => {
+        const [sr,sg,sb] = STREAM_COLORS_HEX[stream] || [100,116,139];
+        doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(55,65,81);
+        doc.text(stream, 14, y+3.5);
+        doc.setFillColor(241,245,249);
+        doc.roundedRect(100, y, 80, 5, 2, 2, "F");
+        doc.setFillColor(sr,sg,sb);
+        doc.roundedRect(100, y, Math.max(3, 80*(pct/100)), 5, 2, 2, "F");
+        doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(30,41,59);
+        doc.text(`${pct}%`, 185, y+3.8, { align:"right" });
+        y += 9;
+      });
+      y += 4;
+
+      // ── SUBJECTS & CAREERS (2 col) ──
+      const streamInfo = SA_STREAMS[topStream];
+      doc.setFillColor(r,g,b);
+      doc.roundedRect(10, y, (W-24)/2, 6, 2, 2, "F");
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(255,255,255);
+      doc.text("Subjects You Will Take", 14, y+4.2);
+      doc.setFillColor(r,g,b);
+      doc.roundedRect(10+(W-24)/2+4, y, (W-24)/2, 6, 2, 2, "F");
+      doc.text("Possible Career Paths", 14+(W-24)/2+4, y+4.2);
+      y += 10;
+      const maxRows = Math.max(streamInfo.subjects.length, streamInfo.careers.length);
+      for(let i=0; i<maxRows; i++){
+        doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(55,65,81);
+        if(streamInfo.subjects[i]) doc.text(`• ${streamInfo.subjects[i]}`, 14, y);
+        if(streamInfo.careers[i])  doc.text(`• ${streamInfo.careers[i]}`, 14+(W-24)/2+4, y);
+        y += 7;
+      }
+      y += 4;
+
+      // ── SUBJECT MARKS (if available) ──
+      const marks = student?.marks || {};
+      const markEntries = Object.entries(marks).filter(([,v])=>v>0);
+      if(markEntries.length > 0){
+        doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,41,59);
+        doc.text("Subject Marks & APS Breakdown", 14, y); y+=6;
+        doc.setDrawColor(226,232,240); doc.line(14,y,W-14,y); y+=4;
+
+        // Table header
+        doc.setFillColor(30,41,59);
+        doc.rect(14, y, W-28, 7, "F");
+        doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(255,255,255);
+        doc.text("Subject", 17, y+4.8);
+        doc.text("Mark", 120, y+4.8);
+        doc.text("Symbol", 145, y+4.8);
+        doc.text("APS", 175, y+4.8);
+        y += 9;
+
+        markEntries.forEach(([id, mark], i) => {
+          const bg = i%2===0 ? [255,255,255] : [248,250,252];
+          doc.setFillColor(...bg); doc.rect(14, y, W-28, 7, "F");
+          doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(55,65,81);
+          doc.text(SUBJECT_LABELS[id]||id, 17, y+4.8);
+          doc.setFont("helvetica","bold");
+          const apsV = markToAPS(mark);
+          const symV = symbolFor(mark);
+          const markColor = mark>=60?[5,150,105]:mark>=40?[180,83,9]:[185,28,28];
+          doc.setTextColor(...markColor);
+          doc.text(`${mark}%`, 120, y+4.8);
+          doc.text(symV, 145, y+4.8);
+          doc.text(String(apsV), 175, y+4.8);
+          y += 7;
+        });
+
+        // APS total
+        if(student?.aps){
+          doc.setFillColor(r,g,b);
+          doc.rect(14, y, W-28, 8, "F");
+          doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(255,255,255);
+          doc.text("Estimated APS Total", 17, y+5.5);
+          doc.text(`${student.aps} / 42`, W-16, y+5.5, {align:"right"});
+          y += 12;
+        }
+      }
+
+      // ── MATH RESULTS ──
+      if(mathResults){
+        doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,41,59);
+        doc.text("Math Challenge Results", 14, y); y+=6;
+        doc.setDrawColor(226,232,240); doc.line(14,y,W-14,y); y+=5;
+        doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(55,65,81);
+        doc.text(`Score: ${mathResults.correct} / ${mathResults.total}  (${mathPct}%)`, 14, y); y+=6;
+        doc.setTextColor(100,116,139);
+        const ml = mathPct>=70?"Pure Mathematics recommended":mathPct>=40?"Technical Mathematics may suit you":"Consider Mathematical Literacy";
+        doc.text(ml, 14, y); y+=10;
+      }
+
+      // ── ADVICE ──
+      if(y > 240){ doc.addPage(); y = 20; }
+      doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(30,41,59);
+      doc.text("Personalised Advice", 14, y); y+=6;
+      doc.setDrawColor(226,232,240); doc.line(14,y,W-14,y); y+=5;
+      const advice = [
+        student?.aps>=30 ? `Your APS of ${student.aps} is strong — keep it up!` : student?.aps>0 ? `Work on improving your APS of ${student.aps} before applying.` : null,
+        topStream==="Science Stream" ? "Focus on achieving 60%+ in Mathematics and Physical Sciences." : null,
+        topStream==="Commerce Stream" ? "Aim for 60%+ in Accounting and Mathematics for BCom programmes." : null,
+        topStream==="Humanities Stream" ? "Develop strong writing and communication skills." : null,
+        topStream==="Engineering / Technical Stream" ? "Excel in Technical Maths, Technical Sciences, and EGD." : null,
+        "Apply for NSFAS bursary at nsfas.org.za before January each year.",
+        "Visit your school counsellor and attend university open days in Grade 11.",
+      ].filter(Boolean);
+      doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(55,65,81);
+      advice.forEach(tip => {
+        const lines = doc.splitTextToSize(`• ${tip}`, W-28);
+        doc.text(lines, 14, y); y += lines.length * 6;
+      });
+
+      // ── FOOTER ──
+      const totalPages = doc.internal.getNumberOfPages();
+      for(let p=1;p<=totalPages;p++){
+        doc.setPage(p);
+        doc.setFillColor(15,23,42);
+        doc.rect(0, 285, W, 12, "F");
+        doc.setFont("helvetica","normal"); doc.setFontSize(7); doc.setTextColor(100,116,139);
+        doc.text("STABLYM · Subject Stream Selector · South Africa", 14, 292);
+        doc.text(`Page ${p} of ${totalPages}`, W-14, 292, {align:"right"});
+      }
+
+      // ── SAVE ──
+      const fname = `Stablym_Report_${student?.name||"Student"}_${student?.surname||""}.pdf`;
+      doc.save(fname);
+    } catch(err) {
+      console.error(err);
+      setDlError("Could not generate PDF. Please try again.");
     } finally {
       setDownloading(false);
     }
@@ -90,6 +298,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
           <div style={s.bannerLeft}>
             <span style={s.bannerIcon}>{info.icon}</span>
             <div>
+              <div style={{ marginBottom:4 }}><StablymLogo variant="dark" size="xs" /></div>
               <p style={s.bannerLabel}>
                 {student?.name ? `${student.name}'s Recommended Stream` : "Your Recommended Stream"}
               </p>

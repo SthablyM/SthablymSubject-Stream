@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import axios from "axios";
 import StudentProfile from "./StudentProfile";
 import EnhancedResults from "./EnhancedResults";
+import StablymLogo from "./StablymLogoComponent";
 
 // ─── TIMER LIMITS ─────────────────────────────────────────────────────────────
 const ATTITUDE_TIME  = 30;   // seconds per attitude/opinion question
@@ -237,9 +238,9 @@ function WelcomeScreen({ onStart }) {
       <div style={st.orb3} />
 
       <div style={st.welcomeCard}>
-        <div style={st.logoRing}>🎓</div>
-        <h1 style={st.welcomeTitle}>STABLYM</h1>
-        <h2 style={st.welcomeSub}>Subject Stream Selector</h2>
+        <div style={{ marginBottom: 24, display:"flex", justifyContent:"center" }}>
+          <StablymLogo variant="dark" size="lg" />
+        </div>
         <p style={st.welcomeTagline}>
           "Be honest with yourself.<br />
           <strong>This is the beginning of your dreams.</strong>"
@@ -523,7 +524,10 @@ export default function Quiz() {
       <div style={{ ...st.card, ...cardUrgencyStyle }}>
 
         <div style={st.header}>
-          <h1 style={st.appTitle}>🎓 STABLYM Stream Selector</h1>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <StablymLogo variant="icon" size="sm" />
+            <span style={{ fontSize:14, fontWeight:600, color:"#94a3b8" }}>Stream Selector</span>
+          </div>
           <p style={st.subtitle}>Grade 10 Stream &amp; Career Guidance</p>
         </div>
 
