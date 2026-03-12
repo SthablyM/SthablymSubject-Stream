@@ -6,6 +6,7 @@
 import React, { useState } from "react";
 import UniversityFinder from "./UniversityFinder";
 import StablymLogo from "./StablymLogoComponent";
+import PastPapersQuiz from "./PastPapersQuiz";
 
 const SA_STREAMS = {
   "Science Stream":                 { subjects:["Mathematics","Physical Sciences","Life Sciences","Geography / Agricultural Sciences"],    careers:["Doctor","Engineer","Pharmacist","Environmental Scientist","Veterinarian","Biotechnologist"],                        color:"#2563eb", icon:"🔬", bg:"#eff6ff" },
@@ -283,11 +284,14 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
     }
   };
 
+  const isHighSchool = parseInt(student?.grade) >= 10;
+
   const NAV = [
     { id:"results",      label:"📊 Results"      },
     { id:"universities", label:"🏫 What Can I Study?"  },
     { id:"bursaries",    label:"💰 Bursaries"     },
     { id:"advice",       label:"💡 Advice"        },
+    ...(isHighSchool ? [{ id:"pastpapers", label:"📝 Past Papers Quiz" }] : []),
   ];
 
   return (
@@ -300,7 +304,9 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
             <div>
               <div style={{ marginBottom:4 }}><StablymLogo variant="dark" size="xs" /></div>
               <p style={s.bannerLabel}>
-                {student?.name ? `${student.name}'s Recommended Stream` : "Your Recommended Stream"}
+                {parseInt(student?.grade) >= 10
+                  ? `Grade ${student.grade} — Your Subject Stream`
+                  : student?.name ? `${student.name}'s Recommended Stream` : "Your Recommended Stream"}
               </p>
               <h1 style={s.bannerStream}>{topStream}</h1>
               {student?.aps > 0 && (
@@ -334,6 +340,17 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
         {/* ══ RESULTS TAB ══════════════════════════════════════════════════════ */}
         {activeSection === "results" && (
           <div>
+            {parseInt(student?.grade) >= 10 && (
+              <div style={{ background:"#eff6ff", border:"1px solid #bfdbfe", borderRadius:12, padding:"12px 16px", marginBottom:16, display:"flex", gap:12, alignItems:"flex-start" }}>
+                <span style={{ fontSize:22, flexShrink:0 }}>ℹ️</span>
+                <div>
+                  <b style={{ fontSize:14, color:"#1e40af" }}>Grade {student.grade} Student</b>
+                  <p style={{ margin:"4px 0 0", fontSize:13, color:"#1e40af", lineHeight:1.6 }}>
+                    Your stream was identified from your subject marks. The <b>"What Can I Study?"</b> tab shows all university programmes you currently qualify for based on your APS of <b>{student.aps}/42</b>.
+                  </p>
+                </div>
+              </div>
+            )}
             {isLow   && <div style={s.warningBox}>⚠️ Your scores are spread across streams. Consider speaking to a school counsellor before deciding.</div>}
             {isClose && !isLow && <div style={s.infoBox}>💡 You also show strong interest in <b>{second[0]}</b>. Talk to a teacher about both options.</div>}
 
@@ -445,7 +462,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
               <div>
                 <h3 style={{ margin:"0 0 4px", color:"#713f12" }}>Apply for NSFAS First!</h3>
                 <p style={{ margin:0, fontSize:13, color:"#713f12", lineHeight:1.6 }}>
-                  NSFAS (National Student Financial Aid Scheme) covers <b>full tuition, accommodation, and meals</b> for qualifying students at public universities and TVET colleges. Apply at <b>nsfas.org.za</b> before January each year.
+                  NSFAS (National Student Financial Aid Scheme) covers <b>full tuition, accommodation, and meals</b> for qualifying students at public universities and TVET colleges. Apply at <a href="https://nsfas.org.za" target="_blank" rel="noopener noreferrer" style={{color:"#92400e",fontWeight:700}}>nsfas.org.za ↗</a> before January each year.
                 </p>
               </div>
             </div>
@@ -469,6 +486,11 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
               ))}
             </div>
           </div>
+        )}
+
+        {/* ══ PAST PAPERS TAB ══════════════════════════════════════════════════ */}
+        {activeSection === "pastpapers" && isHighSchool && (
+          <PastPapersQuiz student={student} onBack={() => setActiveSection("results")} />
         )}
 
         {/* ══ ADVICE TAB ═══════════════════════════════════════════════════════ */}

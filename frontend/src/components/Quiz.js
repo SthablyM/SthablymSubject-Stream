@@ -499,10 +499,50 @@ export default function Quiz() {
     setScreen("profile");
   };
 
+  // Infer stream from student marks for Gr 10-12 (no quiz needed)
+  const inferStreamFromMarks = (marks = {}) => {
+    const scores = {
+      "Science Stream": 0, "Commerce Stream": 0,
+      "Humanities Stream": 0, "Engineering / Technical Stream": 0,
+    };
+    const map = {
+      physscience: "Science Stream", lifescience: "Science Stream",
+      agroscience: "Science Stream", geography: "Science Stream",
+      puremaths: "Science Stream",
+      accounting: "Commerce Stream", business: "Commerce Stream",
+      economics: "Commerce Stream",
+      history: "Humanities Stream", tourism: "Humanities Stream",
+      consumer: "Humanities Stream", mathslit: "Humanities Stream",
+      drama: "Humanities Stream", visualarts: "Humanities Stream",
+      techscience: "Engineering / Technical Stream",
+      civiltech: "Engineering / Technical Stream",
+      electricaltech: "Engineering / Technical Stream",
+      mechanicaltech: "Engineering / Technical Stream",
+      egd: "Engineering / Technical Stream",
+      techmaths: "Engineering / Technical Stream",
+      itcs: "Engineering / Technical Stream",
+    };
+    Object.entries(marks).forEach(([key, val]) => {
+      if (val && val > 0 && map[key]) scores[map[key]] += val;
+    });
+    // Normalise to percentages (max possible 100 per subject, pick highest)
+    const total = Object.values(scores).reduce((a,b)=>a+b,0) || 1;
+    const pct = {};
+    Object.entries(scores).forEach(([k,v]) => { pct[k] = Math.round((v/total)*100); });
+    return pct;
+  };
+
   const startQuiz = (studentData) => {
     setStudent(studentData);
-    setScreen("quiz");
-    resetTimer(ATTITUDE_TIME);
+    if (studentData.skipQuiz) {
+      // Grade 10-12: skip quiz, go straight to results with inferred stream scores
+      const inferred = inferStreamFromMarks(studentData.marks);
+      setStreamScores(inferred);
+      setScreen("results");
+    } else {
+      setScreen("quiz");
+      resetTimer(ATTITUDE_TIME);
+    }
   };
 
   if (screen === "welcome") return <WelcomeScreen onStart={goToProfile} />;

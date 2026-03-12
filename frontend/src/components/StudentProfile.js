@@ -192,7 +192,7 @@ export default function StudentProfile({ onComplete }) {
     // Strip "na" values — pass only real marks to quiz
     const cleanMarks = {};
     Object.entries(marks).forEach(([k, v]) => { if (v !== "na" && v > 0) cleanMarks[k] = v; });
-    onComplete({ ...form, marks: cleanMarks, aps, mathsLevel: mathsLevel() });
+    onComplete({ ...form, marks: cleanMarks, aps, mathsLevel: mathsLevel(), skipQuiz: parseInt(form.grade) >= 10 });
   };
 
   // ── Render a single subject row ────────────────────────────────────────────
@@ -270,6 +270,43 @@ export default function StudentProfile({ onComplete }) {
           <p style={s.cardSub}>Fill in your details and current marks to personalise your stream recommendation</p>
         </div>
 
+        {/* ── Grade Warning for Gr 10-12 ── */}
+        {parseInt(form.grade) >= 10 && (
+          <div style={s.gradeWarning}>
+            <span style={{ fontSize: 32, flexShrink: 0 }}>🎓</span>
+            <div>
+              <h3 style={{ margin: "0 0 6px", color: "#92400e", fontSize: 16 }}>
+                This quiz is designed for <b>Grade 9 students</b>
+              </h3>
+              <p style={{ margin: "0 0 8px", fontSize: 13, color: "#92400e", lineHeight: 1.6 }}>
+                The Stream Selector quiz helps <b>Grade 9 learners choose their Grade 10 subjects</b>.
+                Since you are in <b>Grade {form.grade}</b>, you have already selected your subjects.
+              </p>
+              <p style={{ margin: 0, fontSize: 13, color: "#92400e", lineHeight: 1.6 }}>
+                💡 You can still fill in your profile and marks below to:
+              </p>
+              <ul style={{ margin: "6px 0 0 16px", fontSize: 13, color: "#78350f", lineHeight: 1.8 }}>
+                <li>See <b>what university programmes you qualify for</b> based on your current APS</li>
+                <li>Find <b>bursaries</b> matching your stream</li>
+                <li>Get personalised <b>university and career advice</b></li>
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {/* ── Grade 9 welcome ── */}
+        {parseInt(form.grade) === 9 && (
+          <div style={s.grade9Banner}>
+            <span style={{ fontSize: 28, flexShrink: 0 }}>✅</span>
+            <div>
+              <b style={{ fontSize: 14, color: "#14532d" }}>You are in Grade 9 — perfect!</b>
+              <p style={{ margin: "4px 0 0", fontSize: 13, color: "#14532d", lineHeight: 1.6 }}>
+                Complete your profile below, then take the quiz to find out which subjects to choose for Grade 10.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* ── Personal Details ── */}
         <div style={s.section}>
           <h3 style={s.sectionLabel}>📋 Personal Details</h3>
@@ -290,7 +327,11 @@ export default function StudentProfile({ onComplete }) {
             </Field>
             <Field label="Current Grade">
               <select style={s.input} value={form.grade} onChange={e => update("grade", e.target.value)}>
-                {["8","9","10","11","12"].map(g => <option key={g}>{g}</option>)}
+                <option value="8">Grade 8</option>
+                <option value="9">Grade 9 ✓ (Take the Quiz)</option>
+                <option value="10">Grade 10</option>
+                <option value="11">Grade 11</option>
+                <option value="12">Grade 12</option>
               </select>
             </Field>
           </div>
@@ -407,7 +448,7 @@ export default function StudentProfile({ onComplete }) {
           </p>
         )}
         <button style={s.submitBtn} onClick={handleSubmit}>
-          Continue to Quiz →
+          {parseInt(form.grade) >= 10 ? "View My University Options →" : "Begin Stream Quiz →"}
         </button>
       </div>
     </div>
@@ -467,4 +508,6 @@ const s = {
   apsBadge:       { borderRadius:99, padding:"2px 10px", fontSize:12, fontWeight:700, flexShrink:0 },
   apsUni:         { fontSize:11, color:"#6b7280", flexShrink:0 },
   submitBtn:      { display:"block", width:"calc(100% - 64px)", margin:"20px 32px 32px", padding:"16px", background:"linear-gradient(135deg,#6366f1,#2563eb)", color:"#fff", border:"none", borderRadius:14, fontSize:16, fontWeight:800, cursor:"pointer" },
+  gradeWarning:   { display:"flex", gap:14, background:"#fffbeb", border:"2px solid #fcd34d", borderRadius:14, padding:"18px 20px", margin:"0 0 20px", alignItems:"flex-start" },
+  grade9Banner:   { display:"flex", gap:12, background:"#f0fdf4", border:"2px solid #bbf7d0", borderRadius:14, padding:"14px 18px", margin:"0 0 20px", alignItems:"flex-start" },
 };

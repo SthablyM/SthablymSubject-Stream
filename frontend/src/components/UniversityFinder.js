@@ -487,7 +487,7 @@ function BursaryPanel({ stream, color }) {
           <h3 style={{margin:"0 0 4px",color:"#713f12",fontSize:15}}>Apply for NSFAS First!</h3>
           <p style={{margin:0,fontSize:13,color:"#713f12",lineHeight:1.6}}>
             NSFAS covers <b>full tuition, accommodation, meals and travel</b> for qualifying students at public universities and TVET colleges.
-            Apply at <b>nsfas.org.za</b> — deadline is <b>31 January</b> each year. Household income must be under R350 000/year.
+            Apply at <a href="https://nsfas.org.za" target="_blank" rel="noopener noreferrer" style={{color:"#92400e",fontWeight:700}}>nsfas.org.za</a> — deadline is <b>31 January</b> each year. Household income must be under R350 000/year.
           </p>
         </div>
       </div>
@@ -500,7 +500,10 @@ function BursaryPanel({ stream, color }) {
           </div>
           <p style={{fontSize:13,color:"#374151",margin:"0 0 3px"}}>📚 {b.field}</p>
           {b.note && <p style={{fontSize:12,color:"#d97706",margin:"0 0 3px"}}>ℹ️ {b.note}</p>}
-          <p style={{fontSize:12,color:"#6366f1",margin:0}}>🌐 {b.link}</p>
+          <a href={`https://${b.link}`} target="_blank" rel="noopener noreferrer"
+             style={{fontSize:12,color:"#6366f1",margin:0,display:"inline-flex",alignItems:"center",gap:5,textDecoration:"none",fontWeight:600}}>
+            🌐 {b.link} <span style={{fontSize:10,opacity:0.7}}>↗</span>
+          </a>
         </div>
       ))}
 
