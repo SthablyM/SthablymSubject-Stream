@@ -69,7 +69,7 @@ const SUBJECT_GROUPS = [
       { id: "history",     label: "History",                        required: false, lo: false, stream: "Humanities" },
       { id: "tourism",     label: "Tourism",                        required: false, lo: false, stream: "Humanities" },
       { id: "consumer",    label: "Consumer Studies",               required: false, lo: false, stream: "Humanities" },
-      { id: "xhosa",       label: "isiXhosa / Zulu / Sepedi (HomeLanguage /1st additional  Language)", required: false, lo: false, stream: "Humanities" },
+      { id: "xhosa",       label: "isiXhosa / Zulu / Sotho (2nd Language)", required: false, lo: false, stream: "Humanities" },
       { id: "religion",    label: "Religion Studies",               required: false, lo: false, stream: "Humanities" },
       { id: "drama",       label: "Dramatic Arts",                  required: false, lo: false, stream: "Humanities" },
       { id: "visualarts",  label: "Visual Arts",                    required: false, lo: false, stream: "Humanities" },
@@ -116,7 +116,6 @@ export default function StudentProfile({ onComplete }) {
   // Pre-set all three maths to "na" — student clicks Select to activate their one
   const [marks,  setMarks]  = useState({ puremaths: "na", techmaths: "na", mathslit: "na" });
   const [errors, setErrors] = useState({});
-  const [showAPS, setShowAPS] = useState(false);
   const [openGroups, setOpenGroups] = useState(
     Object.fromEntries(SUBJECT_GROUPS.map(g => [g.group, true]))
   );
@@ -190,90 +189,114 @@ export default function StudentProfile({ onComplete }) {
     onComplete({ ...form, marks: cleanMarks, aps, mathsLevel: mathsLevel(), skipQuiz: parseInt(form.grade) >= 10 });
   };
 
-  // ── Render a single subject row ────────────────────────────────────────────
+  // ── Colour helpers (same as Teacher Dashboard) ────────────────────────────
+  const apsColorHex = (a) =>
+    a >= 6 ? "#16a34a" : a >= 5 ? "#22c55e" : a >= 4 ? "#d97706" : a >= 3 ? "#f97316" : a >= 2 ? "#dc2626" : "#94a3b8";
+
+  // ── Maths select: choosing one auto-NAs the other two ──────────────────────
+  const selectMaths = (id) => {
+    setMarks(m => {
+      const next = { ...m };
+      ["puremaths","techmaths","mathslit"].forEach(mid => {
+        if (mid === id) delete next[mid];
+        else next[mid] = "na";
+      });
+      return next;
+    });
+  };
+
+  // ── Single subject row — Teacher Dashboard style ───────────────────────────
   const SubjectRow = ({ sub, groupColor }) => {
     const val    = marks[sub.id];
     const isNA   = val === "na";
-    const numVal = (typeof val === "number" && val > 0) ? val : null;
-    const apsVal = numVal ? markToAPS(numVal) : null;
-    const apsColor = apsVal >= 5 ? { bg:"#d1fae5", fg:"#065f46" }
-                   : apsVal >= 3 ? { bg:"#fef9c3", fg:"#713f12" }
-                   : apsVal      ? { bg:"#fee2e2", fg:"#991b1b" }
-                   : null;
-
-    // Maths group: selecting one auto-NAs the others
-    const selectMaths = () => {
-      setMarks(m => {
-        const next = { ...m };
-        ["puremaths","techmaths","mathslit"].forEach(mid => {
-          if (mid === sub.id) delete next[mid];
-          else next[mid] = "na";
-        });
-        return next;
-      });
-    };
+    const numVal = (typeof val === "number" && val >= 0) ? val : null;
+    const apsVal = numVal !== null && !sub.lo ? markToAPS(numVal) : null;
+    const sym    = numVal !== null ? symbolLabel(numVal) : null;
+    const ac     = apsVal ? apsColorHex(apsVal) : "#e2e8f0";
 
     return (
-      <div style={{ ...s.subjectRow, opacity: isNA ? 0.45 : 1 }}>
-        {/* Stream colour dot */}
-        <div style={{ ...s.streamDot, background: groupColor }} />
+      <div style={{
+        display:"flex", alignItems:"center", padding:"10px 14px",
+        borderBottom:"1px solid #f1f5f9",
+        background: isNA ? "#fafafa" : "#fff",
+        opacity: isNA ? 0.55 : 1,
+        transition:"opacity .2s",
+      }}>
+        {/* Colour dot */}
+        <div style={{ width:8, height:8, borderRadius:"50%", background: isNA ? "#d1d5db" : groupColor, flexShrink:0, marginRight:10 }} />
 
         {/* Label */}
-        <div style={s.subjectLabel}>
-          <span style={{ fontSize: 13, fontWeight: sub.required ? 700 : 500, color: "#1e293b" }}>
+        <div style={{ flex:1, display:"flex", flexWrap:"wrap", alignItems:"center", gap:6 }}>
+          <span style={{ fontSize:13, fontWeight: sub.required ? 700 : 500, color:"#1e293b" }}>
             {sub.label}
           </span>
-          {sub.required && <span style={{ color:"#dc2626", fontSize:11 }}> *required</span>}
-          {sub.stream && <span style={s.streamTag}>{sub.stream}</span>}
+          {sub.required && <span style={{ fontSize:9, color:"#dc2626", fontWeight:800 }}>★ required</span>}
+          {sub.lo       && <span style={{ fontSize:10, color:"#94a3b8", fontStyle:"italic" }}>not counted in APS</span>}
+          {sub.mathsGroup && <span style={{ fontSize:10, background:"#ede9fe", color:"#6d28d9", padding:"1px 7px", borderRadius:99, fontWeight:700 }}>choose 1</span>}
+          {sub.stream   && !sub.mathsGroup && <span style={{ fontSize:10, background:"#f1f5f9", color:"#6b7280", borderRadius:99, padding:"1px 7px", fontWeight:600 }}>{sub.stream}</span>}
         </div>
 
-        {/* Input area */}
-        <div style={s.subjectInputArea}>
+        {/* Right-side controls */}
+        <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
 
-          {/* Mark input — visible when not NA */}
+          {/* ── Number input (visible when not NA) ── */}
           {!isNA && (
             <input
-              style={{ ...s.markInput, borderColor: errors[sub.id] ? "#fca5a5" : "#e2e8f0" }}
-              type="number"
-              min="0"
-              max="100"
+              type="number" min="0" max="100" placeholder="%"
               value={numVal ?? ""}
-              placeholder="%"
               onChange={e => updateMark(sub.id, e.target.value)}
+              style={{
+                width:68, padding:"7px 8px",
+                border:`2px solid ${numVal !== null ? ac : "#e2e8f0"}`,
+                borderRadius:8, fontSize:14, textAlign:"center", outline:"none",
+                fontWeight:700, background:"#f8fafc", color:"#1e293b",
+                transition:"border-color .2s",
+              }}
             />
           )}
 
-          {/* APS pill */}
-          {!isNA && apsVal && (
-            <div style={{ ...s.apsPill, background: apsColor.bg, color: apsColor.fg }}>
-              <span style={{ fontSize: 11, fontWeight: 700 }}>{symbolLabel(numVal)}</span>
-              <span style={{ fontSize: 10 }}> · APS {apsVal}</span>
+          {/* ── APS + symbol badge ── */}
+          {apsVal !== null && numVal !== null && (
+            <div style={{
+              display:"flex", alignItems:"center", gap:5,
+              background: ac + "18", border:`1.5px solid ${ac}`, borderRadius:8,
+              padding:"4px 10px", minWidth:76,
+            }}>
+              <span style={{ fontSize:15, fontWeight:900, color:ac }}>{sym}</span>
+              <span style={{ fontSize:11, color:ac, fontWeight:700 }}>APS {apsVal}</span>
             </div>
           )}
 
-          {/* Maths group: Select / Chosen button */}
+          {/* LO badge */}
+          {sub.lo && numVal !== null && (
+            <span style={{ fontSize:11, color:"#94a3b8", minWidth:76, textAlign:"center" }}>LO ✓</span>
+          )}
+
+          {/* ── Maths group: Select / ✓ Chosen ── */}
           {sub.mathsGroup && (
             <button
+              onClick={() => isNA && selectMaths(sub.id)}
               style={{
-                ...s.naBtn,
+                padding:"5px 12px", border:"none", borderRadius:8, fontSize:12, fontWeight:700, cursor: isNA ? "pointer" : "default",
                 ...(isNA
-                  ? { background:"#eff6ff", color:"#2563eb", border:"1.5px solid #93c5fd", fontWeight:700 }
-                  : { background:"#d1fae5", color:"#065f46", border:"1.5px solid #6ee7b7", fontWeight:700 }
-                ),
+                  ? { background:"#eff6ff", color:"#2563eb", border:"1.5px solid #93c5fd" }
+                  : { background:"#d1fae5", color:"#065f46", border:"1.5px solid #6ee7b7" }),
               }}
-              onClick={isNA ? selectMaths : undefined}
-              title={isNA ? "Click to select this maths" : "Currently selected — enter your mark above"}
             >
               {isNA ? "Select" : "✓ Chosen"}
             </button>
           )}
 
-          {/* Regular N/A for optional non-maths subjects */}
+          {/* ── N/A toggle for optional non-maths ── */}
           {!sub.required && !sub.mathsGroup && (
             <button
-              style={{ ...s.naBtn, ...(isNA ? s.naBtnActive : {}) }}
               onClick={() => toggleNA(sub.id)}
-              title={isNA ? "Click to enter mark" : "Click if you don't take this subject"}
+              style={{
+                padding:"5px 10px", borderRadius:8, fontSize:11, fontWeight:700, cursor:"pointer",
+                ...(isNA
+                  ? { background:"#f1f5f9", color:"#374151", border:"1.5px solid #94a3b8" }
+                  : { background:"#f8fafc", color:"#6b7280", border:"1.5px solid #e2e8f0" }),
+              }}
             >
               {isNA ? "✓ N/A" : "N/A"}
             </button>
@@ -379,24 +402,64 @@ export default function StudentProfile({ onComplete }) {
           <div style={s.hintBox}>
             <span style={{ fontSize: 16 }}>💡</span>
             <div>
-              <b>How to fill this in:</b> Enter your latest mark (0–100) for subjects you take.
-              Click <b>N/A</b> for subjects you don't take. APS and symbol are calculated automatically.
+              <b>How to fill this in:</b> Type your latest mark (0–100) for each subject you take.
+              Hit <b>N/A</b> for subjects you don't do. Your <b>APS updates live</b> as you type — symbols (A–G) appear automatically.
             </div>
           </div>
 
+          {/* ── Live APS bar (shows as soon as any mark entered) ── */}
+          {aps > 0 && (
+            <div style={{ background:"linear-gradient(135deg,#eff6ff,#f0fdf4)", border:"1px solid #bfdbfe", borderRadius:14, padding:"16px 20px", marginBottom:16, display:"flex", gap:20, alignItems:"center", flexWrap:"wrap" }}>
+              <div>
+                <div style={{ fontSize:10, fontWeight:700, color:"#1e40af", letterSpacing:"1px", textTransform:"uppercase" }}>Live APS</div>
+                <div style={{ fontSize:42, fontWeight:900, color:"#0f172a", lineHeight:1 }}>
+                  {aps}<span style={{ fontSize:18, color:"#94a3b8", fontWeight:400 }}>/42</span>
+                </div>
+                <div style={{ fontSize:11, color:"#64748b" }}>Best 6 · LO excluded · {mathsLevel()}</div>
+              </div>
+              <div style={{ flex:1, minWidth:140 }}>
+                <div style={{ height:10, background:"#e2e8f0", borderRadius:99, overflow:"hidden", marginBottom:6 }}>
+                  <div style={{ height:"100%", borderRadius:99, transition:"width .5s",
+                    width:`${Math.min(100,(aps/42)*100)}%`,
+                    background: aps>=30?"#16a34a":aps>=22?"#f59e0b":"#dc2626" }} />
+                </div>
+                <div style={{ fontSize:12, fontWeight:600, color: aps>=30?"#16a34a":aps>=22?"#d97706":"#dc2626" }}>
+                  {aps>=30?"🟢 Strong — most universities open":aps>=22?"🟡 Good — many programmes available":"🔴 Needs improvement"}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── NSC Symbol key ── */}
+          <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:16 }}>
+            {[[80,"A",7],[70,"B",6],[60,"C",5],[50,"D",4],[40,"E",3],[30,"F",2],[0,"G",1]].map(([pct,sym,apsP]) => {
+              const col = apsP>=6?"#16a34a":apsP>=5?"#22c55e":apsP>=4?"#d97706":apsP>=3?"#f97316":apsP>=2?"#dc2626":"#94a3b8";
+              return (
+                <div key={sym} style={{ textAlign:"center", background:"#fff", border:`1.5px solid ${col}`, borderRadius:8, padding:"4px 10px", minWidth:48 }}>
+                  <div style={{ fontSize:15, fontWeight:900, color:col }}>{sym}</div>
+                  <div style={{ fontSize:9, color:"#94a3b8" }}>{pct}%+</div>
+                  <div style={{ fontSize:9, fontWeight:700, color:col }}>APS {apsP}</div>
+                </div>
+              );
+            })}
+          </div>
+
           {SUBJECT_GROUPS.map(group => (
-            <div key={group.group} style={s.groupWrap}>
-              <button style={{ ...s.groupHeader, borderLeft: `4px solid ${group.color}` }}
+            <div key={group.group} style={{ marginBottom:12, borderRadius:14, overflow:"hidden", boxShadow:"0 1px 4px rgba(0,0,0,.06)", border:"1px solid #f1f5f9" }}>
+              <button
+                style={{ width:"100%", display:"flex", alignItems:"center", gap:10, padding:"11px 16px",
+                  background:"#f8fafc", border:"none", borderLeft:`4px solid ${group.color}`,
+                  cursor:"pointer", textAlign:"left", flexWrap:"wrap" }}
                 onClick={() => toggleGroup(group.group)}>
-                <span style={{ fontWeight: 700, color: group.color }}>{group.group}</span>
-                {group.note && <span style={s.groupNote}>{group.note}</span>}
-                <span style={{ marginLeft: "auto", color: "#94a3b8", fontSize: 18 }}>
+                <span style={{ fontWeight:700, color:group.color, fontSize:13 }}>{group.group}</span>
+                {group.note && <span style={{ fontSize:11, color:"#6b7280", fontStyle:"italic" }}>{group.note}</span>}
+                <span style={{ marginLeft:"auto", color:"#94a3b8", fontSize:16 }}>
                   {openGroups[group.group] ? "▲" : "▼"}
                 </span>
               </button>
 
               {openGroups[group.group] && (
-                <div style={s.groupBody}>
+                <div style={{ background:"#fff" }}>
                   {group.subjects.map(sub => (
                     <SubjectRow key={sub.id} sub={sub} groupColor={group.color} />
                   ))}
@@ -406,66 +469,26 @@ export default function StudentProfile({ onComplete }) {
           ))}
         </div>
 
-        {/* ── APS Summary ── */}
+        {/* ── APS Career Guide (always visible when APS > 0) ── */}
         {aps > 0 && (
-          <div style={s.apsBox}>
-            <div>
-              <p style={s.apsLabel}>Your Estimated APS Score</p>
-              <div style={s.apsScore}>
-                {aps}
-                <span style={s.apsMax}> / 42</span>
-              </div>
-              <p style={s.apsNote}>
-                Best 6 subjects · Life Orientation excluded · Maths: {mathsLevel()}
-              </p>
-            </div>
-
-            {/* Mini APS bar */}
-            <div style={s.apsBarWrap}>
-              <div style={s.apsBarTrack}>
-                <div style={{ ...s.apsBarFill,
-                  width: `${Math.min(100,(aps/42)*100)}%`,
-                  background: aps >= 30 ? "#16a34a" : aps >= 22 ? "#d97706" : "#dc2626"
-                }} />
-              </div>
-              <p style={{ fontSize: 12, color: "#64748b", margin: "4px 0 0" }}>
-                {aps >= 30 ? "🟢 Strong — most universities open to you"
-                 : aps >= 22 ? "🟡 Good — many programmes available"
-                 : "🔴 Needs improvement — focus on key subjects"}
-              </p>
-            </div>
-
-            <button style={s.apsGuideBtn} onClick={() => setShowAPS(v => !v)}>
-              {showAPS ? "Hide Guide ▲" : "Career APS Guide ▼"}
-            </button>
-          </div>
-        )}
-
-        {/* APS Career Guide */}
-        {showAPS && (
-          <div style={s.apsGuide}>
-            <h4 style={{ margin: "0 0 12px", color: "#1e293b", fontSize: 14 }}>
-              📊 APS Requirements for Popular SA Careers
+          <div style={{ margin:"0 32px 8px", padding:"16px 20px", background:"#f8fafc", borderRadius:14, border:"1px solid #e2e8f0" }}>
+            <h4 style={{ margin:"0 0 12px", color:"#1e293b", fontSize:14, fontWeight:700 }}>
+              🎓 Career APS Requirements — Your Score: <span style={{ color:"#2563eb" }}>{aps}/42</span>
             </h4>
             {APS_GUIDE.map((row, i) => {
               const reachable = aps >= row.aps;
               return (
-                <div key={i} style={{ ...s.apsRow, background: i % 2 === 0 ? "#f8fafc" : "#fff" }}>
-                  <span style={s.apsCareer}>{row.career}</span>
-                  <span style={{
-                    ...s.apsBadge,
-                    background: reachable ? "#d1fae5" : "#fee2e2",
-                    color: reachable ? "#065f46" : "#991b1b"
-                  }}>
-                    {reachable ? "✓" : "✗"} APS {row.aps}+
+                <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"7px 10px", background:i%2===0?"#f8fafc":"#fff", flexWrap:"wrap", borderRadius:6 }}>
+                  <span style={{ flex:1, fontSize:13, fontWeight:600, color:"#1e293b", minWidth:140 }}>{row.career}</span>
+                  <span style={{ borderRadius:99, padding:"2px 10px", fontSize:12, fontWeight:700, flexShrink:0,
+                    background:reachable?"#d1fae5":"#fee2e2", color:reachable?"#065f46":"#991b1b" }}>
+                    {reachable?"✓":"✗"} APS {row.aps}+
                   </span>
-                  <span style={s.apsUni}>{row.university}</span>
+                  <span style={{ fontSize:11, color:"#6b7280", flexShrink:0 }}>{row.university}</span>
                 </div>
               );
             })}
-            <p style={{ fontSize: 11, color: "#94a3b8", marginTop: 8 }}>
-              ✓ Green = within reach with your current APS · ✗ Red = needs improvement
-            </p>
+            <p style={{ fontSize:11, color:"#94a3b8", marginTop:8 }}>✓ Green = within reach · ✗ Red = needs improvement</p>
           </div>
         )}
 
@@ -507,34 +530,7 @@ const s = {
   row2:           { display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 },
   input:          { padding:"11px 14px", border:"2px solid #e2e8f0", borderRadius:10, fontSize:14, outline:"none", background:"#f8fafc", color:"#1e293b", width:"100%", boxSizing:"border-box" },
   inputErr:       { borderColor:"#fca5a5", background:"#fff5f5" },
-  hintBox:        { display:"flex", gap:10, background:"#fffbeb", border:"1px solid #fde68a", borderRadius:10, padding:"12px 14px", marginBottom:20, fontSize:13, color:"#713f12", lineHeight:1.6 },
-  groupWrap:      { marginBottom:12 },
-  groupHeader:    { width:"100%", display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background:"#f8fafc", border:"none", borderRadius:10, cursor:"pointer", textAlign:"left", flexWrap:"wrap" },
-  groupNote:      { fontSize:11, color:"#6b7280", fontStyle:"italic" },
-  groupBody:      { padding:"4px 0 4px 10px" },
-  subjectRow:     { display:"flex", alignItems:"center", gap:10, padding:"9px 8px", borderBottom:"1px solid #f1f5f9", transition:"opacity .2s" },
-  streamDot:      { width:8, height:8, borderRadius:"50%", flexShrink:0 },
-  subjectLabel:   { flex:1, display:"flex", flexWrap:"wrap", alignItems:"center", gap:6 },
-  streamTag:      { fontSize:10, background:"#f1f5f9", color:"#6b7280", borderRadius:99, padding:"1px 7px", fontWeight:600 },
-  subjectInputArea:{ display:"flex", alignItems:"center", gap:8, flexShrink:0 },
-  markInput:      { width:70, padding:"7px 10px", border:"2px solid #e2e8f0", borderRadius:8, fontSize:13, outline:"none", textAlign:"center" },
-  apsPill:        { borderRadius:8, padding:"3px 8px", fontSize:12, fontWeight:700, whiteSpace:"nowrap" },
-  naBtn:          { padding:"5px 10px", border:"2px solid #e2e8f0", borderRadius:8, background:"#f8fafc", fontSize:11, fontWeight:700, color:"#6b7280", cursor:"pointer", whiteSpace:"nowrap" },
-  naBtnActive:    { background:"#f1f5f9", borderColor:"#94a3b8", color:"#374151" },
-  apsBox:         { margin:"24px 32px 0", padding:"20px 24px", background:"linear-gradient(135deg,#eff6ff,#f0fdf4)", borderRadius:16, border:"1px solid #bfdbfe", display:"flex", flexWrap:"wrap", gap:16, alignItems:"flex-start" },
-  apsLabel:       { fontSize:13, color:"#1e40af", fontWeight:600, margin:0 },
-  apsScore:       { fontSize:44, fontWeight:900, color:"#1e293b", lineHeight:1.1, margin:"4px 0" },
-  apsMax:         { fontSize:20, color:"#94a3b8", fontWeight:400 },
-  apsNote:        { fontSize:11, color:"#64748b", margin:0 },
-  apsBarWrap:     { flex:1, minWidth:160 },
-  apsBarTrack:    { height:10, background:"#e2e8f0", borderRadius:99, overflow:"hidden" },
-  apsBarFill:     { height:"100%", borderRadius:99, transition:"width .5s ease" },
-  apsGuideBtn:    { padding:"10px 18px", background:"#2563eb", color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:700, cursor:"pointer", alignSelf:"flex-start" },
-  apsGuide:       { margin:"0 32px 24px", padding:"16px 20px", background:"#f8fafc", borderRadius:14, border:"1px solid #e2e8f0" },
-  apsRow:         { display:"flex", alignItems:"center", gap:10, padding:"8px 10px", flexWrap:"wrap" },
-  apsCareer:      { flex:1, fontSize:13, fontWeight:600, color:"#1e293b", minWidth:140 },
-  apsBadge:       { borderRadius:99, padding:"2px 10px", fontSize:12, fontWeight:700, flexShrink:0 },
-  apsUni:         { fontSize:11, color:"#6b7280", flexShrink:0 },
+  hintBox:        { display:"flex", gap:10, background:"#fffbeb", border:"1px solid #fde68a", borderRadius:10, padding:"12px 14px", marginBottom:16, fontSize:13, color:"#713f12", lineHeight:1.6 },
   submitBtn:      { display:"block", width:"calc(100% - 64px)", margin:"20px 32px 32px", padding:"16px", background:"linear-gradient(135deg,#6366f1,#2563eb)", color:"#fff", border:"none", borderRadius:14, fontSize:16, fontWeight:800, cursor:"pointer" },
   gradeWarning:   { display:"flex", gap:14, background:"#fffbeb", border:"2px solid #fcd34d", borderRadius:14, padding:"18px 20px", margin:"0 0 20px", alignItems:"flex-start" },
   grade9Banner:   { display:"flex", gap:12, background:"#f0fdf4", border:"2px solid #bbf7d0", borderRadius:14, padding:"14px 18px", margin:"0 0 20px", alignItems:"flex-start" },
