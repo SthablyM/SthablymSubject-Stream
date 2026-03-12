@@ -287,11 +287,12 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
   const isHighSchool = parseInt(student?.grade) >= 10;
 
   const NAV = [
-    { id:"results",      label:"📊 Results"      },
-    { id:"universities", label:"🏫 What Can I Study?"  },
-    { id:"bursaries",    label:"💰 Bursaries"     },
-    { id:"advice",       label:"💡 Advice"        },
+    { id:"results",      label:"📊 Results"           },
+    { id:"universities", label:"🏫 What Can I Study?" },
+    { id:"bursaries",    label:"💰 Bursaries"          },
+    { id:"advice",       label:"💡 Advice"             },
     ...(isHighSchool ? [{ id:"pastpapers", label:"📝 Past Papers Quiz" }] : []),
+    { id:"teacher",      label:"🎓 Teacher Portal"    },
   ];
 
   return (
@@ -335,7 +336,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
         ))}
       </div>
 
-      <div style={s.content}>
+      <div style={{ ...s.content, maxWidth: activeSection === "teacher" ? 1100 : 780 }}>
 
         {/* ══ RESULTS TAB ══════════════════════════════════════════════════════ */}
         {activeSection === "results" && (
@@ -493,6 +494,11 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
           <PastPapersQuiz student={student} onBack={() => setActiveSection("results")} />
         )}
 
+        {/* ══ TEACHER PORTAL TAB ═══════════════════════════════════════════════ */}
+        {activeSection === "teacher" && (
+          <TeacherPortal student={student} streamColor={info.color} />
+        )}
+
         {/* ══ ADVICE TAB ═══════════════════════════════════════════════════════ */}
         {activeSection === "advice" && (
           <div>
@@ -552,6 +558,670 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
         <button style={s.retakeBtn} onClick={() => window.location.reload()}>
           🔄 Retake Quiz (New Questions)
         </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── TEACHER PORTAL COMPONENT ────────────────────────────────────────────────
+// Self-contained — no imports needed. Embedded directly in EnhancedResults.
+
+const TP_SUBJECTS = [
+  { id:"english",        label:"English HL / FAL",             required:true  },
+  { id:"puremaths",      label:"Mathematics",                  group:"maths"  },
+  { id:"techmaths",      label:"Technical Mathematics",        group:"maths"  },
+  { id:"mathslit",       label:"Mathematical Literacy",        group:"maths"  },
+  { id:"lifeorien",      label:"Life Orientation",             lo:true        },
+  { id:"physscience",    label:"Physical Sciences"                            },
+  { id:"lifescience",    label:"Life Sciences"                                },
+  { id:"accounting",     label:"Accounting"                                   },
+  { id:"business",       label:"Business Studies"                             },
+  { id:"economics",      label:"Economics"                                    },
+  { id:"history",        label:"History"                                      },
+  { id:"geography",      label:"Geography"                                    },
+  { id:"tourism",        label:"Tourism"                                      },
+  { id:"techscience",    label:"Technical Sciences"                           },
+  { id:"civiltech",      label:"Civil Technology"                             },
+  { id:"electricaltech", label:"Electrical Technology"                        },
+  { id:"mechanicaltech", label:"Mechanical Technology"                        },
+  { id:"egd",            label:"Engineering Graphics & Design"                },
+  { id:"itcs",           label:"IT / Computer Science"                        },
+];
+
+const TP_APS_CAREERS = [
+  { career:"Medicine (MBChB)",         aps:36, unis:"UCT, Wits, UP, SMU"        },
+  { career:"Engineering (BSc Eng)",    aps:32, unis:"Wits, UCT, UP, UJ, TUT"    },
+  { career:"Pharmacy (BPharm)",        aps:32, unis:"UP, UKZN, NWU, UWC"        },
+  { career:"Law (LLB)",                aps:30, unis:"UCT, Wits, UP, UWC"        },
+  { career:"Accounting (BCom CA)",     aps:28, unis:"Wits, UCT, UP, UJ, UNISA"  },
+  { career:"IT / Computer Science",    aps:28, unis:"Wits, UCT, UNISA, CPUT"    },
+  { career:"Education (BEd)",          aps:24, unis:"UNISA, UJ, UKZN, NWU"      },
+  { career:"Social Work (BSW)",        aps:22, unis:"UNISA, UWC, UKZN"          },
+  { career:"N-Diploma (TVET)",         aps:18, unis:"Any TVET College"           },
+];
+
+const tp_markToAPS   = m => m>=80?7:m>=70?6:m>=60?5:m>=50?4:m>=40?3:m>=30?2:1;
+const tp_symbolLabel = m => m>=80?"A":m>=70?"B":m>=60?"C":m>=50?"D":m>=40?"E":m>=30?"F":"G";
+const tp_apsColor    = a => a>=6?"#16a34a":a>=5?"#22c55e":a>=4?"#d97706":a>=3?"#f97316":a>=2?"#dc2626":"#94a3b8";
+const tp_apsLabel    = a => a>=6?"Excellent":a>=4?"Satisfactory":a>=2?"Not yet achieved":"–";
+
+const tp_calcAPS = marks => {
+  const pts = TP_SUBJECTS
+    .filter(s => !s.lo && typeof marks[s.id]==="number" && marks[s.id]>0)
+    .map(s => tp_markToAPS(marks[s.id]));
+  pts.sort((a,b)=>b-a);
+  return pts.slice(0,6).reduce((t,x)=>t+x,0);
+};
+
+const tp_mathsLabel = marks =>
+  typeof marks.puremaths==="number" ? "Pure Mathematics" :
+  typeof marks.techmaths==="number" ? "Technical Mathematics" :
+  typeof marks.mathslit==="number"  ? "Mathematical Literacy" : "–";
+
+const TP_INITIAL_STUDENTS = [
+  { id:1, name:"Student 1", grade:9,  marks:{}, examRecords:[] },
+  { id:2, name:"Student 2", grade:10, marks:{}, examRecords:[] },
+  { id:3, name:"Student 3", grade:11, marks:{}, examRecords:[] },
+];
+
+function TeacherPortal({ student: quizStudent, streamColor }) {
+  const [students, setStudents] = React.useState(() => {
+    // Pre-populate with the current quiz student if they have a name
+    if (quizStudent?.name) {
+      return [{
+        id: 1,
+        name: quizStudent.name,
+        grade: parseInt(quizStudent.grade) || 9,
+        marks: quizStudent.marks || {},
+        examRecords: [],
+        stream: null,
+      }, ...TP_INITIAL_STUDENTS.slice(1)];
+    }
+    return TP_INITIAL_STUDENTS;
+  });
+
+  const [selected,  setSelected]  = React.useState(null);
+  const [tab,       setTab]       = React.useState("marks");
+  const [newName,   setNewName]   = React.useState("");
+  const [newGrade,  setNewGrade]  = React.useState("9");
+  const [adding,    setAdding]    = React.useState(false);
+
+  const student = students.find(s => s.id === selected);
+
+  const updateStudent = (id, fn) =>
+    setStudents(ss => ss.map(s => s.id===id ? fn(s) : s));
+
+  const setMark = (id, subId, val) => updateStudent(id, s => ({
+    ...s, marks: { ...s.marks,
+      [subId]: val===undefined ? undefined : Math.min(100, Math.max(0, parseInt(val)||0)) }
+  }));
+
+  const addExamRecord = (id, rec) => updateStudent(id, s => ({
+    ...s, examRecords: [...(s.examRecords||[]), rec]
+  }));
+
+  const addStudent = () => {
+    if (!newName.trim()) return;
+    setStudents(ss => [...ss, {
+      id: Date.now(), name: newName.trim(), grade: parseInt(newGrade), marks:{}, examRecords:[]
+    }]);
+    setNewName(""); setAdding(false);
+  };
+
+  const openStudent = id => { setSelected(id); setTab("marks"); };
+
+  const color = streamColor || "#2563eb";
+
+  // ── Styles (scoped with tp_ prefix to avoid collisions) ──
+  const tpCard  = { background:"#fff", borderRadius:14, padding:"18px 22px", marginBottom:14, boxShadow:"0 1px 6px rgba(0,0,0,.07)", border:"1px solid #f1f5f9" };
+  const tpInp   = { padding:"9px 12px", border:"2px solid #e2e8f0", borderRadius:8, fontSize:13, outline:"none", fontFamily:"inherit", background:"#f8fafc", width:"100%", color:"#1e293b" };
+  const tpInpE  = { ...tpInp, borderColor:"#fca5a5", background:"#fff5f5" };
+  const tpBtn   = (bg, col="#fff") => ({ padding:"9px 20px", background:bg, color:col, border:"none", borderRadius:8, fontSize:13, fontWeight:700, cursor:"pointer" });
+
+  return (
+    <div style={{ fontFamily:"'Segoe UI',sans-serif" }}>
+
+      {/* ── Header ── */}
+      <div style={{ background:"linear-gradient(135deg,#0f172a,#1e3a5f)", borderRadius:16, padding:"22px 28px", marginBottom:22, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:12 }}>
+        <div>
+          <div style={{ fontSize:22, fontWeight:900, color:"#38bdf8", letterSpacing:"-1px" }}>Teacher Portal</div>
+          <div style={{ fontSize:13, color:"rgba(255,255,255,.6)", marginTop:3 }}>Enter student marks · Record exams · Print APS reports</div>
+        </div>
+        <div style={{ display:"flex", gap:12, flexWrap:"wrap" }}>
+          {[
+            { label:"Students",       value:students.length,                                                                     color:"#38bdf8" },
+            { label:"Marks Entered",  value:students.filter(s=>Object.values(s.marks).some(v=>typeof v==="number")).length,      color:"#4ade80" },
+            { label:"Exams Recorded", value:students.filter(s=>s.examRecords?.length>0).length,                                  color:"#a78bfa" },
+          ].map(({label,value,color:c}) => (
+            <div key={label} style={{ background:"rgba(255,255,255,.08)", borderRadius:10, padding:"10px 18px", textAlign:"center" }}>
+              <div style={{ fontSize:24, fontWeight:900, color:c }}>{value}</div>
+              <div style={{ fontSize:11, color:"rgba(255,255,255,.5)" }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── ROSTER VIEW ── */}
+      {!selected && (
+        <div>
+          {/* Add student row */}
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
+            <span style={{ fontSize:15, fontWeight:700, color:"#1e293b" }}>Class Roster ({students.length} students)</span>
+            <button style={tpBtn(color)} onClick={()=>setAdding(v=>!v)}>
+              {adding ? "✕ Cancel" : "+ Add Student"}
+            </button>
+          </div>
+
+          {adding && (
+            <div style={{ display:"flex", gap:10, marginBottom:14, background:"#fff", padding:"14px", borderRadius:12, boxShadow:"0 1px 4px rgba(0,0,0,.08)" }}>
+              <input style={{ ...tpInp, flex:1 }} placeholder="Student full name"
+                value={newName} onChange={e=>setNewName(e.target.value)}
+                onKeyDown={e=>e.key==="Enter"&&addStudent()} />
+              <select style={{ ...tpInp, width:120 }} value={newGrade} onChange={e=>setNewGrade(e.target.value)}>
+                {[8,9,10,11,12].map(g=><option key={g} value={g}>Grade {g}</option>)}
+              </select>
+              <button style={tpBtn("#16a34a")} onClick={addStudent}>Save</button>
+            </div>
+          )}
+
+          {/* Roster table */}
+          <div style={{ background:"#fff", borderRadius:14, overflow:"hidden", boxShadow:"0 1px 6px rgba(0,0,0,.07)", border:"1px solid #f1f5f9" }}>
+            <div style={{ display:"grid", gridTemplateColumns:"2fr .7fr 1.2fr 1fr 1.2fr .8fr", padding:"10px 18px", background:"#f8fafc", borderBottom:"1px solid #f1f5f9" }}>
+              {["Student","Grade","Marks","APS","Exam Records",""].map(h => (
+                <span key={h} style={{ fontSize:11, fontWeight:700, color:"#64748b", textTransform:"uppercase", letterSpacing:".5px" }}>{h}</span>
+              ))}
+            </div>
+            {students.map((st, i) => {
+              const aps     = tp_calcAPS(st.marks);
+              const entered = Object.values(st.marks).filter(v=>typeof v==="number"&&v>=0).length;
+              const apsCol  = aps>=30?"#16a34a":aps>=22?"#d97706":aps>0?"#dc2626":null;
+              return (
+                <div key={st.id} style={{ display:"grid", gridTemplateColumns:"2fr .7fr 1.2fr 1fr 1.2fr .8fr",
+                  padding:"12px 18px", borderBottom:i<students.length-1?"1px solid #f8fafc":"none",
+                  alignItems:"center", background:i%2===0?"#fff":"#fafbfc" }}>
+                  <span style={{ fontWeight:700, fontSize:14, color:"#0f172a" }}>{st.name}</span>
+                  <span style={{ fontSize:12, fontWeight:700, color:color, background:color+"15", padding:"2px 9px", borderRadius:99, display:"inline-block" }}>Gr {st.grade}</span>
+                  <span style={{ fontSize:13, color:entered>0?"#16a34a":"#94a3b8", fontWeight:600 }}>{entered>0?`${entered} subjects`:"—"}</span>
+                  <span>
+                    {aps>0
+                      ? <span style={{ background:apsCol+"15", color:apsCol, fontWeight:800, padding:"3px 10px", borderRadius:99, fontSize:13, border:`1px solid ${apsCol}30` }}>{aps}/42</span>
+                      : <span style={{ color:"#94a3b8",fontSize:13 }}>—</span>}
+                  </span>
+                  <span style={{ fontSize:13, color:st.examRecords?.length>0?"#7c3aed":"#94a3b8", fontWeight:600 }}>
+                    {st.examRecords?.length>0?`✓ ${st.examRecords.length} recorded`:"None yet"}
+                  </span>
+                  <button onClick={()=>openStudent(st.id)}
+                    style={{ padding:"6px 12px", background:"#eff6ff", color:color, border:`1.5px solid ${color}40`, borderRadius:8, fontSize:12, fontWeight:700, cursor:"pointer" }}>
+                    Open →
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── STUDENT DETAIL VIEW ── */}
+      {selected && student && (
+        <div>
+          {/* Back + student header */}
+          <div style={{ display:"flex", alignItems:"center", gap:14, marginBottom:20 }}>
+            <button onClick={()=>setSelected(null)} style={{ padding:"7px 14px", background:"#f1f5f9", color:"#334155", border:"1.5px solid #e2e8f0", borderRadius:8, fontSize:13, fontWeight:600, cursor:"pointer" }}>← Back</button>
+            <div>
+              <h3 style={{ fontSize:20, fontWeight:800, color:"#0f172a", margin:0 }}>{student.name}</h3>
+              <span style={{ fontSize:13, color:"#64748b" }}>Grade {student.grade} · APS: <b style={{ color }}>{tp_calcAPS(student.marks)||"–"}/42</b></span>
+            </div>
+          </div>
+
+          {/* Sub-tabs */}
+          <div style={{ display:"flex", gap:3, background:"#f1f5f9", padding:3, borderRadius:11, marginBottom:22, width:"fit-content" }}>
+            {[
+              {t:"marks",  label:"📝 Enter Marks"  },
+              {t:"exam",   label:"🔒 Exam Records" },
+              {t:"report", label:"📄 Print Report" },
+            ].map(({t,label}) => (
+              <button key={t} onClick={()=>setTab(t)}
+                style={{ padding:"9px 18px", border:"none", borderRadius:8, fontSize:13, fontWeight:600, cursor:"pointer",
+                  background:tab===t?"#fff":"transparent", color:tab===t?"#0f172a":"#64748b",
+                  boxShadow:tab===t?"0 1px 4px rgba(0,0,0,.1)":"none" }}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {tab==="marks"  && <TP_MarksPanel  student={student} onSetMark={(sub,val)=>setMark(student.id,sub,val)} color={color} tpCard={tpCard} tpInp={tpInp} />}
+          {tab==="exam"   && <TP_ExamPanel   student={student} onAdd={rec=>addExamRecord(student.id,rec)} color={color} tpCard={tpCard} tpInp={tpInp} tpInpE={tpInpE} />}
+          {tab==="report" && <TP_ReportPanel student={student} color={color} />}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Marks Panel ───────────────────────────────────────────────────────────────
+function TP_MarksPanel({ student, onSetMark, color, tpCard }) {
+  const { marks } = student;
+  const aps = tp_calcAPS(marks);
+  const pct = Math.min(100, Math.round((aps/42)*100));
+  const barCol = aps>=30?"#16a34a":aps>=22?"#f59e0b":"#dc2626";
+
+  return (
+    <div>
+      {aps > 0 && (
+        <div style={{ ...tpCard, background:"linear-gradient(135deg,#eff6ff,#f0fdf4)", border:"1px solid #bfdbfe", marginBottom:16 }}>
+          <div style={{ display:"flex", gap:24, alignItems:"center", flexWrap:"wrap" }}>
+            <div>
+              <div style={{ fontSize:11, fontWeight:700, color:"#1e40af", letterSpacing:"1px", textTransform:"uppercase" }}>Live APS Score</div>
+              <div style={{ fontSize:52, fontWeight:900, color:"#0f172a", lineHeight:1.1 }}>
+                {aps}<span style={{ fontSize:18, color:"#94a3b8", fontWeight:400 }}>/42</span>
+              </div>
+              <div style={{ fontSize:12, color:"#64748b" }}>Best 6 · LO excluded · {tp_mathsLabel(marks)}</div>
+            </div>
+            <div style={{ flex:1, minWidth:160 }}>
+              <div style={{ height:10, background:"#e2e8f0", borderRadius:99, overflow:"hidden", marginBottom:6 }}>
+                <div style={{ height:"100%", width:`${pct}%`, background:barCol, borderRadius:99, transition:"width .5s" }}/>
+              </div>
+              <div style={{ fontSize:13, fontWeight:600, color:barCol }}>
+                {aps>=30?"🟢 Strong — most universities open":aps>=22?"🟡 Good — many programmes available":"🔴 Needs improvement"}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ background:"#fff", borderRadius:14, overflow:"hidden", boxShadow:"0 1px 6px rgba(0,0,0,.07)", border:"1px solid #f1f5f9" }}>
+        {TP_SUBJECTS.map((sub, i) => {
+          const val    = marks[sub.id];
+          const numVal = typeof val==="number" && val>=0 ? val : null;
+          const apsVal = numVal!==null && !sub.lo ? tp_markToAPS(numVal) : null;
+          const sym    = numVal!==null ? tp_symbolLabel(numVal) : null;
+          const ac     = apsVal ? tp_apsColor(apsVal) : "#e2e8f0";
+
+          return (
+            <div key={sub.id} style={{ display:"flex", alignItems:"center", padding:"9px 16px",
+              borderBottom:i<TP_SUBJECTS.length-1?"1px solid #f8fafc":"none",
+              background:i%2===0?"#fff":"#fafbfc", opacity:sub.lo?.65:1 }}>
+              <div style={{ flex:1, display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                <span style={{ fontSize:13, fontWeight:600, color:"#1e293b" }}>{sub.label}</span>
+                {sub.required && <span style={{ fontSize:9, color:"#dc2626", fontWeight:800 }}>★</span>}
+                {sub.lo && <span style={{ fontSize:10, color:"#94a3b8", fontStyle:"italic" }}>not in APS</span>}
+                {sub.group==="maths" && <span style={{ fontSize:10, background:"#ede9fe", color:"#6d28d9", padding:"1px 7px", borderRadius:99, fontWeight:700 }}>choose 1</span>}
+              </div>
+              <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+                <input type="number" min="0" max="100" placeholder="%" value={numVal??""} 
+                  onChange={e=>{
+                    const v=e.target.value;
+                    onSetMark(sub.id, v===""?undefined:Math.min(100,Math.max(0,parseInt(v)||0)));
+                  }}
+                  style={{ width:64, padding:"6px 8px", border:`2px solid ${numVal!==null?ac:"#e2e8f0"}`,
+                    borderRadius:8, fontSize:14, textAlign:"center", outline:"none",
+                    fontWeight:700, background:"#f8fafc", transition:"border-color .2s" }}
+                />
+                {apsVal!==null && numVal!==null && (
+                  <div style={{ background:ac+"15", border:`1.5px solid ${ac}`, borderRadius:8,
+                    padding:"3px 9px", display:"flex", alignItems:"center", gap:5, minWidth:70 }}>
+                    <span style={{ fontSize:15, fontWeight:900, color:ac }}>{sym}</span>
+                    <span style={{ fontSize:11, color:ac, fontWeight:700 }}>APS {apsVal}</span>
+                  </div>
+                )}
+                {sub.lo && numVal!==null && <span style={{ fontSize:11, color:"#94a3b8", minWidth:70 }}>LO ✓</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Symbol key */}
+      <div style={{ marginTop:16, background:"#f8fafc", borderRadius:12, padding:"14px 18px", border:"1px solid #e2e8f0" }}>
+        <div style={{ fontSize:12, fontWeight:700, color:"#475569", marginBottom:10, textTransform:"uppercase", letterSpacing:".5px" }}>NSC Symbol Scale</div>
+        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+          {[[80,"A",7],[70,"B",6],[60,"C",5],[50,"D",4],[40,"E",3],[30,"F",2],[0,"G",1]].map(([p,sy,a]) => (
+            <div key={sy} style={{ textAlign:"center", background:"#fff", border:`1.5px solid ${tp_apsColor(a)}`,
+              borderRadius:10, padding:"6px 12px", minWidth:56 }}>
+              <div style={{ fontSize:17, fontWeight:900, color:tp_apsColor(a) }}>{sy}</div>
+              <div style={{ fontSize:10, color:"#94a3b8" }}>{p}%+</div>
+              <div style={{ fontSize:10, fontWeight:700, color:tp_apsColor(a) }}>APS {a}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Exam Records Panel ────────────────────────────────────────────────────────
+function TP_ExamPanel({ student, onAdd, color, tpCard, tpInp, tpInpE }) {
+  const blank = { date:"", subject:"", paper:"1", venue:"", duration:"3 hours", invigilator:"", confirmed:false, incidents:"" };
+  const [form,     setForm]     = React.useState(blank);
+  const [showForm, setShowForm] = React.useState(false);
+  const [errors,   setErrors]   = React.useState({});
+
+  const set = (k,v) => setForm(f=>({...f,[k]:v}));
+
+  const validate = () => {
+    const e={};
+    if(!form.date)               e.date="Required";
+    if(!form.subject)            e.subject="Required";
+    if(!form.venue.trim())       e.venue="Required";
+    if(!form.invigilator.trim()) e.invigilator="Required";
+    if(!form.confirmed)          e.confirmed="You must tick the declaration to submit";
+    setErrors(e); return Object.keys(e).length===0;
+  };
+
+  const save = () => {
+    if(!validate()) return;
+    onAdd({ ...form, id:Date.now(), recordedAt:new Date().toLocaleString("en-ZA",{dateStyle:"medium",timeStyle:"short"}) });
+    setForm(blank); setShowForm(false); setErrors({});
+  };
+
+  const recs = student.examRecords || [];
+
+  return (
+    <div>
+      <div style={{ marginBottom:16 }}>
+        <h4 style={{ fontSize:16, fontWeight:800, color:"#1e293b", margin:"0 0 4px" }}>🔒 Exam Invigilation Records</h4>
+        <p style={{ fontSize:13, color:"#64748b", margin:0 }}>
+          Each record is timestamped and signed off by the invigilator — preventing mark disputes and confirming the student wrote the exam fairly.
+        </p>
+      </div>
+
+      <div style={{ background:"#fef3c7", border:"1px solid #fcd34d", borderRadius:12, padding:"12px 16px", marginBottom:16, display:"flex", gap:10, alignItems:"flex-start" }}>
+        <span style={{ fontSize:20 }}>🛡️</span>
+        <div style={{ fontSize:13, color:"#92400e" }}>
+          <b>Anti-Cheat System:</b> Each record creates a permanent, timestamped log confirming the student was present, wrote independently, and no irregularities occurred. These records support mark validation and dispute resolution.
+        </div>
+      </div>
+
+      {recs.length===0 && (
+        <div style={{ background:"#f8fafc", border:"2px dashed #e2e8f0", borderRadius:14, padding:"36px 20px", textAlign:"center", marginBottom:14 }}>
+          <div style={{ fontSize:32, marginBottom:8 }}>📋</div>
+          <div style={{ fontSize:14, fontWeight:700, color:"#64748b" }}>No exam records yet</div>
+          <div style={{ fontSize:13, color:"#94a3b8" }}>Add a record each time this student writes an exam</div>
+        </div>
+      )}
+
+      {recs.map((rec, i) => (
+        <div key={rec.id} style={{ ...tpCard, marginBottom:10 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
+            <div>
+              <span style={{ fontWeight:800, fontSize:14, color:"#1e293b" }}>{rec.subject} — Paper {rec.paper}</span>
+              <span style={{ marginLeft:10, fontSize:12, color:"#64748b" }}>📅 {rec.date}</span>
+            </div>
+            <span style={{ background:"#d1fae5", color:"#065f46", fontWeight:700, fontSize:11, padding:"3px 10px", borderRadius:99 }}>✓ Verified</span>
+          </div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"4px 16px", fontSize:13, marginBottom:8 }}>
+            {[["Venue",rec.venue],["Duration",rec.duration],["Invigilator",rec.invigilator],["Recorded",rec.recordedAt]].map(([k,v])=>(
+              <div key={k}><span style={{ color:"#94a3b8" }}>{k}: </span><b style={{ color:"#1e293b" }}>{v}</b></div>
+            ))}
+          </div>
+          {rec.incidents && (
+            <div style={{ background:"#fef3c7", border:"1px solid #fcd34d", borderRadius:8, padding:"8px 12px", fontSize:12, color:"#92400e", marginBottom:8 }}>⚠️ <b>Incident:</b> {rec.incidents}</div>
+          )}
+          <div style={{ fontSize:11, color:"#94a3b8", fontStyle:"italic", borderTop:"1px solid #f1f5f9", paddingTop:8 }}>
+            "{rec.invigilator} confirmed {student.name} was present and wrote this exam under supervision with no irregularities{rec.incidents?" (see incident above)":""}."
+          </div>
+        </div>
+      ))}
+
+      {!showForm && (
+        <button onClick={()=>setShowForm(true)}
+          style={{ padding:"11px 22px", background:"#7c3aed", color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:700, cursor:"pointer", marginTop:4 }}>
+          + Record New Exam
+        </button>
+      )}
+
+      {showForm && (
+        <div style={{ ...tpCard, border:"1.5px solid #e2e8f0", marginTop:14 }}>
+          <div style={{ fontSize:15, fontWeight:800, color:"#1e293b", marginBottom:18 }}>📝 New Invigilation Record — {student.name}</div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:14 }}>
+            {[
+              { label:"Exam Date *",        err:errors.date,         el:<input style={errors.date?tpInpE:tpInp} type="date" value={form.date} onChange={e=>set("date",e.target.value)} /> },
+              { label:"Subject *",          err:errors.subject,      el:<select style={errors.subject?tpInpE:tpInp} value={form.subject} onChange={e=>set("subject",e.target.value)}>
+                  <option value="">Select subject...</option>
+                  {TP_SUBJECTS.map(s=><option key={s.id} value={s.label}>{s.label}</option>)}
+                </select> },
+              { label:"Paper",              err:null,                el:<select style={tpInp} value={form.paper} onChange={e=>set("paper",e.target.value)}>
+                  {["1","2","3","Practical","SBA / Portfolio"].map(p=><option key={p} value={p}>Paper {p}</option>)}
+                </select> },
+              { label:"Duration",           err:null,                el:<select style={tpInp} value={form.duration} onChange={e=>set("duration",e.target.value)}>
+                  {["1 hour","1.5 hours","2 hours","2.5 hours","3 hours","3.5 hours"].map(d=><option key={d}>{d}</option>)}
+                </select> },
+              { label:"Exam Venue *",       err:errors.venue,        el:<input style={errors.venue?tpInpE:tpInp} placeholder="e.g. Hall B, Room 14" value={form.venue} onChange={e=>set("venue",e.target.value)} /> },
+              { label:"Invigilator Name *", err:errors.invigilator,  el:<input style={errors.invigilator?tpInpE:tpInp} placeholder="Full name of teacher on duty" value={form.invigilator} onChange={e=>set("invigilator",e.target.value)} /> },
+            ].map(({label,err,el}) => (
+              <div key={label} style={{ display:"flex", flexDirection:"column", gap:5 }}>
+                <label style={{ fontSize:12, fontWeight:700, color:"#475569", textTransform:"uppercase", letterSpacing:".5px" }}>{label}</label>
+                {el}
+                {err && <span style={{ fontSize:11, color:"#dc2626" }}>⚠ {err}</span>}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display:"flex", flexDirection:"column", gap:5, marginBottom:14 }}>
+            <label style={{ fontSize:12, fontWeight:700, color:"#475569", textTransform:"uppercase", letterSpacing:".5px" }}>Incidents / Irregularities</label>
+            <textarea style={{ ...tpInp, height:72, resize:"vertical" }}
+              placeholder="Leave blank if exam ran normally. Note any incidents here."
+              value={form.incidents} onChange={e=>set("incidents",e.target.value)} />
+          </div>
+
+          {/* Declaration */}
+          <div style={{ background:errors.confirmed?"#fff5f5":"#f0fdf4", border:`2px solid ${errors.confirmed?"#fca5a5":"#bbf7d0"}`, borderRadius:12, padding:"16px", marginBottom:14 }}>
+            <div style={{ display:"flex", gap:12, alignItems:"flex-start" }}>
+              <input type="checkbox" id="tp_decl" checked={form.confirmed} onChange={e=>set("confirmed",e.target.checked)}
+                style={{ width:18, height:18, marginTop:2, accentColor:"#16a34a", flexShrink:0, cursor:"pointer" }} />
+              <label htmlFor="tp_decl" style={{ fontSize:13, color:"#1e293b", cursor:"pointer", lineHeight:1.7 }}>
+                <b>📋 Invigilator Declaration:</b> I, <b style={{ color:"#1e40af" }}>{form.invigilator||"[invigilator]"}</b>, confirm that{" "}
+                <b>{student.name}</b> was present and wrote <b>{form.subject||"[subject]"}</b> (Paper {form.paper}) on{" "}
+                <b>{form.date||"[date]"}</b> at <b>{form.venue||"[venue]"}</b> for <b>{form.duration}</b>.
+                The exam was conducted under my supervision. The student's work is their own.
+                No irregularities occurred{form.incidents?" (except as noted)":""}.
+                <b style={{ color:"#dc2626" }}> This declaration will be attached to the student's record.</b>
+              </label>
+            </div>
+            {errors.confirmed && <div style={{ fontSize:12, color:"#dc2626", marginTop:8, paddingLeft:30 }}>⚠ {errors.confirmed}</div>}
+          </div>
+
+          <div style={{ display:"flex", gap:10 }}>
+            <button onClick={save} style={{ padding:"10px 22px", background:"#16a34a", color:"#fff", border:"none", borderRadius:8, fontSize:13, fontWeight:700, cursor:"pointer" }}>✓ Save Record</button>
+            <button onClick={()=>{setShowForm(false);setErrors({});setForm(blank);}} style={{ padding:"10px 18px", background:"#f1f5f9", color:"#334155", border:"1.5px solid #e2e8f0", borderRadius:8, fontSize:13, fontWeight:600, cursor:"pointer" }}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Report Panel ──────────────────────────────────────────────────────────────
+function TP_ReportPanel({ student, color }) {
+  const { marks, examRecords } = student;
+  const aps  = tp_calcAPS(marks);
+  const date = new Date().toLocaleDateString("en-ZA",{year:"numeric",month:"long",day:"numeric"});
+  const entered = TP_SUBJECTS.filter(s => typeof marks[s.id]==="number" && marks[s.id]>=0);
+
+  return (
+    <div>
+      <div style={{ display:"flex", gap:12, alignItems:"center", marginBottom:20 }}>
+        <button onClick={()=>window.print()}
+          style={{ padding:"12px 22px", background:"#0f172a", color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:700, cursor:"pointer" }}>
+          🖨️ Print / Save as PDF
+        </button>
+        <span style={{ fontSize:13, color:"#64748b" }}>Use your browser print dialog → choose "Save as PDF"</span>
+      </div>
+
+      {/* ── Printable Report ── */}
+      <div style={{ background:"#fff", borderRadius:16, padding:"36px", maxWidth:820, boxShadow:"0 4px 24px rgba(0,0,0,.09)", border:"1px solid #e2e8f0" }}>
+
+        {/* Header */}
+        <div style={{ background:"linear-gradient(135deg,#0f172a,#1e3a5f)", borderRadius:12, padding:"26px 30px", marginBottom:26 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:12 }}>
+            <div>
+              <div style={{ fontSize:28, fontWeight:900, color:"#38bdf8", letterSpacing:"-1px" }}>STABLYM</div>
+              <div style={{ fontSize:11, color:"rgba(255,255,255,.45)", letterSpacing:"3px", textTransform:"uppercase" }}>Student Academic Report</div>
+            </div>
+            <div style={{ textAlign:"right", fontSize:12, color:"rgba(255,255,255,.55)" }}>
+              <div>{date}</div><div style={{ marginTop:3 }}>Confidential · School Use Only</div>
+            </div>
+          </div>
+          <div style={{ marginTop:18, paddingTop:16, borderTop:"1px solid rgba(255,255,255,.1)" }}>
+            <div style={{ fontSize:22, fontWeight:800, color:"#fff" }}>{student.name}</div>
+            <div style={{ fontSize:13, color:"rgba(255,255,255,.6)", marginTop:4 }}>
+              Grade {student.grade} · {tp_mathsLabel(marks)} · {examRecords?.length||0} exam records on file
+            </div>
+          </div>
+        </div>
+
+        {/* APS block */}
+        <div style={{ display:"flex", gap:22, background:"#f8fafc", border:"1px solid #e2e8f0", borderRadius:12, padding:"20px 24px", marginBottom:24, flexWrap:"wrap" }}>
+          <div style={{ flex:2, minWidth:180 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:"#1e40af", textTransform:"uppercase", letterSpacing:"1px" }}>Estimated APS Score</div>
+            <div style={{ fontSize:58, fontWeight:900, color:"#0f172a", lineHeight:1, margin:"6px 0" }}>
+              {aps>0?aps:"—"}<span style={{ fontSize:22, color:"#94a3b8", fontWeight:400 }}>/42</span>
+            </div>
+            <div style={{ fontSize:12, color:"#64748b" }}>Best 6 subjects · LO excluded · {tp_mathsLabel(marks)}</div>
+            {aps>0 && (
+              <div style={{ marginTop:10, display:"inline-block", fontWeight:700, fontSize:13, padding:"5px 14px", borderRadius:8,
+                background:aps>=30?"#d1fae5":aps>=22?"#fef3c7":"#fee2e2",
+                color:aps>=30?"#065f46":aps>=22?"#92400e":"#991b1b" }}>
+                {aps>=30?"🟢 Strong":"🟡 Good" /* simplified */}
+              </div>
+            )}
+          </div>
+          <div style={{ flex:1, minWidth:148, borderLeft:"1px solid #e2e8f0", paddingLeft:22 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:"#475569", marginBottom:8, textTransform:"uppercase" }}>APS Scale</div>
+            {[[7,"A","80%+"],[6,"B","70–79%"],[5,"C","60–69%"],[4,"D","50–59%"],[3,"E","40–49%"],[2,"F","30–39%"],[1,"G","0–29%"]].map(([a,sy,rng])=>(
+              <div key={a} style={{ display:"flex", gap:8, alignItems:"center", marginBottom:4 }}>
+                <span style={{ width:20, height:20, borderRadius:5, background:tp_apsColor(a)+"20", border:`1.5px solid ${tp_apsColor(a)}`,
+                  display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color:tp_apsColor(a), flexShrink:0 }}>{sy}</span>
+                <span style={{ fontSize:11, color:"#64748b", flex:1 }}>{rng}</span>
+                <span style={{ fontSize:11, fontWeight:700, color:tp_apsColor(a) }}>{a}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Subject marks */}
+        <div style={{ marginBottom:24 }}>
+          <div style={{ fontSize:14, fontWeight:800, color:"#1e293b", marginBottom:12, paddingBottom:8, borderBottom:"2px solid #f1f5f9" }}>📝 Subject Results</div>
+          {entered.length===0
+            ? <div style={{ color:"#94a3b8", fontSize:13 }}>No marks entered yet.</div>
+            : (
+              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+                <thead>
+                  <tr style={{ background:"#f1f5f9" }}>
+                    {["Subject","Mark (%)","Symbol","APS Points","Status"].map(h=>(
+                      <th key={h} style={{ padding:"8px 12px", textAlign:"left", fontSize:11, fontWeight:700, color:"#64748b", textTransform:"uppercase", border:"1px solid #e2e8f0" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {entered.map((sub,i)=>{
+                    const m=marks[sub.id]; const a=sub.lo?null:tp_markToAPS(m); const c=a?tp_apsColor(a):"#94a3b8";
+                    return (
+                      <tr key={sub.id} style={{ background:i%2===0?"#f8fafc":"#fff" }}>
+                        <td style={{ padding:"8px 12px", border:"1px solid #e2e8f0", fontWeight:600 }}>{sub.label}</td>
+                        <td style={{ padding:"8px 12px", border:"1px solid #e2e8f0", textAlign:"center", fontWeight:800 }}>{m}%</td>
+                        <td style={{ padding:"8px 12px", border:"1px solid #e2e8f0", textAlign:"center" }}>
+                          <span style={{ background:c+"18", color:c, fontWeight:800, padding:"2px 9px", borderRadius:6, fontSize:13 }}>{tp_symbolLabel(m)}</span>
+                        </td>
+                        <td style={{ padding:"8px 12px", border:"1px solid #e2e8f0", textAlign:"center", fontWeight:800, color:sub.lo?"#94a3b8":c }}>{sub.lo?"—":a}</td>
+                        <td style={{ padding:"8px 12px", border:"1px solid #e2e8f0", fontSize:12, color:sub.lo?"#94a3b8":c }}>{sub.lo?"Compulsory (not in APS)":tp_apsLabel(a)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )
+          }
+        </div>
+
+        {/* University eligibility */}
+        {aps>0 && (
+          <div style={{ marginBottom:24 }}>
+            <div style={{ fontSize:14, fontWeight:800, color:"#1e293b", marginBottom:8, paddingBottom:8, borderBottom:"2px solid #f1f5f9" }}>🎓 University Programme Eligibility</div>
+            <div style={{ fontSize:12, color:"#64748b", marginBottom:10 }}>Based on APS of {aps}/42.</div>
+            <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
+              <thead>
+                <tr style={{ background:"#f1f5f9" }}>
+                  {["Programme","Min APS","Universities","Status"].map(h=>(
+                    <th key={h} style={{ padding:"8px 10px", textAlign:"left", fontSize:11, fontWeight:700, color:"#64748b", textTransform:"uppercase", border:"1px solid #e2e8f0" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {TP_APS_CAREERS.map((c,i)=>{
+                  const ok=aps>=c.aps;
+                  return (
+                    <tr key={c.career} style={{ background:i%2===0?"#f8fafc":"#fff" }}>
+                      <td style={{ padding:"8px 10px", border:"1px solid #e2e8f0", fontWeight:600 }}>{c.career}</td>
+                      <td style={{ padding:"8px 10px", border:"1px solid #e2e8f0", textAlign:"center", fontWeight:700 }}>{c.aps}+</td>
+                      <td style={{ padding:"8px 10px", border:"1px solid #e2e8f0", fontSize:12, color:"#64748b" }}>{c.unis}</td>
+                      <td style={{ padding:"8px 10px", border:"1px solid #e2e8f0", textAlign:"center" }}>
+                        <span style={{ background:ok?"#d1fae5":"#fee2e2", color:ok?"#065f46":"#991b1b", fontWeight:700, padding:"2px 9px", borderRadius:6, fontSize:11 }}>
+                          {ok?"✓ Qualifies":"✗ Below req."}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Exam records */}
+        <div style={{ marginBottom:24 }}>
+          <div style={{ fontSize:14, fontWeight:800, color:"#1e293b", marginBottom:12, paddingBottom:8, borderBottom:"2px solid #f1f5f9" }}>🔒 Exam Invigilation Records</div>
+          {(!examRecords||examRecords.length===0)
+            ? <div style={{ color:"#94a3b8", fontSize:13 }}>No exam records on file.</div>
+            : (
+              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
+                <thead>
+                  <tr style={{ background:"#f1f5f9" }}>
+                    {["Date","Subject","Paper","Venue","Invigilator","Incidents","Verified"].map(h=>(
+                      <th key={h} style={{ padding:"7px 10px", textAlign:"left", fontSize:10, fontWeight:700, color:"#64748b", textTransform:"uppercase", border:"1px solid #e2e8f0" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {examRecords.map((r,i)=>(
+                    <tr key={r.id} style={{ background:i%2===0?"#f8fafc":"#fff" }}>
+                      <td style={{ padding:"7px 10px", border:"1px solid #e2e8f0" }}>{r.date}</td>
+                      <td style={{ padding:"7px 10px", border:"1px solid #e2e8f0", fontWeight:600 }}>{r.subject}</td>
+                      <td style={{ padding:"7px 10px", border:"1px solid #e2e8f0", textAlign:"center" }}>P{r.paper}</td>
+                      <td style={{ padding:"7px 10px", border:"1px solid #e2e8f0" }}>{r.venue}</td>
+                      <td style={{ padding:"7px 10px", border:"1px solid #e2e8f0", fontWeight:600 }}>{r.invigilator}</td>
+                      <td style={{ padding:"7px 10px", border:"1px solid #e2e8f0", color:r.incidents?"#92400e":"#16a34a", fontSize:11 }}>{r.incidents||"None"}</td>
+                      <td style={{ padding:"7px 10px", border:"1px solid #e2e8f0", textAlign:"center" }}>
+                        <span style={{ background:"#d1fae5", color:"#065f46", fontWeight:700, padding:"2px 8px", borderRadius:6, fontSize:10 }}>✓</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )
+          }
+        </div>
+
+        {/* Signatures */}
+        <div style={{ marginBottom:12 }}>
+          <div style={{ fontSize:14, fontWeight:800, color:"#1e293b", marginBottom:16, paddingBottom:8, borderBottom:"2px solid #f1f5f9" }}>✍️ Authorisation Signatures</div>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:24 }}>
+            {["Class Teacher","Principal / HOD","Parent / Guardian"].map(r=>(
+              <div key={r}>
+                <div style={{ borderBottom:"2px solid #1e293b", height:42, marginBottom:6 }}></div>
+                <div style={{ fontSize:12, fontWeight:700, color:"#1e293b" }}>{r}</div>
+                <div style={{ fontSize:11, color:"#94a3b8" }}>Signature &amp; Date</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ borderTop:"1px solid #e2e8f0", marginTop:20, paddingTop:12, display:"flex", justifyContent:"space-between", fontSize:11, color:"#94a3b8", flexWrap:"wrap", gap:8 }}>
+          <span>Stablym Teacher Portal · stablym.co.za</span>
+          <span>Confidential — school use only</span>
+          <span>{date}</span>
+        </div>
       </div>
     </div>
   );

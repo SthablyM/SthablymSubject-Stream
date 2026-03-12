@@ -24,7 +24,6 @@ const symbolLabel = (mark) => {
 };
 
 // ─── ALL NSC SUBJECTS GROUPED BY STREAM ──────────────────────────────────────
-// Each subject has: id, label, stream tag, Lo (Life Orientation = capped at 4 APS)
 const SUBJECT_GROUPS = [
   {
     group: "📋 Compulsory for All",
@@ -39,9 +38,9 @@ const SUBJECT_GROUPS = [
     color: "#2563eb",
     note: "You can only do ONE of these. Select N/A for the ones you don't take.",
     subjects: [
-      { id: "puremaths",  label: "Pure Mathematics",          required: false, lo: false, stream: "Science / Commerce" },
-      { id: "techmaths",  label: "Technical Mathematics",     required: false, lo: false, stream: "Engineering / Technical" },
-      { id: "mathslit",   label: "Mathematical Literacy",     required: false, lo: false, stream: "Humanities" },
+      { id: "puremaths",  label: "Pure Mathematics",          required: false, lo: false, stream: "Science / Commerce",  mathsGroup: true },
+      { id: "techmaths",  label: "Technical Mathematics",     required: false, lo: false, stream: "Engineering / Technical", mathsGroup: true },
+      { id: "mathslit",   label: "Mathematical Literacy",     required: false, lo: false, stream: "Humanities",          mathsGroup: true },
     ]
   },
   {
@@ -70,7 +69,7 @@ const SUBJECT_GROUPS = [
       { id: "history",     label: "History",                        required: false, lo: false, stream: "Humanities" },
       { id: "tourism",     label: "Tourism",                        required: false, lo: false, stream: "Humanities" },
       { id: "consumer",    label: "Consumer Studies",               required: false, lo: false, stream: "Humanities" },
-      { id: "xhosa",       label: "isiXhosa / Zulu / Sotho (2nd Language)", required: false, lo: false, stream: "Humanities" },
+      { id: "xhosa",       label: "isiXhosa / Zulu / Sepedi (HomeLanguage /1st additional  Language)", required: false, lo: false, stream: "Humanities" },
       { id: "religion",    label: "Religion Studies",               required: false, lo: false, stream: "Humanities" },
       { id: "drama",       label: "Dramatic Arts",                  required: false, lo: false, stream: "Humanities" },
       { id: "visualarts",  label: "Visual Arts",                    required: false, lo: false, stream: "Humanities" },
@@ -114,8 +113,8 @@ export default function StudentProfile({ onComplete }) {
   const [form, setForm] = useState({ name: "", surname: "", school: "", grade: "9", province: "" });
 
   // marks: { subjectId: number | "na" }
-  // "na" means student doesn't take this subject
-  const [marks,  setMarks]  = useState({});
+  // Pre-set all three maths to "na" — student clicks Select to activate their one
+  const [marks,  setMarks]  = useState({ puremaths: "na", techmaths: "na", mathslit: "na" });
   const [errors, setErrors] = useState({});
   const [showAPS, setShowAPS] = useState(false);
   const [openGroups, setOpenGroups] = useState(
@@ -126,51 +125,48 @@ export default function StudentProfile({ onComplete }) {
 
   const update = (field, val) => setForm(f => ({ ...f, [field]: val }));
 
-  const setMark = (id, val) => setMarks(m => ({ ...m, [id]: val }));
+  // Direct mark update — simple and reliable
+  const updateMark = (id, val) => {
+    if (val === "" || val === null || val === undefined) {
+      setMarks(m => { const n = { ...m }; delete n[id]; return n; });
+      return;
+    }
+    const num = parseInt(val, 10);
+    if (!isNaN(num)) {
+      setMarks(m => ({ ...m, [id]: Math.min(100, Math.max(0, num)) }));
+    }
+  };
 
   const toggleNA = (id) => {
     setMarks(m => {
-      const current = m[id];
-      if (current === "na") {
-        // Un-mark N/A → go back to empty
-        const next = { ...m };
-        delete next[id];
-        return next;
-      }
-      return { ...m, [id]: "na" };
+      const next = { ...m };
+      if (next[id] === "na") delete next[id];
+      else next[id] = "na";
+      return next;
     });
-  };
-
-  const updateMark = (id, val) => {
-    const num = Math.min(100, Math.max(0, parseInt(val) || 0));
-    setMarks(m => ({ ...m, [id]: num }));
   };
 
   const toggleGroup = (group) => setOpenGroups(o => ({ ...o, [group]: !o[group] }));
 
   // ── APS Calculator ─────────────────────────────────────────────────────────
-  // Rules: Best 6 subjects (excluding LO) + LO capped at APS 4
+  // Life Orientation is excluded — best 6 subjects only (max APS = 42)
   const calcAPS = () => {
-    const loMark = marks["lifeorien"];
-    const loAPS  = (loMark && loMark !== "na" && loMark > 0) ? Math.min(markToAPS(loMark), 4) : 0;
-
     const scorable = ALL_SUBJECTS
-      .filter(s => !s.lo && s.id !== "lifeorien")
-      .filter(s => marks[s.id] && marks[s.id] !== "na" && marks[s.id] > 0)
+      .filter(s => s.id !== "lifeorien")
+      .filter(s => typeof marks[s.id] === "number" && marks[s.id] > 0)
       .map(s => ({ id: s.id, aps: markToAPS(marks[s.id]) }));
 
     scorable.sort((a, b) => b.aps - a.aps);
-    const top6total = scorable.slice(0, 6).reduce((sum, x) => sum + x.aps, 0);
-    return top6total + loAPS;
+    return scorable.slice(0, 6).reduce((sum, x) => sum + x.aps, 0);
   };
 
   const aps = calcAPS();
 
   // Detect which maths the student is doing
   const mathsLevel = () => {
-    if (marks["puremaths"] && marks["puremaths"] !== "na") return "Pure Mathematics";
-    if (marks["techmaths"] && marks["techmaths"] !== "na") return "Technical Mathematics";
-    if (marks["mathslit"]  && marks["mathslit"]  !== "na") return "Mathematical Literacy";
+    if (typeof marks["puremaths"] === "number") return "Pure Mathematics";
+    if (typeof marks["techmaths"] === "number") return "Technical Mathematics";
+    if (typeof marks["mathslit"]  === "number") return "Mathematical Literacy";
     return "Not specified";
   };
 
@@ -189,22 +185,33 @@ export default function StudentProfile({ onComplete }) {
 
   const handleSubmit = () => {
     if (!validate()) return;
-    // Strip "na" values — pass only real marks to quiz
     const cleanMarks = {};
-    Object.entries(marks).forEach(([k, v]) => { if (v !== "na" && v > 0) cleanMarks[k] = v; });
+    Object.entries(marks).forEach(([k, v]) => { if (typeof v === "number" && v > 0) cleanMarks[k] = v; });
     onComplete({ ...form, marks: cleanMarks, aps, mathsLevel: mathsLevel(), skipQuiz: parseInt(form.grade) >= 10 });
   };
 
   // ── Render a single subject row ────────────────────────────────────────────
   const SubjectRow = ({ sub, groupColor }) => {
-    const val   = marks[sub.id];
-    const isNA  = val === "na";
-    const numVal = (!isNA && val > 0) ? val : null;
+    const val    = marks[sub.id];
+    const isNA   = val === "na";
+    const numVal = (typeof val === "number" && val > 0) ? val : null;
     const apsVal = numVal ? markToAPS(numVal) : null;
     const apsColor = apsVal >= 5 ? { bg:"#d1fae5", fg:"#065f46" }
                    : apsVal >= 3 ? { bg:"#fef9c3", fg:"#713f12" }
                    : apsVal      ? { bg:"#fee2e2", fg:"#991b1b" }
                    : null;
+
+    // Maths group: selecting one auto-NAs the others
+    const selectMaths = () => {
+      setMarks(m => {
+        const next = { ...m };
+        ["puremaths","techmaths","mathslit"].forEach(mid => {
+          if (mid === sub.id) delete next[mid];
+          else next[mid] = "na";
+        });
+        return next;
+      });
+    };
 
     return (
       <div style={{ ...s.subjectRow, opacity: isNA ? 0.45 : 1 }}>
@@ -222,26 +229,47 @@ export default function StudentProfile({ onComplete }) {
 
         {/* Input area */}
         <div style={s.subjectInputArea}>
+
+          {/* Mark input — visible when not NA */}
           {!isNA && (
-            <>
-              <input
-                style={{ ...s.markInput, borderColor: errors[sub.id] ? "#fca5a5" : "#e2e8f0" }}
-                type="number" min="0" max="100"
-                value={numVal || ""}
-                onChange={e => updateMark(sub.id, e.target.value)}
-                placeholder="%"
-              />
-              {apsVal && (
-                <div style={{ ...s.apsPill, background: apsColor.bg, color: apsColor.fg }}>
-                  <span style={{ fontSize: 11, fontWeight: 700 }}>{symbolLabel(numVal)}</span>
-                  <span style={{ fontSize: 10 }}> · APS {apsVal}</span>
-                </div>
-              )}
-            </>
+            <input
+              style={{ ...s.markInput, borderColor: errors[sub.id] ? "#fca5a5" : "#e2e8f0" }}
+              type="number"
+              min="0"
+              max="100"
+              value={numVal ?? ""}
+              placeholder="%"
+              onChange={e => updateMark(sub.id, e.target.value)}
+            />
           )}
 
-          {/* N/A toggle */}
-          {!sub.required && (
+          {/* APS pill */}
+          {!isNA && apsVal && (
+            <div style={{ ...s.apsPill, background: apsColor.bg, color: apsColor.fg }}>
+              <span style={{ fontSize: 11, fontWeight: 700 }}>{symbolLabel(numVal)}</span>
+              <span style={{ fontSize: 10 }}> · APS {apsVal}</span>
+            </div>
+          )}
+
+          {/* Maths group: Select / Chosen button */}
+          {sub.mathsGroup && (
+            <button
+              style={{
+                ...s.naBtn,
+                ...(isNA
+                  ? { background:"#eff6ff", color:"#2563eb", border:"1.5px solid #93c5fd", fontWeight:700 }
+                  : { background:"#d1fae5", color:"#065f46", border:"1.5px solid #6ee7b7", fontWeight:700 }
+                ),
+              }}
+              onClick={isNA ? selectMaths : undefined}
+              title={isNA ? "Click to select this maths" : "Currently selected — enter your mark above"}
+            >
+              {isNA ? "Select" : "✓ Chosen"}
+            </button>
+          )}
+
+          {/* Regular N/A for optional non-maths subjects */}
+          {!sub.required && !sub.mathsGroup && (
             <button
               style={{ ...s.naBtn, ...(isNA ? s.naBtnActive : {}) }}
               onClick={() => toggleNA(sub.id)}
@@ -250,6 +278,7 @@ export default function StudentProfile({ onComplete }) {
               {isNA ? "✓ N/A" : "N/A"}
             </button>
           )}
+
         </div>
       </div>
     );
@@ -357,7 +386,6 @@ export default function StudentProfile({ onComplete }) {
 
           {SUBJECT_GROUPS.map(group => (
             <div key={group.group} style={s.groupWrap}>
-              {/* Group header — collapsible */}
               <button style={{ ...s.groupHeader, borderLeft: `4px solid ${group.color}` }}
                 onClick={() => toggleGroup(group.group)}>
                 <span style={{ fontWeight: 700, color: group.color }}>{group.group}</span>
@@ -388,7 +416,7 @@ export default function StudentProfile({ onComplete }) {
                 <span style={s.apsMax}> / 42</span>
               </div>
               <p style={s.apsNote}>
-                Best 6 subjects + Life Orientation (capped at 4) · Maths: {mathsLevel()}
+                Best 6 subjects · Life Orientation excluded · Maths: {mathsLevel()}
               </p>
             </div>
 
