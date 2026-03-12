@@ -69,7 +69,7 @@ const SUBJECT_GROUPS = [
       { id: "history",     label: "History",                        required: false, lo: false, stream: "Humanities" },
       { id: "tourism",     label: "Tourism",                        required: false, lo: false, stream: "Humanities" },
       { id: "consumer",    label: "Consumer Studies",               required: false, lo: false, stream: "Humanities" },
-      { id: "xhosa",       label: "isiXhosa / Zulu / Sotho (2nd Language)", required: false, lo: false, stream: "Humanities" },
+      { id: "xhosa",       label: "isiXhosa / Zulu / Sepedi (2nd Language)", required: false, lo: false, stream: "Humanities" },
       { id: "religion",    label: "Religion Studies",               required: false, lo: false, stream: "Humanities" },
       { id: "drama",       label: "Dramatic Arts",                  required: false, lo: false, stream: "Humanities" },
       { id: "visualarts",  label: "Visual Arts",                    required: false, lo: false, stream: "Humanities" },
@@ -365,17 +365,17 @@ export default function StudentProfile({ onComplete }) {
           <div style={s.row2}>
             <Field label="First Name *" error={errors.name}>
               <input style={{ ...s.input, ...(errors.name ? s.inputErr : {}) }}
-                value={form.name} onChange={e => update("name", e.target.value)} placeholder="e.g. Thabo" />
+                value={form.name} onChange={e => update("name", e.target.value)} placeholder="e.g.Sthably " />
             </Field>
             <Field label="Surname *" error={errors.surname}>
               <input style={{ ...s.input, ...(errors.surname ? s.inputErr : {}) }}
-                value={form.surname} onChange={e => update("surname", e.target.value)} placeholder="e.g. Nkosi" />
+                value={form.surname} onChange={e => update("surname", e.target.value)} placeholder="e.g. Nkadimeng" />
             </Field>
           </div>
           <div style={s.row2}>
             <Field label="School Name *" error={errors.school}>
               <input style={{ ...s.input, ...(errors.school ? s.inputErr : {}) }}
-                value={form.school} onChange={e => update("school", e.target.value)} placeholder="e.g. Soweto High School" />
+                value={form.school} onChange={e => update("school", e.target.value)} placeholder="e.g. Mphahlele High School" />
             </Field>
             <Field label="Current Grade">
               <select style={s.input} value={form.grade} onChange={e => update("grade", e.target.value)}>
