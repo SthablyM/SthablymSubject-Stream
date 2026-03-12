@@ -276,21 +276,138 @@ const QUESTION_BANK = [
   { id:"ge11_02", grade:11, subject:"Geography", topic:"Population", question:"A population pyramid with a wide base indicates:", options:["High birth rate, young population","Low birth rate","Ageing population","High death rate only"], answer:0, explanation:"Wide base in a population pyramid = many young people = high birth rate (often developing countries)" },
   { id:"ge12_01", grade:12, subject:"Geography", topic:"Development", question:"The Human Development Index (HDI) measures:", options:["Life expectancy, education, and income","GDP only","Population size","Industrial output"], answer:0, explanation:"HDI = composite measure of health (life expectancy), education, and standard of living (GNI per capita)" },
   { id:"ge12_02", grade:12, subject:"Geography", topic:"Geomorphology", question:"A V-shaped valley is formed by:", options:["River erosion","Glacial erosion","Wind erosion","Tectonic uplift"], answer:0, explanation:"V-shaped valleys are formed by river downcutting (vertical erosion) in mountainous areas" },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TECHNICAL MATHEMATICS — GRADE 10
+  // ══════════════════════════════════════════════════════════════════════════
+  { id:"tm10_01", grade:10, subject:"Technical Mathematics", topic:"Algebra", question:"Simplify: 4a + 3b − 2a + b", options:["2a + 4b","6a + 4b","2a + 2b","6a + 2b"], answer:0, explanation:"Collect like terms: (4a−2a) + (3b+b) = 2a + 4b" },
+  { id:"tm10_02", grade:10, subject:"Technical Mathematics", topic:"Algebra", question:"Solve for x: 5x − 10 = 20", options:["x = 6","x = 2","x = 10","x = 30"], answer:0, explanation:"5x = 20 + 10 = 30, so x = 30 ÷ 5 = 6" },
+  { id:"tm10_03", grade:10, subject:"Technical Mathematics", topic:"Algebra", question:"Expand: 3(2x − 4)", options:["6x − 12","6x + 12","6x − 4","3x − 12"], answer:0, explanation:"Distribute: 3 × 2x = 6x and 3 × (−4) = −12, giving 6x − 12" },
+  { id:"tm10_04", grade:10, subject:"Technical Mathematics", topic:"Exponents", question:"What is 3⁴?", options:["81","12","27","64"], answer:0, explanation:"3⁴ = 3 × 3 × 3 × 3 = 81" },
+  { id:"tm10_05", grade:10, subject:"Technical Mathematics", topic:"Exponents", question:"Simplify: x⁵ ÷ x²", options:["x³","x⁷","x¹⁰","x"], answer:0, explanation:"When dividing same bases, subtract exponents: x⁵ ÷ x² = x^(5−2) = x³" },
+  { id:"tm10_06", grade:10, subject:"Technical Mathematics", topic:"Geometry", question:"A right angle measures:", options:["90°","180°","45°","360°"], answer:0, explanation:"A right angle is exactly 90° — shown by a small square in diagrams" },
+  { id:"tm10_07", grade:10, subject:"Technical Mathematics", topic:"Geometry", question:"The perimeter of a square with side 7 cm is:", options:["28 cm","14 cm","49 cm","21 cm"], answer:0, explanation:"Perimeter of square = 4 × side = 4 × 7 = 28 cm" },
+  { id:"tm10_08", grade:10, subject:"Technical Mathematics", topic:"Geometry", question:"The area of a triangle with base 10 cm and height 6 cm is:", options:["30 cm²","60 cm²","16 cm²","100 cm²"], answer:0, explanation:"Area of triangle = ½ × base × height = ½ × 10 × 6 = 30 cm²" },
+  { id:"tm10_09", grade:10, subject:"Technical Mathematics", topic:"Measurement", question:"Convert 3.5 km to metres:", options:["3500 m","350 m","35 000 m","3.5 m"], answer:0, explanation:"1 km = 1000 m, so 3.5 km = 3.5 × 1000 = 3500 m" },
+  { id:"tm10_10", grade:10, subject:"Technical Mathematics", topic:"Measurement", question:"The volume of a rectangular prism 4m × 3m × 2m is:", options:["24 m³","18 m³","9 m³","26 m³"], answer:0, explanation:"Volume = length × width × height = 4 × 3 × 2 = 24 m³" },
+  { id:"tm10_11", grade:10, subject:"Technical Mathematics", topic:"Trigonometry", question:"In a right-angled triangle, which side is the hypotenuse?", options:["The side opposite the right angle","The shortest side","The base","The vertical side"], answer:0, explanation:"The hypotenuse is always opposite the right angle and is the longest side of a right triangle" },
+  { id:"tm10_12", grade:10, subject:"Technical Mathematics", topic:"Trigonometry", question:"sin 30° =", options:["0.5","1","0.866","0.707"], answer:0, explanation:"sin 30° = 1/2 = 0.5 (standard angle — must be memorised)" },
+  { id:"tm10_13", grade:10, subject:"Technical Mathematics", topic:"Number Patterns", question:"The next term in: 2, 5, 8, 11, … is:", options:["14","13","15","12"], answer:0, explanation:"Common difference is 3: 11 + 3 = 14" },
+  { id:"tm10_14", grade:10, subject:"Technical Mathematics", topic:"Statistics", question:"The mean of 4, 8, 6, 10, 2 is:", options:["6","5","7","8"], answer:0, explanation:"Mean = sum ÷ count = (4+8+6+10+2) ÷ 5 = 30 ÷ 5 = 6" },
+  { id:"tm10_15", grade:10, subject:"Technical Mathematics", topic:"Finance", question:"Simple interest on R1000 at 5% for 2 years is:", options:["R100","R50","R200","R105"], answer:0, explanation:"SI = P × r × t = 1000 × 0.05 × 2 = R100" },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TECHNICAL MATHEMATICS — GRADE 11
+  // ══════════════════════════════════════════════════════════════════════════
+  { id:"tm11_01", grade:11, subject:"Technical Mathematics", topic:"Algebra", question:"Factorise: 2x² + 6x", options:["2x(x + 3)","2(x² + 3x)","x(2x + 6)","2x(x − 3)"], answer:0, explanation:"Take out the HCF: 2x is common to both terms → 2x(x + 3)" },
+  { id:"tm11_02", grade:11, subject:"Technical Mathematics", topic:"Algebra", question:"Solve: x² = 25", options:["x = ±5","x = 5","x = 25","x = ±25"], answer:0, explanation:"Take the square root of both sides: x = ±√25 = ±5" },
+  { id:"tm11_03", grade:11, subject:"Technical Mathematics", topic:"Trigonometry", question:"cos 45° =", options:["√2/2","1/2","√3/2","1"], answer:0, explanation:"cos 45° = 1/√2 = √2/2 ≈ 0.707" },
+  { id:"tm11_04", grade:11, subject:"Technical Mathematics", topic:"Trigonometry", question:"In a right triangle, if the opposite = 6 and hypotenuse = 10, sin θ =", options:["0.6","0.8","0.75","0.5"], answer:0, explanation:"sin θ = opposite/hypotenuse = 6/10 = 0.6" },
+  { id:"tm11_05", grade:11, subject:"Technical Mathematics", topic:"Geometry", question:"The sum of interior angles of a quadrilateral is:", options:["360°","180°","270°","540°"], answer:0, explanation:"A quadrilateral has 4 sides. Sum of interior angles = (4−2) × 180° = 360°" },
+  { id:"tm11_06", grade:11, subject:"Technical Mathematics", topic:"Geometry", question:"A circle with radius 7 cm has circumference:", options:["44 cm","14 cm","154 cm","28 cm"], answer:0, explanation:"C = 2πr = 2 × 22/7 × 7 = 44 cm" },
+  { id:"tm11_07", grade:11, subject:"Technical Mathematics", topic:"Geometry", question:"Area of a circle with radius 5 cm:", options:["78.5 cm²","31.4 cm²","25 cm²","15.7 cm²"], answer:0, explanation:"A = πr² = π × 5² = 25π ≈ 78.5 cm²" },
+  { id:"tm11_08", grade:11, subject:"Technical Mathematics", topic:"Finance", question:"R5000 at 8% compound interest for 2 years gives:", options:["R5832","R5800","R5400","R6000"], answer:0, explanation:"A = P(1+r)ⁿ = 5000(1.08)² = 5000 × 1.1664 = R5832" },
+  { id:"tm11_09", grade:11, subject:"Technical Mathematics", topic:"Measurement", question:"Convert 250 cm² to m²:", options:["0.025 m²","2.5 m²","0.25 m²","25 m²"], answer:0, explanation:"1 m² = 10 000 cm², so 250 cm² ÷ 10 000 = 0.025 m²" },
+  { id:"tm11_10", grade:11, subject:"Technical Mathematics", topic:"Statistics", question:"The mode of: 3, 5, 5, 7, 8, 5 is:", options:["5","7","3","8"], answer:0, explanation:"The mode is the value that appears most often. 5 appears 3 times." },
+  { id:"tm11_11", grade:11, subject:"Technical Mathematics", topic:"Algebra", question:"If y = 2x − 3, what is x when y = 7?", options:["x = 5","x = 7","x = 4","x = 2"], answer:0, explanation:"7 = 2x − 3 → 2x = 10 → x = 5" },
+  { id:"tm11_12", grade:11, subject:"Technical Mathematics", topic:"Number Patterns", question:"Find T₄ of the sequence Tₙ = 3n + 1:", options:["13","10","7","16"], answer:0, explanation:"T₄ = 3(4) + 1 = 12 + 1 = 13" },
+  { id:"tm11_13", grade:11, subject:"Technical Mathematics", topic:"Geometry", question:"Two angles are supplementary if they add up to:", options:["180°","90°","360°","270°"], answer:0, explanation:"Supplementary angles sum to 180°. Complementary angles sum to 90°." },
+  { id:"tm11_14", grade:11, subject:"Technical Mathematics", topic:"Trigonometry", question:"tan θ = opposite/…?", options:["adjacent","hypotenuse","base","height"], answer:0, explanation:"TOA in SOH-CAH-TOA: tan = Opposite ÷ Adjacent" },
+  { id:"tm11_15", grade:11, subject:"Technical Mathematics", topic:"Measurement", question:"The surface area of a cube with side 3 cm is:", options:["54 cm²","27 cm²","18 cm²","36 cm²"], answer:0, explanation:"Surface area of cube = 6s² = 6 × 3² = 6 × 9 = 54 cm²" },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // TECHNICAL MATHEMATICS — GRADE 12
+  // ══════════════════════════════════════════════════════════════════════════
+  { id:"tm12_01", grade:12, subject:"Technical Mathematics", topic:"Algebra", question:"Solve: 2x² − 8 = 0", options:["x = ±2","x = ±4","x = 2","x = 4"], answer:0, explanation:"2x² = 8 → x² = 4 → x = ±√4 = ±2" },
+  { id:"tm12_02", grade:12, subject:"Technical Mathematics", topic:"Algebra", question:"The roots of x² − 6x + 9 = 0 are:", options:["x = 3 (repeated)","x = 3 and x = −3","x = −3 (repeated)","x = 6 and x = 3"], answer:0, explanation:"Factorise: (x−3)² = 0, so x = 3 is a repeated root" },
+  { id:"tm12_03", grade:12, subject:"Technical Mathematics", topic:"Trigonometry", question:"The sine rule states: a/sin A =", options:["b/sin B","b/cos B","a/cos A","sin B/b"], answer:0, explanation:"Sine rule: a/sin A = b/sin B = c/sin C — used for non-right triangles" },
+  { id:"tm12_04", grade:12, subject:"Technical Mathematics", topic:"Trigonometry", question:"The cosine rule: c² = a² + b² − 2ab cos C is used when you know:", options:["Two sides and included angle","Only angles","Only one side","Three angles"], answer:0, explanation:"Cosine rule is used when you have two sides and the included angle (SAS) or all three sides (SSS)" },
+  { id:"tm12_05", grade:12, subject:"Technical Mathematics", topic:"Finance", question:"The depreciation formula (straight line) is:", options:["A = P(1 − in)","A = P(1 + i)ⁿ","A = P − P/n","A = Pin"], answer:0, explanation:"Straight-line depreciation: A = P(1 − in), where i = annual rate and n = years" },
+  { id:"tm12_06", grade:12, subject:"Technical Mathematics", topic:"Finance", question:"Hire purchase means you:", options:["Pay in instalments with interest","Pay cash upfront","Rent without ownership","Save before buying"], answer:0, explanation:"Hire purchase (HP): you take the item immediately and pay it off in monthly instalments (with interest)" },
+  { id:"tm12_07", grade:12, subject:"Technical Mathematics", topic:"Geometry", question:"The volume of a cone: V = ⅓πr²h. If r=3 and h=7:", options:["21π","63π","9π","7π"], answer:0, explanation:"V = ⅓ × π × 3² × 7 = ⅓ × π × 9 × 7 = 21π" },
+  { id:"tm12_08", grade:12, subject:"Technical Mathematics", topic:"Geometry", question:"The surface area of a cylinder (closed both ends): SA =", options:["2πr² + 2πrh","πr² + 2πrh","2πrh","4πr²"], answer:0, explanation:"Closed cylinder SA = 2 circles + curved surface = 2πr² + 2πrh" },
+  { id:"tm12_09", grade:12, subject:"Technical Mathematics", topic:"Statistics", question:"The range of: 4, 9, 2, 15, 7 is:", options:["13","11","15","7"], answer:0, explanation:"Range = maximum − minimum = 15 − 2 = 13" },
+  { id:"tm12_10", grade:12, subject:"Technical Mathematics", topic:"Statistics", question:"An ogive is a graph of:", options:["Cumulative frequency","Frequency only","Mean values","Probability"], answer:0, explanation:"An ogive (cumulative frequency curve) shows running totals of frequency — used to find quartiles" },
+  { id:"tm12_11", grade:12, subject:"Technical Mathematics", topic:"Measurement", question:"Convert 72 km/h to m/s:", options:["20 m/s","72 m/s","0.72 m/s","7.2 m/s"], answer:0, explanation:"Divide by 3.6: 72 ÷ 3.6 = 20 m/s. (or × 1000/3600)" },
+  { id:"tm12_12", grade:12, subject:"Technical Mathematics", topic:"Number Patterns", question:"In a geometric sequence, if T₁ = 3 and r = 2, find T₅:", options:["48","96","24","12"], answer:0, explanation:"Tₙ = a × r^(n−1). T₅ = 3 × 2⁴ = 3 × 16 = 48" },
+  { id:"tm12_13", grade:12, subject:"Technical Mathematics", topic:"Algebra", question:"Solve simultaneously: x + y = 7 and x − y = 3:", options:["x=5, y=2","x=3, y=4","x=4, y=3","x=7, y=0"], answer:0, explanation:"Add the equations: 2x = 10, x = 5. Then 5 + y = 7, y = 2." },
+  { id:"tm12_14", grade:12, subject:"Technical Mathematics", topic:"Trigonometry", question:"Area of a triangle = ½ab sin C. If a=6, b=8, C=30°:", options:["12","24","48","6"], answer:0, explanation:"Area = ½ × 6 × 8 × sin 30° = ½ × 6 × 8 × 0.5 = 12" },
+  { id:"tm12_15", grade:12, subject:"Technical Mathematics", topic:"Geometry", question:"Two tangents drawn from an external point to a circle are:", options:["Equal in length","Parallel","Perpendicular to each other","Different lengths"], answer:0, explanation:"Tangent lines from an external point to a circle are always equal in length" },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MATHEMATICAL LITERACY — GRADE 10
+  // ══════════════════════════════════════════════════════════════════════════
+  { id:"ml10_01", grade:10, subject:"Mathematical Literacy", topic:"Numbers & Calculations", question:"What is 15% of R800?", options:["R120","R80","R150","R200"], answer:0, explanation:"15% of 800 = 0.15 × 800 = R120" },
+  { id:"ml10_02", grade:10, subject:"Mathematical Literacy", topic:"Numbers & Calculations", question:"A shirt costs R350. It is discounted by 20%. What is the sale price?", options:["R280","R70","R420","R300"], answer:0, explanation:"Discount = 20% × 350 = R70. Sale price = 350 − 70 = R280" },
+  { id:"ml10_03", grade:10, subject:"Mathematical Literacy", topic:"Numbers & Calculations", question:"Which fraction is equivalent to 0.75?", options:["3/4","3/5","7/10","1/4"], answer:0, explanation:"0.75 = 75/100 = 3/4 (simplify by dividing by 25)" },
+  { id:"ml10_04", grade:10, subject:"Mathematical Literacy", topic:"Finance", question:"If you earn R3500 per month and pay 25% tax, your take-home pay is:", options:["R2625","R875","R3000","R2500"], answer:0, explanation:"Tax = 25% × 3500 = R875. Take-home = 3500 − 875 = R2625" },
+  { id:"ml10_05", grade:10, subject:"Mathematical Literacy", topic:"Finance", question:"VAT at 15% on an item of R200 means the total cost is:", options:["R230","R215","R200","R185"], answer:0, explanation:"VAT = 15% × 200 = R30. Total = 200 + 30 = R230" },
+  { id:"ml10_06", grade:10, subject:"Mathematical Literacy", topic:"Measurement", question:"How many millilitres are in 2.5 litres?", options:["2500 ml","250 ml","25 000 ml","0.25 ml"], answer:0, explanation:"1 litre = 1000 ml. 2.5 × 1000 = 2500 ml" },
+  { id:"ml10_07", grade:10, subject:"Mathematical Literacy", topic:"Measurement", question:"A room is 5m long and 4m wide. Its area is:", options:["20 m²","18 m²","9 m²","40 m²"], answer:0, explanation:"Area of rectangle = length × width = 5 × 4 = 20 m²" },
+  { id:"ml10_08", grade:10, subject:"Mathematical Literacy", topic:"Maps & Plans", question:"On a map with scale 1:50 000, a distance of 2 cm represents:", options:["1 km","50 000 cm","2 km","500 m"], answer:0, explanation:"2 cm × 50 000 = 100 000 cm = 1000 m = 1 km" },
+  { id:"ml10_09", grade:10, subject:"Mathematical Literacy", topic:"Data Handling", question:"The middle value of an ordered data set is called the:", options:["Median","Mean","Mode","Range"], answer:0, explanation:"The median is the middle value when data is arranged in order" },
+  { id:"ml10_10", grade:10, subject:"Mathematical Literacy", topic:"Data Handling", question:"A pie chart shows data as parts of a:", options:["Circle","Bar","Line","Histogram"], answer:0, explanation:"A pie chart divides a circle into sectors, each representing a proportion of the whole" },
+  { id:"ml10_11", grade:10, subject:"Mathematical Literacy", topic:"Numbers & Calculations", question:"Round 3.748 to 2 decimal places:", options:["3.75","3.74","3.7","4.00"], answer:0, explanation:"Look at the 3rd decimal (8 ≥ 5), so round up: 3.748 → 3.75" },
+  { id:"ml10_12", grade:10, subject:"Mathematical Literacy", topic:"Finance", question:"An electricity bill shows 450 units at R1.20 per unit. The bill is:", options:["R540","R450","R270","R120"], answer:0, explanation:"450 units × R1.20 = R540" },
+  { id:"ml10_13", grade:10, subject:"Mathematical Literacy", topic:"Measurement", question:"A fence needs to go around a garden 12m × 8m. How much fencing is needed?", options:["40 m","20 m","96 m","32 m"], answer:0, explanation:"Perimeter = 2(l + w) = 2(12 + 8) = 2 × 20 = 40 m" },
+  { id:"ml10_14", grade:10, subject:"Mathematical Literacy", topic:"Numbers & Calculations", question:"Express 45 minutes as a fraction of 1 hour:", options:["3/4","1/2","1/4","2/3"], answer:0, explanation:"45 minutes out of 60 minutes = 45/60 = 3/4" },
+  { id:"ml10_15", grade:10, subject:"Mathematical Literacy", topic:"Finance", question:"If petrol costs R22.50 per litre and you fill 40 litres, the cost is:", options:["R900","R450","R880","R990"], answer:0, explanation:"40 × R22.50 = R900" },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MATHEMATICAL LITERACY — GRADE 11
+  // ══════════════════════════════════════════════════════════════════════════
+  { id:"ml11_01", grade:11, subject:"Mathematical Literacy", topic:"Finance", question:"Compound interest on R4000 at 6% for 2 years (using A = P(1+r)ⁿ):", options:["R4494.40","R4480","R4240","R4480.40"], answer:0, explanation:"A = 4000 × (1.06)² = 4000 × 1.1236 = R4494.40" },
+  { id:"ml11_02", grade:11, subject:"Mathematical Literacy", topic:"Finance", question:"A monthly bond repayment is R2800. Over 20 years, total repayment =", options:["R672 000","R280 000","R336 000","R560 000"], answer:0, explanation:"Total = R2800 × 12 months × 20 years = R2800 × 240 = R672 000" },
+  { id:"ml11_03", grade:11, subject:"Mathematical Literacy", topic:"Finance", question:"If inflation is 5% per year, an item costing R100 today will cost how much in 2 years?", options:["R110.25","R110","R105","R115"], answer:0, explanation:"After 1 yr: 100 × 1.05 = R105. After 2 yrs: 105 × 1.05 = R110.25" },
+  { id:"ml11_04", grade:11, subject:"Mathematical Literacy", topic:"Measurement", question:"A car travels 360 km in 4 hours. Its average speed is:", options:["90 km/h","40 km/h","1440 km/h","45 km/h"], answer:0, explanation:"Speed = Distance ÷ Time = 360 ÷ 4 = 90 km/h" },
+  { id:"ml11_05", grade:11, subject:"Mathematical Literacy", topic:"Measurement", question:"Convert 3 hours 45 minutes to minutes:", options:["225 min","345 min","183 min","215 min"], answer:0, explanation:"3 hours = 180 minutes. 180 + 45 = 225 minutes" },
+  { id:"ml11_06", grade:11, subject:"Mathematical Literacy", topic:"Maps & Plans", question:"A plan has scale 1:100. A wall 3 cm on the plan is actually:", options:["3 m","30 m","300 cm","0.3 m"], answer:0, explanation:"3 cm × 100 = 300 cm = 3 m" },
+  { id:"ml11_07", grade:11, subject:"Mathematical Literacy", topic:"Data Handling", question:"On a box-and-whisker plot, the box represents:", options:["The middle 50% of the data","The full range","The mean","The mode"], answer:0, explanation:"The box in a box-and-whisker plot spans from Q1 to Q3 — the interquartile range (middle 50% of data)" },
+  { id:"ml11_08", grade:11, subject:"Mathematical Literacy", topic:"Data Handling", question:"In a scatter plot, a positive correlation means:", options:["As x increases, y increases","As x increases, y decreases","No relationship","Random data"], answer:0, explanation:"Positive correlation: both variables increase together — the scatter plot slopes upward from left to right" },
+  { id:"ml11_09", grade:11, subject:"Mathematical Literacy", topic:"Probability", question:"A die is rolled. P(even number) =", options:["1/2","1/3","2/3","1/6"], answer:0, explanation:"Even numbers on a die: 2, 4, 6 = 3 out of 6 outcomes. P = 3/6 = 1/2" },
+  { id:"ml11_10", grade:11, subject:"Mathematical Literacy", topic:"Probability", question:"If P(rain) = 0.3, then P(no rain) =", options:["0.7","0.3","0.6","1.3"], answer:0, explanation:"P(not A) = 1 − P(A) = 1 − 0.3 = 0.7" },
+  { id:"ml11_11", grade:11, subject:"Mathematical Literacy", topic:"Numbers & Calculations", question:"A recipe uses 750 g of flour for 12 muffins. For 20 muffins you need:", options:["1250 g","900 g","1500 g","600 g"], answer:0, explanation:"750/12 × 20 = 62.5 × 20 = 1250 g" },
+  { id:"ml11_12", grade:11, subject:"Mathematical Literacy", topic:"Finance", question:"A R20 000 car loses 15% of its value per year. After 1 year it is worth:", options:["R17 000","R3000","R16 000","R18 000"], answer:0, explanation:"Depreciation = 15% × 20 000 = R3000. Value = 20 000 − 3000 = R17 000" },
+  { id:"ml11_13", grade:11, subject:"Mathematical Literacy", topic:"Measurement", question:"Convert 2.5 kg to grams:", options:["2500 g","250 g","25 000 g","0.25 g"], answer:0, explanation:"1 kg = 1000 g. 2.5 × 1000 = 2500 g" },
+  { id:"ml11_14", grade:11, subject:"Mathematical Literacy", topic:"Finance", question:"R600 is shared in the ratio 3:2 between two people. The larger share is:", options:["R360","R240","R300","R400"], answer:0, explanation:"Total parts = 5. Larger share = 3/5 × 600 = R360" },
+  { id:"ml11_15", grade:11, subject:"Mathematical Literacy", topic:"Measurement", question:"How many tiles (30cm × 30cm) are needed to cover a floor of 2.7m × 1.8m?", options:["54","27","81","45"], answer:0, explanation:"Floor area = 270 × 180 = 48 600 cm². Tile area = 30 × 30 = 900 cm². 48 600 ÷ 900 = 54 tiles" },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MATHEMATICAL LITERACY — GRADE 12
+  // ══════════════════════════════════════════════════════════════════════════
+  { id:"ml12_01", grade:12, subject:"Mathematical Literacy", topic:"Finance", question:"A house is bought for R800 000 at 9.5% interest over 20 years. This is an example of:", options:["A mortgage bond","A personal loan","Hire purchase","Leasing"], answer:0, explanation:"A mortgage bond is a long-term loan secured against property — the most common way to buy a house in SA" },
+  { id:"ml12_02", grade:12, subject:"Mathematical Literacy", topic:"Finance", question:"If your gross income is R25 000/month and tax is R4800, your net income is:", options:["R20 200","R29 800","R4800","R25 000"], answer:0, explanation:"Net income = Gross income − Tax = R25 000 − R4800 = R20 200" },
+  { id:"ml12_03", grade:12, subject:"Mathematical Literacy", topic:"Finance", question:"UIF stands for:", options:["Unemployment Insurance Fund","Universal Income Fund","Urban Insurance Finance","United Income Fund"], answer:0, explanation:"UIF (Unemployment Insurance Fund) provides short-term relief to workers who lose their jobs" },
+  { id:"ml12_04", grade:12, subject:"Mathematical Literacy", topic:"Maps & Plans", question:"On a road map, a straight line of 4 cm represents 200 km. The scale is:", options:["1:5 000 000","1:500 000","1:50 000","1:200 000"], answer:0, explanation:"200 km = 20 000 000 mm. 4 cm = 40 mm. Scale = 40 : 20 000 000 = 1 : 500 000. Let me recalc: 200km=200×100 000cm=20 000 000cm. 4cm:20 000 000cm = 1:5 000 000" },
+  { id:"ml12_05", grade:12, subject:"Mathematical Literacy", topic:"Measurement", question:"A swimming pool is 25m × 10m × 2m deep. Its volume in litres is:", options:["500 000 L","5000 L","50 000 L","5 000 000 L"], answer:0, explanation:"Volume = 25 × 10 × 2 = 500 m³. 1 m³ = 1000 L. 500 × 1000 = 500 000 L" },
+  { id:"ml12_06", grade:12, subject:"Mathematical Literacy", topic:"Data Handling", question:"The interquartile range (IQR) is:", options:["Q3 − Q1","Q2 − Q1","Max − Min","Mean − Median"], answer:0, explanation:"IQR = Q3 − Q1 — measures the spread of the middle 50% of data, less affected by outliers" },
+  { id:"ml12_07", grade:12, subject:"Mathematical Literacy", topic:"Data Handling", question:"Which graph would best show how a family spends their monthly budget?", options:["Pie chart","Line graph","Scatter plot","Histogram"], answer:0, explanation:"A pie chart is ideal for showing proportions/parts of a whole — perfect for budget breakdowns" },
+  { id:"ml12_08", grade:12, subject:"Mathematical Literacy", topic:"Probability", question:"In a class of 30 students, 12 play sport. P(randomly chosen student plays sport) =", options:["2/5","1/3","3/5","12/100"], answer:0, explanation:"P = 12/30 = 2/5 = 0.4. Simplify 12/30 by dividing by 6." },
+  { id:"ml12_09", grade:12, subject:"Mathematical Literacy", topic:"Finance", question:"Depreciation of R40 000 at 10% p.a. using the reducing balance method after 2 years:", options:["R32 400","R32 000","R36 000","R8 000"], answer:0, explanation:"Year 1: 40000 × 0.9 = R36 000. Year 2: 36000 × 0.9 = R32 400" },
+  { id:"ml12_10", grade:12, subject:"Mathematical Literacy", topic:"Finance", question:"A budget deficit means:", options:["Expenses exceed income","Income exceeds expenses","Income equals expenses","Savings are positive"], answer:0, explanation:"A deficit = spending more than you earn. A surplus = earning more than you spend." },
+  { id:"ml12_11", grade:12, subject:"Mathematical Literacy", topic:"Numbers & Calculations", question:"R15 000 increased by 12% is:", options:["R16 800","R13 200","R1800","R17 000"], answer:0, explanation:"Increase = 12% × 15 000 = R1800. New amount = 15 000 + 1800 = R16 800" },
+  { id:"ml12_12", grade:12, subject:"Mathematical Literacy", topic:"Measurement", question:"A nurse gives a patient 0.5 ml per kg of body weight. For a 60 kg patient, the dosage is:", options:["30 ml","120 ml","60 ml","0.5 ml"], answer:0, explanation:"Dosage = 0.5 ml × 60 kg = 30 ml" },
+  { id:"ml12_13", grade:12, subject:"Mathematical Literacy", topic:"Maps & Plans", question:"A builder reads a floor plan where 1 cm = 2 m. A room measuring 4 cm × 3 cm on the plan has an actual area of:", options:["48 m²","24 m²","12 m²","6 m²"], answer:0, explanation:"Actual dimensions: 4×2=8 m and 3×2=6 m. Area = 8 × 6 = 48 m²" },
+  { id:"ml12_14", grade:12, subject:"Mathematical Literacy", topic:"Data Handling", question:"An outlier in a data set is a value that is:", options:["Much higher or lower than the rest of the data","The most common value","Equal to the mean","In the middle of the data"], answer:0, explanation:"An outlier is an extreme value that lies far from the other data points — it can skew the mean" },
+  { id:"ml12_15", grade:12, subject:"Mathematical Literacy", topic:"Finance", question:"Store A sells 5 kg of rice for R65. Store B sells 3 kg for R42. Which is better value?", options:["Store A (R13/kg vs R14/kg)","Store B","They are equal","Cannot compare"], answer:0, explanation:"Store A: R65÷5 = R13/kg. Store B: R42÷3 = R14/kg. Store A is cheaper per kg." },
+
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SUBJECT CONFIG
 // ─────────────────────────────────────────────────────────────────────────────
 const SUBJECTS = {
-  "Mathematics":        { icon:"📐", color:"#2563eb", grades:[10,11,12] },
-  "Physical Sciences":  { icon:"⚗️", color:"#7c3aed", grades:[10,11,12] },
-  "Life Sciences":      { icon:"🧬", color:"#16a34a", grades:[10,11,12] },
-  "Accounting":         { icon:"📒", color:"#b45309", grades:[10,12] },
-  "English":            { icon:"📖", color:"#0891b2", grades:[10,11,12] },
-  "Business Studies":   { icon:"💼", color:"#059669", grades:[10,11,12] },
-  "Economics":          { icon:"📈", color:"#dc2626", grades:[10,11,12] },
-  "History":            { icon:"🏛️", color:"#6d28d9", grades:[10,11,12] },
-  "Geography":          { icon:"🌍", color:"#0369a1", grades:[10,11,12] },
+  "Mathematics":              { icon:"📐", color:"#2563eb", grades:[10,11,12] },
+  "Technical Mathematics":    { icon:"🔧", color:"#0369a1", grades:[10,11,12] },
+  "Mathematical Literacy":    { icon:"💡", color:"#7c3aed", grades:[10,11,12] },
+  "Physical Sciences":        { icon:"⚗️", color:"#6d28d9", grades:[10,11,12] },
+  "Life Sciences":             { icon:"🧬", color:"#16a34a", grades:[10,11,12] },
+  "Accounting":               { icon:"📒", color:"#b45309", grades:[10,12] },
+  "English":                  { icon:"📖", color:"#0891b2", grades:[10,11,12] },
+  "Business Studies":         { icon:"💼", color:"#059669", grades:[10,11,12] },
+  "Economics":                { icon:"📈", color:"#dc2626", grades:[10,11,12] },
+  "History":                  { icon:"🏛️", color:"#92400e", grades:[10,11,12] },
+  "Geography":                { icon:"🌍", color:"#0369a1", grades:[10,11,12] },
 };
 
 const GRADE_COLORS = { 10:"#2563eb", 11:"#7c3aed", 12:"#16a34a" };
