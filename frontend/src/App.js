@@ -1,21 +1,24 @@
 // src/App.js
 import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Quiz from "./components/Quiz";
 import Footer from "./components/Footer";
-
-// ── NOTE: Results, StudentProfile, UniversityFinder are all managed
-// internally by Quiz.js — you no longer need to import them here.
-// The flow is: Welcome → Student Profile → Quiz → Enhanced Results
-// All powered by a single <Quiz /> component.
+import SchoolPilot from "./components/SchoolPilot";
+import AccessGate from "./components/AccessGate";
 
 function App() {
   return (
-    <div className="app-container">
-      <div className="main-content">
-        <Quiz />
-      </div>
-      <Footer />
-    </div>
+    <AccessGate>
+      <Router>
+        <div className="app-container">
+          <Routes>
+            <Route path="/" element={<Quiz />} />
+            <Route path="/school-pilot" element={<SchoolPilot />} />
+          </Routes>
+        </div>
+        <Footer />
+      </Router>
+    </AccessGate>
   );
 }
 

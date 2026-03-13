@@ -31,6 +31,7 @@ const SUBJECT_GROUPS = [
     subjects: [
       { id: "english",   label: "English Home Language / First Additional Language", required: true,  lo: false },
       { id: "lifeorien", label: "Life Orientation",                                   required: true,  lo: true  },
+       { id: "xhosa",       label: "isiXhosa / Zulu / Sepedi (2nd Language)", required: false, lo: false, false: false },
     ]
   },
   {
