@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/demo",
+      "destination": "/stablym-website.html"
+    },
+    {
+      "source": "/website",
+      "destination": "/stablym-website.html"
+    },
+    {
+      "source": "/((?!stablym-website\\.html).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -4,40 +4,30 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Stablym — SA Subject Stream Selector</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+  window.EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
+  window.EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+  window.EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
+  // emailjs.init(window.EMAILJS_PUBLIC_KEY);
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --ink:    #0a0e1a;
-  --sky:    #0ea5e9;
-  --lime:   #84cc16;
-  --amber:  #f59e0b;
-  --cream:  #fafaf7;
-  --muted:  #64748b;
-  --border: #e2e8f0;
-  --card:   #ffffff;
-  --red:    #ef4444;
-  --green:  #16a34a;
-}
+:root{--ink:#0a0e1a;--sky:#0ea5e9;--lime:#84cc16;--amber:#f59e0b;--cream:#fafaf7;--muted:#64748b;--border:#e2e8f0;--card:#ffffff;--red:#ef4444;--green:#16a34a}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);overflow-x:hidden}
 h1,h2,h3,h4{font-family:'Syne',sans-serif}
-
-/* ── NAV ── */
 nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.06);padding:0 40px;height:66px;display:flex;align-items:center;justify-content:space-between}
 .nav-brand{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:-1px;cursor:pointer}
 .nav-brand span{color:var(--sky)}
 .nav-links{display:flex;gap:8px;align-items:center}
-.nav-link{color:rgba(255,255,255,.65);font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;cursor:pointer;border:none;background:none;transition:color .2s}
+.nav-link{color:rgba(255,255,255,.65);font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;cursor:pointer;border:none;background:none;transition:color .2s;font-family:'DM Sans',sans-serif}
 .nav-link:hover{color:#fff}
 .nav-cta{background:var(--sky);color:#fff;font-size:13px;font-weight:700;padding:9px 20px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
 .nav-cta:hover{background:#0284c7;transform:translateY(-1px)}
-
-/* ── PAGES ── */
 .page{display:none;min-height:100vh;padding-top:66px}
 .page.active{display:block}
-
-/* ── HERO ── */
 .hero{background:var(--ink);position:relative;overflow:hidden;padding:100px 40px 80px;min-height:92vh;display:flex;align-items:center}
 .hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 60% 40%,rgba(14,165,233,.15) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 10% 80%,rgba(132,204,22,.08) 0%,transparent 50%)}
 .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:60px 60px}
@@ -56,8 +46,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92
 .hero-stats{display:flex;gap:32px;margin-top:40px;padding-top:32px;border-top:1px solid rgba(255,255,255,.1)}
 .hero-stat-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#fff}
 .hero-stat-lbl{font-size:12px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.5px}
-
-/* ── HERO DEMO CARD ── */
 .hero-demo{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;overflow:hidden;backdrop-filter:blur(10px)}
 .hero-demo-bar{background:rgba(255,255,255,.06);padding:12px 18px;display:flex;gap:6px;align-items:center}
 .demo-dot{width:10px;height:10px;border-radius:50%}
@@ -75,16 +63,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92
 .demo-sub-row{display:flex;justify-content:space-between;align-items:center;font-size:12px}
 .demo-sub-name{color:rgba(255,255,255,.6)}
 .demo-sub-badge{padding:2px 8px;border-radius:6px;font-weight:700;font-size:11px}
-
-/* ── SECTION COMMONS ── */
 .section{padding:80px 40px;max-width:1100px;margin:0 auto}
 .section-label{font-size:11px;font-weight:700;color:var(--sky);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
 .section-title{font-size:clamp(28px,4vw,42px);font-weight:800;color:var(--ink);letter-spacing:-1px;margin-bottom:16px}
 .section-sub{font-size:16px;color:var(--muted);line-height:1.7;max-width:580px}
 .section-center{text-align:center;margin:0 auto}
 .section-center .section-sub{margin:0 auto}
-
-/* ── HOW IT WORKS ── */
 .how-wrap{background:#fff;border-radius:24px;padding:60px;border:1px solid var(--border);box-shadow:0 2px 40px rgba(0,0,0,.04)}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:48px}
 .step{position:relative;text-align:center;padding:24px 16px}
@@ -93,8 +77,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92
 .step-num{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin:0 auto 16px}
 .step-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px}
 .step-desc{font-size:13px;color:var(--muted);line-height:1.6}
-
-/* ── FEATURES ── */
 .features-bg{background:var(--ink)}
 .features-bg .section-title,.features-bg .section-label{color:#fff}
 .features-bg .section-sub{color:rgba(255,255,255,.55)}
@@ -104,8 +86,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92
 .feature-icon{font-size:32px;margin-bottom:16px}
 .feature-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:8px}
 .feature-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.65}
-
-/* ── DEMO PAGE ── */
 .demo-gate{background:var(--ink);min-height:100vh;padding-top:66px}
 .demo-hero{background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:60px 40px;text-align:center}
 .demo-hero h2{font-size:36px;font-weight:800;color:#fff;margin-bottom:12px;letter-spacing:-1px}
@@ -115,29 +95,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92
 .demo-quiz-header{background:linear-gradient(135deg,#2563eb,#0ea5e9);padding:24px 32px;display:flex;justify-content:space-between;align-items:center}
 .demo-quiz-header h3{font-family:'Syne',sans-serif;font-size:18px;color:#fff;font-weight:700}
 .demo-badge{background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:99px;letter-spacing:1px;text-transform:uppercase}
-.demo-questions{padding:32px}
-.demo-q{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #f1f5f9}
-.demo-q:last-child{border-bottom:none;margin-bottom:0}
-.demo-q-text{font-size:15px;font-weight:600;color:#1e293b;margin-bottom:14px}
-.demo-options{display:flex;flex-direction:column;gap:8px}
-.demo-option{display:flex;align-items:center;gap:12px;padding:12px 16px;border:2px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all .15s;font-size:14px;color:#374151;background:#fff}
-.demo-option:hover{border-color:#0ea5e9;background:#eff6ff;color:#1e40af}
-.demo-option.selected{border-color:#0ea5e9;background:#eff6ff;color:#1e40af;font-weight:600}
-.demo-option input{accent-color:#0ea5e9;width:16px;height:16px}
-
-/* ── LOCK SCREEN ── */
 .demo-lock{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:0 0 20px 20px;padding:48px 32px;text-align:center;position:relative;overflow:hidden}
 .demo-lock::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 10px,rgba(255,255,255,.015) 10px,rgba(255,255,255,.015) 20px)}
 .lock-icon{font-size:48px;margin-bottom:16px}
 .lock-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:10px}
 .lock-sub{font-size:14px;color:rgba(255,255,255,.55);max-width:480px;margin:0 auto 28px;line-height:1.7}
-.lock-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.lock-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;z-index:2}
 .btn-sky{background:var(--sky);color:#fff;padding:13px 26px;border-radius:11px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
 .btn-sky:hover{background:#0284c7;transform:translateY(-2px)}
 .btn-lime{background:var(--lime);color:#1a2e00;padding:13px 26px;border-radius:11px;font-size:14px;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
 .btn-lime:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(132,204,22,.4)}
-
-/* ── PRICING ── */
 .pricing-bg{background:#f8fafc;padding:80px 40px}
 .pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1000px;margin:48px auto 0}
 .price-card{background:#fff;border-radius:20px;padding:36px 28px;border:2px solid var(--border);position:relative;transition:all .25s}
@@ -164,8 +131,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92
 .price-btn-filled:hover{background:#0284c7;transform:translateY(-1px)}
 .price-btn-lime{background:var(--lime);color:#1a2e00}
 .price-btn-lime:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(132,204,22,.3)}
-
-/* ── STUDENT PACKAGES ── */
 .student-pricing{background:var(--ink);padding:80px 40px}
 .student-pricing .section-title{color:#fff}
 .student-pricing .section-label{color:var(--lime)}
@@ -186,14 +151,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92
 .student-btn-free{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
 .student-btn-paid{background:var(--lime);color:#1a2e00}
 
-/* ── PAYMENT GATE ── */
-.payment-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(10,14,26,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px}
+/* ── PAYMENT OVERLAY ── */
+.payment-overlay{display:none;position:fixed;inset:0;z-index:1000;background:rgba(10,14,26,.85);backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
 .payment-overlay.open{display:flex}
-.payment-modal{background:#fff;border-radius:24px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.4)}
+.payment-modal{background:#fff;border-radius:24px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.4);display:flex;flex-direction:column}
 .payment-modal-header{background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:28px 32px;border-radius:24px 24px 0 0;position:relative}
 .payment-modal-header h3{font-family:'Syne',sans-serif;font-size:20px;color:#fff;font-weight:700;margin-bottom:4px}
 .payment-modal-header p{font-size:13px;color:rgba(255,255,255,.55)}
-.modal-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.modal-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;transition:background .2s}
+.modal-close:hover{background:rgba(255,255,255,.2)}
 .payment-body{padding:28px 32px}
 .payment-summary{background:#f8fafc;border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid #e2e8f0}
 .payment-summary-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px;color:#374151}
@@ -203,25 +169,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92
 .form-input{width:100%;padding:11px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;font-family:'DM Sans',sans-serif;background:#f8fafc;color:#1e293b;transition:border-color .2s}
 .form-input:focus{border-color:var(--sky);background:#fff}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.card-field{display:flex;align-items:center;gap:8px;padding:11px 14px;border:2px solid #e2e8f0;border-radius:10px;background:#f8fafc;margin-bottom:16px}
-.card-field input{flex:1;border:none;outline:none;font-size:14px;font-family:'DM Mono',monospace;background:transparent;color:#1e293b}
-.card-icons{display:flex;gap:6px}
-.card-icon{width:32px;height:22px;background:#1e293b;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff}
 .secure-badge{display:flex;align-items:center;gap:8px;font-size:12px;color:#64748b;margin-bottom:20px}
-.pay-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--sky),#0284c7);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.pay-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--sky),#0284c7);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
 .pay-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(14,165,233,.4)}
 .pay-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
 .payment-note{font-size:11px;color:#94a3b8;text-align:center;margin-top:12px;line-height:1.6}
-/* success screen */
 .payment-success{display:none;text-align:center;padding:48px 32px}
 .payment-success.show{display:block}
-.success-icon{font-size:64px;margin-bottom:16px}
-.success-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#1e293b;margin-bottom:10px}
-.success-sub{font-size:14px;color:#64748b;line-height:1.7;max-width:360px;margin:0 auto 24px}
-.success-actions{display:flex;flex-direction:column;gap:10px}
 
-/* ── CONTACT / PILOT PAGE ── */
-.contact-page{background:#f8fafc;min-height:100vh;padding-top:66px}
+/* ── CONTACT ── */
+.contact-page{background:#f8fafc;min-height:100vh;padding-top:0}
 .contact-hero{background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:60px 40px;text-align:center}
 .contact-hero h2{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#fff;margin-bottom:12px;letter-spacing:-1px}
 .contact-hero p{font-size:16px;color:rgba(255,255,255,.6);max-width:560px;margin:0 auto}
@@ -231,7 +188,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92
 .contact-perk{display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border-radius:12px;padding:14px}
 .perk-icon{font-size:20px;flex-shrink:0}
 .perk-text{font-size:13px;color:#374151;font-weight:500;line-height:1.5}
-.contact-form .form-group{margin-bottom:16px}
 .select-input{width:100%;padding:11px 14px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;outline:none;font-family:'DM Sans',sans-serif;background:#f8fafc;color:#1e293b;appearance:none}
 .select-input:focus{border-color:var(--sky)}
 .textarea-input{resize:vertical;min-height:100px}
@@ -240,24 +196,18 @@ nav{position:fixed;top:0;left:0;right:0;z-index:999;background:rgba(10,14,26,.92
 .pilot-success{display:none;text-align:center;padding:32px}
 .pilot-success.show{display:block}
 
-/* ── ACCESS GATE (full content behind login) ── */
-.access-wall{background:var(--ink);min-height:100vh;padding-top:66px;display:flex;align-items:center;justify-content:center;padding:80px 40px}
+/* ── LOGIN ── */
+.access-wall{background:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:80px 40px}
 .access-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:24px;max-width:480px;width:100%;padding:48px 40px;text-align:center;backdrop-filter:blur(10px)}
 .access-card h2{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#fff;margin-bottom:10px}
 .access-card p{font-size:14px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:32px}
-.access-form input{display:block;width:100%;padding:12px 16px;border:2px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.06);color:#fff;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:12px}
-.access-form input::placeholder{color:rgba(255,255,255,.3)}
-.access-form input:focus{border-color:var(--sky)}
 .access-btn{width:100%;padding:13px;background:var(--sky);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:4px;transition:all .2s}
 .access-btn:hover{background:#0284c7}
 .access-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:rgba(255,255,255,.25);font-size:12px}
 .access-divider::before,.access-divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.1)}
-.no-access-note{font-size:12px;color:rgba(255,255,255,.35);margin-top:16px}
-.no-access-note a{color:var(--sky);cursor:pointer;text-decoration:none}
-.no-access-note a:hover{text-decoration:underline}
 
-/* ── SCHOOL DASHBOARD (post-payment / post-login) ── */
-.school-dash{background:#f0f4f8;min-height:100vh;padding-top:66px}
+/* ── DASHBOARD ── */
+.school-dash{background:#f0f4f8;min-height:100vh}
 .dash-topbar{background:#fff;border-bottom:1px solid var(--border);padding:20px 40px;display:flex;justify-content:space-between;align-items:center}
 .dash-topbar h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--ink)}
 .dash-plan-badge{background:#eff6ff;color:#1e40af;font-size:12px;font-weight:700;padding:5px 14px;border-radius:99px;border:1px solid #bfdbfe}
@@ -284,19 +234,17 @@ footer .brand{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color
 footer .brand span{color:var(--sky)}
 footer p{font-size:13px;color:rgba(255,255,255,.35);line-height:1.7}
 footer .footer-links{display:flex;gap:20px;justify-content:center;margin:16px 0;flex-wrap:wrap}
-footer .footer-link{font-size:13px;color:rgba(255,255,255,.45);cursor:pointer;border:none;background:none;transition:color .2s}
+footer .footer-link{font-size:13px;color:rgba(255,255,255,.45);cursor:pointer;border:none;background:none;transition:color .2s;font-family:'DM Sans',sans-serif}
 footer .footer-link:hover{color:rgba(255,255,255,.8)}
 
 /* ── TOAST ── */
 .toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:14px 20px;border-radius:12px;font-size:14px;font-weight:600;z-index:2000;transform:translateY(80px);opacity:0;transition:all .35s;border-left:4px solid var(--green);max-width:320px}
 .toast.show{transform:translateY(0);opacity:1}
 
-/* ── MISC ── */
-.tag{display:inline-block;background:rgba(14,165,233,.1);color:var(--sky);font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;border:1px solid rgba(14,165,233,.25)}
-.divider-section{height:1px;background:var(--border);max-width:1100px;margin:0 auto}
 @media(max-width:768px){
   .hero-inner,.steps,.features-grid,.pricing-grid,.student-grid,.dash-stats,.dash-cards,.contact-perks,.form-row{grid-template-columns:1fr}
   .nav-links .nav-link{display:none}
+  .mobile-admin-btn{display:block !important}
   .hero{padding:60px 20px 60px}
   .section,.pricing-bg,.student-pricing,.contact-wrap,.dash-body{padding-left:20px;padding-right:20px}
   .step::after{display:none}
@@ -305,7 +253,7 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
 </head>
 <body>
 
-<!-- ══ NAV ══════════════════════════════════════════════════════════════════ -->
+<!-- NAV -->
 <nav>
   <div class="nav-brand" onclick="showPage('home')">Stabl<span>ym</span></div>
   <div class="nav-links">
@@ -313,15 +261,16 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
     <button class="nav-link" onclick="showPage('demo')">Demo</button>
     <button class="nav-link" onclick="showPage('pricing')">Pricing</button>
     <button class="nav-link" onclick="showPage('contact')">Request Pilot</button>
-    <button class="nav-link" onclick="showPage('login')">School Login</button>
-    <button class="nav-cta" onclick="openPayment('school-starter')">Get Started →</button>
+    <button class="nav-link" onclick="showPage('admin')" style="color:#fbbf24">⚙ Admin</button>
+    <span id="nav-user-name" style="display:none;font-size:13px;font-weight:600;color:#a3e635;padding:6px 12px;background:rgba(132,204,22,.1);border-radius:8px;border:1px solid rgba(132,204,22,.2)"></span>
+    <button class="nav-cta" onclick="showPage('login')">School Login →</button>
+    <!-- Mobile admin button — always visible -->
+    <button onclick="showPage('admin')" style="background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:none" class="mobile-admin-btn">⚙</button>
   </div>
 </nav>
 
-<!-- ══ HOME PAGE ═════════════════════════════════════════════════════════════ -->
+<!-- ══ HOME PAGE ══ -->
 <div id="page-home" class="page active">
-
-  <!-- HERO -->
   <div class="hero">
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
@@ -341,8 +290,6 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
           <div><div class="hero-stat-num">R50/mo</div><div class="hero-stat-lbl">Per Student</div></div>
         </div>
       </div>
-
-      <!-- Demo preview card -->
       <div class="hero-demo">
         <div class="hero-demo-bar">
           <div class="demo-dot" style="background:#ef4444"></div>
@@ -368,22 +315,10 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
           </div>
           <div class="demo-bar-wrap"><div class="demo-bar-fill"></div></div>
           <div class="demo-subjects">
-            <div class="demo-sub-row">
-              <span class="demo-sub-name">Mathematics</span>
-              <span class="demo-sub-badge" style="background:rgba(22,163,74,.2);color:#4ade80">A · APS 7</span>
-            </div>
-            <div class="demo-sub-row">
-              <span class="demo-sub-name">Physical Sciences</span>
-              <span class="demo-sub-badge" style="background:rgba(14,165,233,.2);color:#7dd3fc">B · APS 6</span>
-            </div>
-            <div class="demo-sub-row">
-              <span class="demo-sub-name">Life Sciences</span>
-              <span class="demo-sub-badge" style="background:rgba(14,165,233,.2);color:#7dd3fc">B · APS 6</span>
-            </div>
-            <div class="demo-sub-row">
-              <span class="demo-sub-name">English HL</span>
-              <span class="demo-sub-badge" style="background:rgba(245,158,11,.2);color:#fcd34d">C · APS 5</span>
-            </div>
+            <div class="demo-sub-row"><span class="demo-sub-name">Mathematics</span><span class="demo-sub-badge" style="background:rgba(22,163,74,.2);color:#4ade80">A · APS 7</span></div>
+            <div class="demo-sub-row"><span class="demo-sub-name">Physical Sciences</span><span class="demo-sub-badge" style="background:rgba(14,165,233,.2);color:#7dd3fc">B · APS 6</span></div>
+            <div class="demo-sub-row"><span class="demo-sub-name">Life Sciences</span><span class="demo-sub-badge" style="background:rgba(14,165,233,.2);color:#7dd3fc">B · APS 6</span></div>
+            <div class="demo-sub-row"><span class="demo-sub-name">English HL</span><span class="demo-sub-badge" style="background:rgba(245,158,11,.2);color:#fcd34d">C · APS 5</span></div>
           </div>
         </div>
       </div>
@@ -397,26 +332,10 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
       <h2 class="section-title section-center">From Subject Confusion to Career Clarity</h2>
       <div class="how-wrap" style="margin-top:32px">
         <div class="steps">
-          <div class="step">
-            <div class="step-num" style="background:#eff6ff;color:#2563eb">1</div>
-            <div class="step-title">School Subscribes</div>
-            <div class="step-desc">Choose a school package — R50/student/month, billed per your enrolled count</div>
-          </div>
-          <div class="step">
-            <div class="step-num" style="background:#f0fdf4;color:#16a34a">2</div>
-            <div class="step-title">Students Access App</div>
-            <div class="step-desc">Teacher sends access codes. Students log in and complete the stream quiz</div>
-          </div>
-          <div class="step">
-            <div class="step-num" style="background:#fef9c3;color:#ca8a04">3</div>
-            <div class="step-title">Enter Marks & Get APS</div>
-            <div class="step-desc">Students enter subject marks. APS calculates automatically with career matching</div>
-          </div>
-          <div class="step">
-            <div class="step-num" style="background:#faf5ff;color:#7c3aed">4</div>
-            <div class="step-title">Teacher Prints Reports</div>
-            <div class="step-desc">Teachers access the portal, record exam invigilation, and print APS reports</div>
-          </div>
+          <div class="step"><div class="step-num" style="background:#eff6ff;color:#2563eb">1</div><div class="step-title">School Subscribes</div><div class="step-desc">Choose a school package — R50/student/month, billed per your enrolled count</div></div>
+          <div class="step"><div class="step-num" style="background:#f0fdf4;color:#16a34a">2</div><div class="step-title">Students Access App</div><div class="step-desc">Teacher sends access codes. Students log in and complete the stream quiz</div></div>
+          <div class="step"><div class="step-num" style="background:#fef9c3;color:#ca8a04">3</div><div class="step-title">Enter Marks & Get APS</div><div class="step-desc">Students enter subject marks. APS calculates automatically with career matching</div></div>
+          <div class="step"><div class="step-num" style="background:#faf5ff;color:#7c3aed">4</div><div class="step-title">Teacher Prints Reports</div><div class="step-desc">Teachers access the portal, record exam invigilation, and print APS reports</div></div>
         </div>
       </div>
     </div>
@@ -429,56 +348,20 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
       <h2 class="section-title" style="color:#fff">Everything a South African School Needs</h2>
       <p class="section-sub">Built specifically for the NSC curriculum — not a generic platform retrofitted for SA.</p>
       <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon">🔬</div>
-          <div class="feature-title">Stream Selector Quiz</div>
-          <div class="feature-desc">Grade 9 learners answer questions to discover whether they belong in Science, Commerce, Humanities, or Engineering streams.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📊</div>
-          <div class="feature-title">Live APS Calculator</div>
-          <div class="feature-desc">Enter subject marks and watch the APS score calculate in real time. Best 6 subjects, LO excluded — exactly per DBE rules.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🎓</div>
-          <div class="feature-title">University Matcher</div>
-          <div class="feature-desc">55+ programmes across SA universities — UCT, Wits, UP, UKZN and more. Shows what the student qualifies for right now.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">💰</div>
-          <div class="feature-title">Bursary Finder</div>
-          <div class="feature-desc">NSFAS, Sasol, Anglo American, and sector-specific bursaries matched to the student's stream and APS score.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">📝</div>
-          <div class="feature-title">Past Papers Quiz</div>
-          <div class="feature-desc">510+ NSC-style questions across 15 subjects for Grades 10–12. Timed, with explanations after each question.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🔒</div>
-          <div class="feature-title">Teacher Invigilation Log</div>
-          <div class="feature-desc">Teachers record exam dates, venues, and sign off declarations. Prevents cheating disputes. Prints to the APS report.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🖨️</div>
-          <div class="feature-title">Printable APS Reports</div>
-          <div class="feature-desc">Full student reports with marks, symbols, APS, university eligibility, exam records, and signature blocks for parents and HODs.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🏫</div>
-          <div class="feature-title">School Dashboard</div>
-          <div class="feature-desc">Manage your whole class. See every student's APS at a glance, track exam records, and export reports.</div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon">🇿🇦</div>
-          <div class="feature-title">Built for SA</div>
-          <div class="feature-desc">NSC symbols (A–G), South African universities, NSFAS, all 9 provinces. Not a generic platform — Stablym is made for your school.</div>
-        </div>
+        <div class="feature-card"><div class="feature-icon">🔬</div><div class="feature-title">Stream Selector Quiz</div><div class="feature-desc">Grade 9 learners answer questions to discover whether they belong in Science, Commerce, Humanities, or Engineering streams.</div></div>
+        <div class="feature-card"><div class="feature-icon">📊</div><div class="feature-title">Live APS Calculator</div><div class="feature-desc">Enter subject marks and watch the APS score calculate in real time. Best 6 subjects, LO excluded — exactly per DBE rules.</div></div>
+        <div class="feature-card"><div class="feature-icon">🎓</div><div class="feature-title">University Matcher</div><div class="feature-desc">55+ programmes across SA universities — UCT, Wits, UP, UKZN and more. Shows what the student qualifies for right now.</div></div>
+        <div class="feature-card"><div class="feature-icon">💰</div><div class="feature-title">Bursary Finder</div><div class="feature-desc">NSFAS, Sasol, Anglo American, and sector-specific bursaries matched to the student's stream and APS score.</div></div>
+        <div class="feature-card"><div class="feature-icon">📝</div><div class="feature-title">Past Papers Quiz</div><div class="feature-desc">510+ NSC-style questions across 15 subjects for Grades 10–12. Timed, with explanations after each question.</div></div>
+        <div class="feature-card"><div class="feature-icon">🔒</div><div class="feature-title">Teacher Invigilation Log</div><div class="feature-desc">Teachers record exam dates, venues, and sign off declarations. Prevents cheating disputes. Prints to the APS report.</div></div>
+        <div class="feature-card"><div class="feature-icon">🖨️</div><div class="feature-title">Printable APS Reports</div><div class="feature-desc">Full student reports with marks, symbols, APS, university eligibility, exam records, and signature blocks.</div></div>
+        <div class="feature-card"><div class="feature-icon">🏫</div><div class="feature-title">School Dashboard</div><div class="feature-desc">Manage your whole class. See every student's APS at a glance, track exam records, and export reports.</div></div>
+        <div class="feature-card"><div class="feature-icon">🇿🇦</div><div class="feature-title">Built for SA</div><div class="feature-desc">NSC symbols (A–G), South African universities, NSFAS, all 9 provinces. Made for your school, not retrofitted.</div></div>
       </div>
     </div>
   </div>
 
-  <!-- SCHOOL PRICING PREVIEW -->
+  <!-- PRICING PREVIEW -->
   <div style="background:#f8fafc;padding:80px 40px;text-align:center">
     <div style="max-width:1100px;margin:0 auto">
       <div class="section-label" style="text-align:center">Transparent Pricing</div>
@@ -506,31 +389,6 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
     </div>
   </div>
 
-  <!-- SOCIAL PROOF -->
-  <div style="background:#fff;padding:60px 40px;text-align:center">
-    <div style="max-width:760px;margin:0 auto">
-      <div class="section-label" style="text-align:center">Why Stablym</div>
-      <h2 class="section-title" style="margin-bottom:40px;text-align:center">Designed Around How SA Schools Actually Work</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
-        <div style="background:#f8fafc;border-radius:14px;padding:20px;text-align:left">
-          <div style="font-size:24px;margin-bottom:10px">🚫</div>
-          <div style="font-size:13px;font-weight:700;color:#dc2626;margin-bottom:6px">Students cannot bypass payment</div>
-          <div style="font-size:12px;color:#64748b;line-height:1.6">Full access is gated behind your school's subscription. Students get a timed demo only.</div>
-        </div>
-        <div style="background:#f8fafc;border-radius:14px;padding:20px;text-align:left">
-          <div style="font-size:24px;margin-bottom:10px">📱</div>
-          <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:6px">Works on any device</div>
-          <div style="font-size:12px;color:#64748b;line-height:1.6">Mobile-first design. Students can use phones, tablets, or computers in the classroom.</div>
-        </div>
-        <div style="background:#f8fafc;border-radius:14px;padding:20px;text-align:left">
-          <div style="font-size:24px;margin-bottom:10px">📋</div>
-          <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:6px">DBE-aligned, NSC accurate</div>
-          <div style="font-size:12px;color:#64748b;line-height:1.6">APS formula matches DBE guidelines exactly. Symbols, LO exclusion, best-6 — all correct.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- CTA BANNER -->
   <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:80px 40px;text-align:center">
     <div style="max-width:600px;margin:0 auto">
@@ -553,107 +411,85 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
       <button class="footer-link" onclick="showPage('login')">School Login</button>
     </div>
     <p>© 2025 Stablym · SA Subject Stream Selector · Built for South African Schools<br/>
-    📧 <a href="mailto:mmathapelosebela@gmail.com" style="color:rgba(255,255,255,.5)">mmathapelosebela@gmail.com</a> · 
+    📧 <a href="/cdn-cgi/l/email-protection#6f02020e1b070e1f0a03001c0a0d0a030e2f08020e0603410c0002" style="color:rgba(255,255,255,.5)"><span class="__cf_email__" data-cfemail="f79a9a96839f9687929b98849295929b96b7909a969e9bd994989a">[email&#160;protected]</span></a> · 
     📱 <a href="https://wa.me/27685438227" target="_blank" style="color:#25D366;font-weight:700">WhatsApp 068 543 8227</a> · 
     💳 Payments via PayFast</p>
   </footer>
 </div>
 
-<!-- ══ DEMO PAGE ═══════════════════════════════════════════════════════════════ -->
+<!-- ══ DEMO PAGE ══ -->
 <div id="page-demo" class="page">
   <div class="demo-gate">
     <div class="demo-hero">
-      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--sky);margin-bottom:16px;text-transform:uppercase;letter-spacing:1px">🎯 School Demo — 3 Free Questions</div>
-      <h2>See Stablym in Action</h2>
-      <p>Try 3 sample questions from the Grade 9 Stream Selector quiz. Full access requires a school subscription.</p>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--sky);margin-bottom:16px;text-transform:uppercase;letter-spacing:1px">🎯 Free Demo — 3 Past Paper Questions</div>
+      <h2>Try Real NSC Past Paper Questions</h2>
+      <p>Pick your grade and answer 3 real questions. See the correct answer and explanation instantly — just like the full app.</p>
     </div>
-
     <div class="demo-container">
-      <div class="demo-quiz-card">
-        <div class="demo-quiz-header">
-          <h3>📋 Grade 9 Stream Selector — Demo</h3>
-          <span class="demo-badge">3 of 30 questions</span>
+      <div id="demo-grade-select" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:28px">
+        <button class="demo-grade-btn" onclick="loadDemoGrade(9,this)"  style="padding:14px 28px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif">Grade 9</button>
+        <button class="demo-grade-btn" onclick="loadDemoGrade(10,this)" style="padding:14px 28px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif">Grade 10</button>
+        <button class="demo-grade-btn" onclick="loadDemoGrade(11,this)" style="padding:14px 28px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif">Grade 11</button>
+        <button class="demo-grade-btn" onclick="loadDemoGrade(12,this)" style="padding:14px 28px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif">Grade 12 ⭐</button>
+      </div>
+
+      <div class="demo-quiz-card" id="demo-quiz-card" style="display:none">
+        <div class="demo-quiz-header" id="demo-quiz-header">
+          <h3 id="demo-quiz-title">📝 Grade 10 — Past Paper Demo</h3>
+          <span class="demo-badge" id="demo-quiz-badge">3 questions</span>
         </div>
-
-        <div class="demo-questions" id="demo-questions">
-          <!-- Q1 -->
-          <div class="demo-q">
-            <div class="demo-q-text">1. When you have free time, which activity do you enjoy most?</div>
-            <div class="demo-options">
-              <label class="demo-option"><input type="radio" name="q1" value="science" onchange="selectOption(this)"> Building or taking things apart to see how they work</label>
-              <label class="demo-option"><input type="radio" name="q1" value="commerce" onchange="selectOption(this)"> Running a small business or selling things</label>
-              <label class="demo-option"><input type="radio" name="q1" value="humanities" onchange="selectOption(this)"> Reading, writing stories, or discussing social issues</label>
-              <label class="demo-option"><input type="radio" name="q1" value="engineering" onchange="selectOption(this)"> Fixing things, building models, or working with tools</label>
-            </div>
-          </div>
-
-          <!-- Q2 -->
-          <div class="demo-q">
-            <div class="demo-q-text">2. Which school subject do you enjoy most?</div>
-            <div class="demo-options">
-              <label class="demo-option"><input type="radio" name="q2" value="science" onchange="selectOption(this)"> Mathematics or Science</label>
-              <label class="demo-option"><input type="radio" name="q2" value="commerce" onchange="selectOption(this)"> Accounting or Economics</label>
-              <label class="demo-option"><input type="radio" name="q2" value="humanities" onchange="selectOption(this)"> History or English</label>
-              <label class="demo-option"><input type="radio" name="q2" value="engineering" onchange="selectOption(this)"> Technical Drawing or Design</label>
-            </div>
-          </div>
-
-          <!-- Q3 -->
-          <div class="demo-q">
-            <div class="demo-q-text">3. In 10 years, which job sounds most exciting to you?</div>
-            <div class="demo-options">
-              <label class="demo-option"><input type="radio" name="q3" value="science" onchange="selectOption(this)"> Doctor, Engineer, or Scientist</label>
-              <label class="demo-option"><input type="radio" name="q3" value="commerce" onchange="selectOption(this)"> Accountant, Entrepreneur, or Financial Analyst</label>
-              <label class="demo-option"><input type="radio" name="q3" value="humanities" onchange="selectOption(this)"> Journalist, Teacher, or Social Worker</label>
-              <label class="demo-option"><input type="radio" name="q3" value="engineering" onchange="selectOption(this)"> Civil Engineer, Electrician, or Draughtsperson</label>
-            </div>
+        <div id="demo-q-list" style="padding:28px;display:flex;flex-direction:column;gap:28px"></div>
+        <div id="demo-results-strip" style="display:none;padding:0 28px 20px">
+          <div id="demo-score-box" style="background:#f0fdf4;border:2px solid #bbf7d0;border-radius:14px;padding:18px 20px;text-align:center;margin-bottom:16px">
+            <div id="demo-score-text" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#14532d"></div>
+            <div id="demo-score-sub" style="font-size:13px;color:#15803d;margin-top:4px"></div>
           </div>
         </div>
 
-        <!-- LOCK SCREEN -->
+        <!-- LOCK SCREEN with working buttons -->
         <div class="demo-lock">
           <div class="lock-icon">🔐</div>
-          <div class="lock-title">That's the end of the free demo</div>
-          <div class="lock-sub">The full Stablym app has <strong style="color:#fff">30+ questions</strong>, a live APS calculator, university matcher, bursary finder, past papers quiz, and teacher portal — all locked behind your school's subscription.</div>
-          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px 20px;margin:0 auto 28px;max-width:440px;text-align:left">
+          <div class="lock-title">That's the free demo</div>
+          <div class="lock-sub">The full Stablym app has <strong style="color:#fff">510+ past paper questions</strong> across 15 subjects for Grades 10–12, plus a live APS calculator, university matcher, bursary finder, and teacher portal.</div>
+          <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:16px 20px;margin:0 auto 28px;max-width:440px;text-align:left;position:relative;z-index:2">
             <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">What's behind the paywall</div>
             <div style="display:flex;flex-direction:column;gap:7px;font-size:13px;color:rgba(255,255,255,.7)">
-              <div>✓ 27 more stream quiz questions</div>
+              <div>✓ 510+ NSC past paper questions (Gr 10–12)</div>
+              <div>✓ 15 subjects — Maths, Science, Accounting & more</div>
               <div>✓ Live APS Calculator (best 6, LO excluded)</div>
               <div>✓ University & programme eligibility</div>
-              <div>✓ 510+ past papers questions</div>
               <div>✓ Bursary finder (NSFAS, Sasol, Anglo & more)</div>
-              <div>✓ Teacher invigilation records</div>
-              <div>✓ Printable student APS reports</div>
-              <div>✓ School dashboard for class management</div>
+              <div>✓ Teacher invigilation records & APS reports</div>
             </div>
           </div>
           <div class="lock-actions">
             <button class="btn-sky" onclick="showPage('contact')">🏫 Request School Pilot</button>
             <button class="btn-lime" onclick="openPayment('school-starter')">💳 Buy School Access — R2 500/mo</button>
           </div>
-          <div style="margin-top:16px;font-size:12px;color:rgba(255,255,255,.3)">Individual student? <span style="color:var(--sky);cursor:pointer" onclick="openPayment('student-plus')">Subscribe for R50/month →</span></div>
+          <div style="margin-top:16px;font-size:12px;color:rgba(255,255,255,.3);position:relative;z-index:2">Individual student? <span style="color:var(--sky);cursor:pointer;text-decoration:underline" onclick="openPayment('student-plus')">Subscribe for R50/month →</span></div>
         </div>
+      </div>
+
+      <div id="demo-prompt" style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.4);font-size:15px">
+        👆 Select your grade above to start the demo
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ PRICING PAGE ════════════════════════════════════════════════════════════ -->
+<!-- ══ PRICING PAGE ══ -->
 <div id="page-pricing" class="page">
   <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);padding:60px 40px;text-align:center">
     <div style="font-size:11px;font-weight:700;color:var(--sky);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px">Pricing</div>
     <h2 style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:#fff;letter-spacing:-1px;margin-bottom:12px">Transparent, Affordable School Pricing</h2>
-    <p style="font-size:16px;color:rgba(255,255,255,.55);max-width:560px;margin:0 auto">R50 per student per month. Choose the package that fits your school size. No hidden fees — ever.</p>
+    <p style="font-size:16px;color:rgba(255,255,255,.55);max-width:560px;margin:0 auto">R50 per student per month. Choose the package that fits your school size.</p>
   </div>
 
-  <!-- SCHOOL PACKAGES -->
   <div class="pricing-bg">
     <div style="max-width:1060px;margin:0 auto">
       <div style="text-align:center;margin-bottom:12px">
         <div class="section-label">For Schools</div>
         <h3 style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-1px">School Packages</h3>
-        <p style="font-size:14px;color:var(--muted);margin-top:6px">Your whole school. One flat monthly rate. Full platform access for every enrolled student.</p>
       </div>
       <div class="pricing-grid">
         <div class="price-card">
@@ -672,7 +508,6 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
           </div>
           <button class="price-btn price-btn-outline" onclick="openPayment('school-starter')">Get Starter — R2 500/mo</button>
         </div>
-
         <div class="price-card featured">
           <div class="price-badge">Most Popular</div>
           <div class="price-name">🚀 Standard</div>
@@ -690,7 +525,6 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
           </div>
           <button class="price-btn price-btn-lime" onclick="openPayment('school-standard')">Get Standard — R5 000/mo</button>
         </div>
-
         <div class="price-card">
           <div class="price-name">🏫 Pro</div>
           <div class="price-amount">R9 000</div>
@@ -708,8 +542,6 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
           <button class="price-btn price-btn-outline" onclick="openPayment('school-pro')">Get Pro — R9 000/mo</button>
         </div>
       </div>
-
-      <!-- Larger schools -->
       <div style="background:#fff;border:2px dashed #e2e8f0;border-radius:16px;padding:28px 32px;margin-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
         <div>
           <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:6px">🏛️ Enterprise / District</div>
@@ -720,7 +552,6 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
     </div>
   </div>
 
-  <!-- STUDENT PACKAGES -->
   <div class="student-pricing">
     <div style="max-width:960px;margin:0 auto">
       <div class="section-label">For Individual Students</div>
@@ -777,19 +608,17 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
   <div style="background:#fff;padding:60px 40px">
     <div style="max-width:720px;margin:0 auto">
       <h3 style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--ink);margin-bottom:32px;text-align:center">Frequently Asked Questions</h3>
-      <div id="faq-list" style="display:flex;flex-direction:column;gap:0"></div>
+      <div id="faq-list"></div>
     </div>
   </div>
 
   <footer>
     <div class="brand">Stabl<span>ym</span></div>
-    <p>© 2025 Stablym · 
-    📧 <a href="mailto:mmathapelosebela@gmail.com" style="color:rgba(255,255,255,.5)">mmathapelosebela@gmail.com</a> · 
-    📱 <a href="https://wa.me/27685438227" target="_blank" style="color:#25D366;font-weight:700">WhatsApp 068 543 8227</a></p>
+    <p>© 2025 Stablym · 📧 <a href="/cdn-cgi/l/email-protection#93fefef2e7fbf2e3f6fffce0f6f1f6fff2d3f4fef2faffbdf0fcfe" style="color:rgba(255,255,255,.5)"><span class="__cf_email__" data-cfemail="365b5b57425e5746535a59455354535a5776515b575f5a1855595b">[email&#160;protected]</span></a> · 📱 <a href="https://wa.me/27685438227" target="_blank" style="color:#25D366;font-weight:700">WhatsApp 068 543 8227</a></p>
   </footer>
 </div>
 
-<!-- ══ CONTACT / PILOT PAGE ═══════════════════════════════════════════════════ -->
+<!-- ══ CONTACT PAGE ══ -->
 <div id="page-contact" class="page">
   <div class="contact-page">
     <div class="contact-hero">
@@ -804,37 +633,23 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
         <div class="contact-perk"><div class="perk-icon">📞</div><div class="perk-text"><strong>Onboarding call</strong><br/>30-min walkthrough for your teachers</div></div>
         <div class="contact-perk"><div class="perk-icon">🔒</div><div class="perk-text"><strong>No obligation</strong><br/>Cancel anytime before day 7</div></div>
       </div>
-
       <div class="contact-card">
         <div id="pilot-form-wrap">
           <h4 style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:20px">Tell Us About Your School</h4>
           <div class="contact-form">
             <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">School Name *</label>
-                <input class="form-input" id="school-name" placeholder="e.g. Soweto High School" type="text"/>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Contact Person *</label>
-                <input class="form-input" id="contact-name" placeholder="Your full name" type="text"/>
-              </div>
+              <div class="form-group"><label class="form-label">School Name *</label><input class="form-input" id="school-name" placeholder="e.g. Soweto High School" type="text"/></div>
+              <div class="form-group"><label class="form-label">Contact Person *</label><input class="form-input" id="contact-name" placeholder="Your full name" type="text"/></div>
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Role</label>
+              <div class="form-group"><label class="form-label">Role</label>
                 <select class="form-input select-input" id="contact-role">
                   <option value="">Select your role...</option>
-                  <option>Principal</option>
-                  <option>Deputy Principal</option>
-                  <option>Head of Department</option>
-                  <option>Grade 9 Teacher</option>
-                  <option>Life Orientation Teacher</option>
-                  <option>School Counsellor</option>
-                  <option>Other</option>
+                  <option>Principal</option><option>Deputy Principal</option><option>Head of Department</option>
+                  <option>Grade 9 Teacher</option><option>Life Orientation Teacher</option><option>School Counsellor</option><option>Other</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label class="form-label">Province</label>
+              <div class="form-group"><label class="form-label">Province</label>
                 <select class="form-input select-input" id="contact-province">
                   <option value="">Select province...</option>
                   <option>Gauteng</option><option>Western Cape</option><option>KwaZulu-Natal</option>
@@ -844,60 +659,39 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
               </div>
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Email Address *</label>
-                <input class="form-input" id="contact-email" placeholder="you@school.gov.za" type="email"/>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Phone Number</label>
-                <input class="form-input" id="contact-phone" placeholder="e.g. 082 123 4567" type="tel"/>
-              </div>
+              <div class="form-group"><label class="form-label">Email Address *</label><input class="form-input" id="contact-email" placeholder="you@school.gov.za" type="email"/></div>
+              <div class="form-group"><label class="form-label">Phone Number</label><input class="form-input" id="contact-phone" placeholder="e.g. 082 123 4567" type="tel"/></div>
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Number of Students *</label>
+              <div class="form-group"><label class="form-label">Number of Students *</label>
                 <select class="form-input select-input" id="contact-students">
                   <option value="">Approx. student count...</option>
-                  <option>Under 50 students</option>
-                  <option>50–100 students</option>
-                  <option>100–200 students</option>
-                  <option>200–500 students</option>
-                  <option>500+ students</option>
+                  <option>Under 50 students</option><option>50–100 students</option>
+                  <option>100–200 students</option><option>200–500 students</option><option>500+ students</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label class="form-label">Grades Using Stablym</label>
+              <div class="form-group"><label class="form-label">Grades Using Stablym</label>
                 <select class="form-input select-input" id="contact-grades">
                   <option value="">Which grades?</option>
-                  <option>Grade 9 only</option>
-                  <option>Grade 9 & 10</option>
-                  <option>Grades 9–11</option>
-                  <option>All high school grades (9–12)</option>
+                  <option>Grade 9 only</option><option>Grade 9 & 10</option>
+                  <option>Grades 9–11</option><option>All high school grades (9–12)</option>
                 </select>
               </div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Message (optional)</label>
-              <textarea class="form-input textarea-input" id="contact-message" placeholder="Tell us anything about your school's needs — we read every message."></textarea>
-            </div>
-            <button class="submit-pilot" onclick="submitPilot()">
-              🚀 Request My Free 7-Day Pilot
-            </button>
+            <div class="form-group"><label class="form-label">Message (optional)</label><textarea class="form-input textarea-input" id="contact-message" placeholder="Tell us anything about your school's needs — we read every message."></textarea></div>
+            <button class="submit-pilot" onclick="submitPilot()">🚀 Request My Free 7-Day Pilot</button>
             <div style="text-align:center;font-size:12px;color:#94a3b8;margin-top:12px">We'll respond within 1 business day · No spam, ever</div>
           </div>
         </div>
-
         <div class="pilot-success" id="pilot-success">
           <div style="font-size:56px;margin-bottom:16px">🎉</div>
           <h3 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--ink);margin-bottom:10px">Pilot Request Received!</h3>
-          <p style="font-size:14px;color:var(--muted);line-height:1.7;max-width:360px;margin:0 auto 24px">
-            Thank you! We'll be in touch within 1 business day to set up your school's free 7-day pilot. Check your email for confirmation.
-          </p>
+          <p style="font-size:14px;color:var(--muted);line-height:1.7;max-width:360px;margin:0 auto 24px">Thank you! We'll be in touch within 1 business day to set up your school's free 7-day pilot.</p>
           <div style="background:#f0fdf4;border:2px solid #bbf7d0;border-radius:14px;padding:18px;text-align:left">
             <div style="font-size:13px;font-weight:700;color:#14532d;margin-bottom:10px">What happens next:</div>
             <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#15803d">
               <div>📱 <strong>WhatsApp us now:</strong> 068 543 8227 — we'll send your code immediately</div>
-              <div>📧 <strong>Or email:</strong> mmathapelosebela@gmail.com</div>
+              <div>📧 <strong>Or email:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="375a5a56435f5647525b58445255525b5677505a565e5b1954585a">[email&#160;protected]</a></div>
               <div>📞 <strong>Day 1:</strong> You receive login codes for your class</div>
               <div>🎓 <strong>Days 2–7:</strong> Students use Stablym freely</div>
               <div>💳 <strong>Day 7:</strong> Decide to subscribe — or walk away, no charge</div>
@@ -910,34 +704,138 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
   </div>
 </div>
 
-<!-- ══ LOGIN PAGE ══════════════════════════════════════════════════════════════ -->
+<!-- ══ LOGIN PAGE ══ -->
 <div id="page-login" class="page">
-  <div class="access-wall">
-    <div class="access-card">
-      <div style="font-size:48px;margin-bottom:16px">🏫</div>
-      <h2>School Login</h2>
-      <p>Enter your school access credentials. Access is granted after subscription or pilot approval — students cannot log in without a valid school code.</p>
-      <div class="access-form">
-        <input id="login-school-code" type="text" placeholder="School access code (e.g. STB-JHB-001)"/>
-        <input id="login-email" type="email" placeholder="Teacher / admin email"/>
-        <input id="login-password" type="password" placeholder="Password"/>
-        <button class="access-btn" onclick="attemptLogin()">Login to School Portal →</button>
+  <div class="access-wall" style="flex-direction:column;gap:24px;align-items:center">
+
+    <!-- STEP 1: CODE ENTRY -->
+    <div class="access-card" style="max-width:480px;width:100%" id="login-step-1">
+      <div style="font-size:48px;margin-bottom:12px">🔑</div>
+      <h2 style="margin-bottom:6px">Enter Your Access Code</h2>
+      <p style="margin-bottom:20px;font-size:13px;color:rgba(255,255,255,.45)">Code sent via WhatsApp after payment. Teachers use their TCH code.</p>
+      <input id="code-input" type="text" placeholder="e.g. STABLYM-SCH-SOWETO-0326"
+        style="display:block;width:100%;padding:14px 16px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(255,255,255,.07);color:#fff;font-size:15px;font-family:'DM Mono',monospace;font-weight:500;outline:none;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;text-align:center"
+        oninput="this.value=this.value.toUpperCase()"
+        onfocus="this.style.borderColor='#0ea5e9'" onblur="this.style.borderColor='rgba(255,255,255,.15)'"
+        onkeydown="if(event.key==='Enter')validateCode()"/>
+      <div id="code-error" style="display:none;margin-bottom:10px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 14px;font-size:13px;color:#fca5a5;text-align:center"></div>
+      <button class="access-btn" onclick="validateCode()">Unlock Access →</button>
+
+      <!-- code type legend -->
+      <div style="margin-top:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px 16px">
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Code types</div>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:12px;color:rgba(255,255,255,.45)">
+          <div><span style="color:#7dd3fc;font-family:'DM Mono',monospace">SCH</span> — School (shared by teacher with all students)</div>
+          <div><span style="color:#a3e635;font-family:'DM Mono',monospace">STU</span> — Individual student subscription</div>
+          <div><span style="color:#f472b6;font-family:'DM Mono',monospace">TCH</span> — Teacher (access to dashboard)</div>
+          <div><span style="color:#c4b5fd;font-family:'DM Mono',monospace">PIL</span> — Free 7-day pilot</div>
+        </div>
       </div>
-      <div class="access-divider">or</div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn-sky" style="width:100%" onclick="showPage('contact')">Request Pilot Access →</button>
-        <button style="width:100%;padding:10px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.12);border-radius:10px;cursor:pointer;font-size:14px;font-family:'DM Sans',sans-serif" onclick="openPayment('school-standard')">Buy School Access →</button>
+
+      <!-- Test mode -->
+      <div style="background:rgba(245,158,11,.08);border:1px dashed rgba(245,158,11,.3);border-radius:12px;padding:12px 14px;margin-top:16px">
+        <div style="font-size:11px;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🧪 Test Mode</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button onclick="testLogin('school')"  style="background:rgba(14,165,233,.12);color:#7dd3fc;border:1px solid rgba(14,165,233,.2);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left">🏫 Test School login</button>
+          <button onclick="testLogin('student')" style="background:rgba(132,204,22,.08);color:#a3e635;border:1px solid rgba(132,204,22,.15);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left">⭐ Test Student login</button>
+          <button onclick="testLogin('teacher')" style="background:rgba(244,114,182,.08);color:#f472b6;border:1px solid rgba(244,114,182,.2);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left">👩‍🏫 Test Teacher login</button>
+        </div>
       </div>
-      <div class="no-access-note">
-        Individual student? <a onclick="openPayment('student-plus')">Subscribe for R50/month →</a><br/>
-        Need your code? <a href="https://wa.me/27685438227" target="_blank">WhatsApp 068 543 8227 →</a><br/>
-        Or email: <a href="mailto:mmathapelosebela@gmail.com">mmathapelosebela@gmail.com</a>
+
+      <div class="access-divider" style="margin-top:20px">no code yet?</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a href="https://wa.me/27685438227?text=Hi%20Stablym!%20I%20need%20an%20access%20code%20please." target="_blank" class="btn-sky" style="width:100%;padding:12px;text-align:center;text-decoration:none;border-radius:10px;font-weight:700;font-size:14px;display:block">💬 WhatsApp for a Code</a>
+        <button style="width:100%;padding:10px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif" onclick="openPayment('student-plus')">Buy Student Access — R50/mo →</button>
+        <button style="width:100%;padding:10px;background:rgba(132,204,22,.07);color:#a3e635;border:1px solid rgba(132,204,22,.15);border-radius:10px;cursor:pointer;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:700" onclick="showPage('contact')">Request Free 7-Day Pilot →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: NAME ENTRY (students only — hidden until valid code entered) -->
+    <div class="access-card" style="max-width:480px;width:100%;display:none" id="login-step-2">
+      <div style="font-size:48px;margin-bottom:12px">👋</div>
+      <h2 style="margin-bottom:6px">What's your name?</h2>
+      <p style="margin-bottom:20px;font-size:13px;color:rgba(255,255,255,.45)">So we can personalise your APS report and save your progress.</p>
+      <div style="margin-bottom:12px">
+        <input id="student-firstname" type="text" placeholder="First name"
+          style="display:block;width:100%;padding:13px 16px;border:2px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(255,255,255,.07);color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px"
+          onfocus="this.style.borderColor='#0ea5e9'" onblur="this.style.borderColor='rgba(255,255,255,.15)'"
+          onkeydown="if(event.key==='Enter')document.getElementById('student-lastname').focus()"/>
+        <input id="student-lastname" type="text" placeholder="Last name"
+          style="display:block;width:100%;padding:13px 16px;border:2px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(255,255,255,.07);color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;outline:none"
+          onfocus="this.style.borderColor='#0ea5e9'" onblur="this.style.borderColor='rgba(255,255,255,.15)'"
+          onkeydown="if(event.key==='Enter')completeStudentLogin()"/>
+      </div>
+      <div style="margin-bottom:12px">
+        <select id="student-grade" style="width:100%;padding:13px 16px;border:2px solid rgba(255,255,255,.15);border-radius:10px;background:#1e293b;color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;outline:none">
+          <option value="">Select your grade...</option>
+          <option value="9">Grade 9</option>
+          <option value="10">Grade 10</option>
+          <option value="11">Grade 11</option>
+          <option value="12">Grade 12</option>
+        </select>
+      </div>
+      <div id="name-error" style="display:none;margin-bottom:10px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 14px;font-size:13px;color:#fca5a5;text-align:center"></div>
+      <button class="access-btn" onclick="completeStudentLogin()" style="margin-bottom:8px">Enter the App →</button>
+      <button onclick="document.getElementById('login-step-2').style.display='none';document.getElementById('login-step-1').style.display='block'" style="width:100%;padding:10px;background:none;color:rgba(255,255,255,.3);border:none;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ STUDENT APP PAGE ══ -->
+<div id="page-student-app" class="page">
+  <div style="background:#f0f4f8;min-height:100vh">
+    <div style="background:#fff;border-bottom:1px solid var(--border);padding:16px 40px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div id="student-app-greeting" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--ink)">Welcome!</div>
+        <div id="student-app-sub" style="font-size:13px;color:var(--muted);margin-top:2px">Choose what you'd like to do today</div>
+      </div>
+      <button onclick="logoutUser()" style="background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">Log out</button>
+    </div>
+    <div style="max-width:900px;margin:0 auto;padding:32px 40px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px">
+        <div onclick="showPage('demo')" style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="font-size:36px;margin-bottom:12px">📝</div>
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">Past Papers</div>
+          <div style="font-size:12px;color:var(--muted)">510+ NSC questions across 15 subjects</div>
+        </div>
+        <div id="aps-card" style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="font-size:36px;margin-bottom:12px">📊</div>
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">APS Calculator</div>
+          <div style="font-size:12px;color:var(--muted)">Enter marks, get your APS score instantly</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="font-size:36px;margin-bottom:12px">🎓</div>
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">University Matcher</div>
+          <div style="font-size:12px;color:var(--muted)">Find programmes you qualify for</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="font-size:36px;margin-bottom:12px">💰</div>
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">Bursary Finder</div>
+          <div style="font-size:12px;color:var(--muted)">NSFAS, Sasol, Anglo & more</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+          <div style="font-size:36px;margin-bottom:12px">🔬</div>
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">Stream Quiz</div>
+          <div style="font-size:12px;color:var(--muted)">Find your ideal subject stream</div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.08)'" onmouseout="this.style.transform='';this.style.boxShadow=''" onclick="window.print()">
+          <div style="font-size:36px;margin-bottom:12px">🖨️</div>
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">My APS Report</div>
+          <div style="font-size:12px;color:var(--muted)">Download & print your full report</div>
+        </div>
+        <!-- Teacher-only card — hidden for students -->
+        <div id="teacher-dash-card" style="display:none;background:linear-gradient(135deg,#0f172a,#1e3a5f);border:1px solid rgba(14,165,233,.3);border-radius:16px;padding:24px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''" onclick="showPage('dashboard')">
+          <div style="font-size:36px;margin-bottom:12px">🏫</div>
+          <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff;margin-bottom:6px">Teacher Dashboard</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.5)">View all students, APS scores & reports</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ SCHOOL DASHBOARD (post-login / post-payment) ═══════════════════════════ -->
+<!-- ══ DASHBOARD PAGE ══ -->
 <div id="page-dashboard" class="page">
   <div class="school-dash">
     <div class="dash-topbar">
@@ -979,241 +877,976 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
   </div>
 </div>
 
-<!-- ══ PAYMENT MODAL ══════════════════════════════════════════════════════════ -->
-<div class="payment-overlay" id="payment-overlay">
-  <div class="payment-modal">
+<!-- ══ ADMIN CODE GENERATOR ══ -->
+<div id="page-admin" class="page">
+  <div style="background:#0a0e1a;min-height:100vh;padding:40px">
+    <div style="max-width:640px;margin:0 auto">
+
+      <!-- ── ADMIN LOGIN WALL ── -->
+      <div id="admin-lock" style="display:flex;align-items:center;justify-content:center;min-height:80vh">
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:40px;max-width:360px;width:100%;text-align:center">
+          <div style="font-size:48px;margin-bottom:16px">🔐</div>
+          <h3 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:8px">Admin Access</h3>
+          <p style="font-size:14px;color:rgba(255,255,255,.4);margin-bottom:24px;line-height:1.6">This area is for Stablym staff only. Enter your admin password to continue.</p>
+          <input id="admin-password-input" type="password" placeholder="Enter admin password"
+            style="width:100%;padding:13px 16px;border:2px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.07);color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:10px;text-align:center"
+            onfocus="this.style.borderColor='#0ea5e9'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"
+            onkeydown="if(event.key==='Enter')checkAdminPassword()"/>
+          <div id="admin-password-error" style="display:none;font-size:12px;color:#fca5a5;margin-bottom:10px">❌ Wrong password. Try again.</div>
+          <button onclick="checkAdminPassword()" style="width:100%;padding:13px;background:#0ea5e9;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Unlock Admin →</button>
+          <button onclick="showPage('home')" style="width:100%;padding:10px;background:none;color:rgba(255,255,255,.3);border:none;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px">← Go back</button>
+        </div>
+      </div>
+
+      <!-- ── ADMIN CONTENT (hidden until password entered) ── -->
+      <div id="admin-content" style="display:none">
+
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#0ea5e9;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Admin Panel</div>
+          <h2 style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#fff;letter-spacing:-1px">Code Generator</h2>
+        </div>
+        <button onclick="showPage('home')" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
+      </div>
+
+      <!-- Generator Card -->
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;margin-bottom:24px">
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:20px">Generate a New Code</div>
+
+        <!-- Type selector -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Subscription Type</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+            <button onclick="selectAdminType('SCH')" id="type-SCH" style="padding:10px;border-radius:10px;border:2px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3fc;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🏫 School</button>
+            <button onclick="selectAdminType('STU')" id="type-STU" style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">⭐ Student</button>
+            <button onclick="selectAdminType('TCH')" id="type-TCH" style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">👩‍🏫 Teacher</button>
+            <button onclick="selectAdminType('PIL')" id="type-PIL" style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🧪 Pilot</button>
+          </div>
+        </div>
+
+        <!-- Name input -->
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px" id="admin-name-label">School Name / Short Code</div>
+          <input id="admin-name" type="text" placeholder="e.g. SOWETO or THABO" maxlength="8"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');generateAdminCode()"
+            style="width:100%;padding:12px 16px;border:2px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.07);color:#fff;font-size:16px;font-family:'DM Mono',monospace;font-weight:600;outline:none;letter-spacing:1px"
+            onfocus="this.style.borderColor='#0ea5e9'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"/>
+          <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:5px">Max 8 characters, letters and numbers only — no spaces</div>
+        </div>
+
+        <!-- Month selector -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Valid Until</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <select id="admin-month" onchange="generateAdminCode()" style="padding:11px 14px;border:2px solid rgba(255,255,255,.12);border-radius:10px;background:#1e293b;color:#fff;font-size:14px;font-family:'DM Sans',sans-serif;outline:none">
+              <option value="01">January</option><option value="02">February</option>
+              <option value="03">March</option><option value="04">April</option>
+              <option value="05">May</option><option value="06">June</option>
+              <option value="07">July</option><option value="08">August</option>
+              <option value="09">September</option><option value="10">October</option>
+              <option value="11">November</option><option value="12">December</option>
+            </select>
+            <select id="admin-year" onchange="generateAdminCode()" style="padding:11px 14px;border:2px solid rgba(255,255,255,.12);border-radius:10px;background:#1e293b;color:#fff;font-size:14px;font-family:'DM Sans',sans-serif;outline:none">
+              <option value="26">2026</option><option value="27">2027</option><option value="28">2028</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Generated code display -->
+        <div id="admin-code-display" style="display:none">
+          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Generated Code</div>
+          <div style="background:#0f172a;border:2px solid #0ea5e9;border-radius:14px;padding:20px;text-align:center;margin-bottom:14px">
+            <div id="admin-code-text" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:#7dd3fc;letter-spacing:2px;word-break:break-all"></div>
+            <div id="admin-code-expiry" style="font-size:12px;color:rgba(255,255,255,.4);margin-top:8px"></div>
+          </div>
+
+          <!-- Action buttons -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <button onclick="copyAdminCode()" style="padding:12px;background:rgba(14,165,233,.2);color:#7dd3fc;border:1px solid rgba(14,165,233,.3);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📋 Copy Code</button>
+            <button onclick="whatsappAdminCode()" style="padding:12px;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">💬 Send via WhatsApp</button>
+          </div>
+        </div>
+
+        <div id="admin-code-placeholder" style="background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.1);border-radius:12px;padding:20px;text-align:center;color:rgba(255,255,255,.25);font-size:14px">
+          Fill in the name above to generate a code
+        </div>
+      </div>
+
+      <!-- Recent codes log -->
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:700;color:#fff">Recently Generated</div>
+          <button onclick="clearCodeLog()" style="font-size:11px;color:rgba(255,255,255,.3);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif">Clear all</button>
+        </div>
+        <div id="admin-code-log">
+          <div style="font-size:13px;color:rgba(255,255,255,.25);text-align:center;padding:16px">No codes generated yet this session</div>
+        </div>
+      </div>
+
+      </div><!-- end admin-content -->
+    </div>
+  </div>
+</div>
+<div class="payment-overlay" id="payment-overlay" onclick="handleOverlayClick(event)">
+  <div class="payment-modal" onclick="event.stopPropagation()">
     <div class="payment-modal-header">
       <h3 id="modal-title">Complete Your Subscription</h3>
-      <p id="modal-subtitle">Secure payment via PayFast · SA's most trusted payment gateway</p>
+      <p id="modal-subtitle">You'll be taken to PayFast to pay securely — then your code is sent instantly</p>
       <button class="modal-close" onclick="closePayment()">✕</button>
     </div>
-
     <div id="payment-form-wrap">
       <div class="payment-body">
         <div class="payment-summary" id="payment-summary"></div>
-
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px">Billing Details</div>
+        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:14px">Your Details</div>
         <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">First Name *</label>
-            <input class="form-input" id="pay-first" placeholder="e.g. Nomsa" type="text"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Last Name *</label>
-            <input class="form-input" id="pay-last" placeholder="e.g. Dlamini" type="text"/>
-          </div>
+          <div class="form-group"><label class="form-label">First Name *</label><input class="form-input" id="pay-first" placeholder="e.g. Nomsa" type="text"/></div>
+          <div class="form-group"><label class="form-label">Last Name *</label><input class="form-input" id="pay-last" placeholder="e.g. Dlamini" type="text"/></div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Email Address *</label>
-          <input class="form-input" id="pay-email" placeholder="nomsa@school.co.za" type="email"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">School / Organisation Name</label>
-          <input class="form-input" id="pay-org" placeholder="e.g. Soweto High School" type="text"/>
+        <div class="form-group"><label class="form-label">Email Address *</label><input class="form-input" id="pay-email" placeholder="nomsa@school.co.za" type="email"/></div>
+        <div class="form-group"><label class="form-label">Phone / WhatsApp Number *</label><input class="form-input" id="pay-phone" placeholder="e.g. 082 123 4567" type="tel"/></div>
+        <div class="form-group"><label class="form-label">School / Organisation (optional)</label><input class="form-input" id="pay-org" placeholder="e.g. Soweto High School" type="text"/></div>
+
+        <!-- PayFast flow explanation -->
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#14532d;line-height:1.8">
+          <strong>💳 What happens when you click Pay:</strong><br/>
+          1. You go to <strong>PayFast's secure checkout</strong> (card, EFT, instant EFT)<br/>
+          2. Payment confirmed → <strong>your access code is emailed to you instantly</strong><br/>
+          3. You also receive a <strong>WhatsApp</strong> from us with your code<br/>
+          4. Enter the code at <strong>School Login</strong> and you're in
         </div>
 
-        <div style="font-size:13px;font-weight:700;color:#1e293b;margin:18px 0 12px">Card Details</div>
-        <div class="card-field">
-          <span style="font-size:18px">💳</span>
-          <input id="card-number" placeholder="4242 4242 4242 4242" maxlength="19" oninput="formatCard(this)"/>
-          <div class="card-icons">
-            <div class="card-icon">VISA</div>
-            <div class="card-icon" style="background:#eb1923;letter-spacing:-.5px">MC</div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Expiry (MM/YY) *</label>
-            <input class="form-input" id="card-expiry" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label">CVV *</label>
-            <input class="form-input" id="card-cvv" placeholder="123" maxlength="4" type="password"/>
-          </div>
-        </div>
+        <div class="secure-badge">🔒 <span>Secured by PayFast · Merchant ID 34129067 · SA's most trusted gateway</span></div>
 
-        <div class="secure-badge">
-          <span>🔒</span>
-          <span>256-bit SSL encrypted · Powered by PayFast · PCI DSS compliant</span>
+        <!-- Sandbox warning — only shows in test mode -->
+        <div id="sandbox-banner" style="display:none;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#fbbf24;line-height:1.6">
+          🧪 <strong>TEST MODE</strong> — Use card <strong>4000000000000002</strong>, any future expiry, any CVV. No real money is charged.
         </div>
 
         <button class="pay-btn" id="pay-submit-btn" onclick="processPayment()">
-          <span id="pay-btn-text">🔒 Pay Securely</span>
+          <span id="pay-btn-text">💳 Pay Now via PayFast</span>
         </button>
-        <div class="payment-note">
-          By subscribing you agree to our Terms of Service. Subscriptions auto-renew monthly. Cancel anytime from your dashboard. Students cannot access full content without a valid paid subscription.
-        </div>
+        <div class="payment-note">You will be redirected to PayFast. After payment your code arrives by email + WhatsApp within seconds.</div>
       </div>
     </div>
 
+    <!-- Hidden PayFast form — submitted programmatically -->
+    <form id="payfast-form" action="" method="POST" style="display:none">
+      <input type="hidden" name="merchant_id"    id="pf-merchant-id"/>
+      <input type="hidden" name="merchant_key"   id="pf-merchant-key"/>
+      <input type="hidden" name="return_url"     id="pf-return-url"/>
+      <input type="hidden" name="cancel_url"     id="pf-cancel-url"/>
+      <input type="hidden" name="notify_url"     id="pf-notify-url"/>
+      <input type="hidden" name="name_first"     id="pf-name-first"/>
+      <input type="hidden" name="name_last"      id="pf-name-last"/>
+      <input type="hidden" name="email_address"  id="pf-email"/>
+      <input type="hidden" name="cell_number"    id="pf-phone"/>
+      <input type="hidden" name="m_payment_id"   id="pf-payment-id"/>
+      <input type="hidden" name="amount"         id="pf-amount"/>
+      <input type="hidden" name="item_name"      id="pf-item-name"/>
+      <input type="hidden" name="item_description" id="pf-item-desc"/>
+      <input type="hidden" name="custom_str1"    id="pf-custom1"/>
+      <input type="hidden" name="custom_str2"    id="pf-custom2"/>
+      <input type="hidden" name="custom_str3"    id="pf-custom3"/>
+      <input type="hidden" name="email_confirmation" value="1"/>
+      <input type="hidden" name="confirmation_address" value="mmathapelosebela@gmail.com"/>
+      <input type="hidden" name="signature"      id="pf-signature"/>
+    </form>
     <div class="payment-success" id="payment-success">
-      <div class="success-icon">🎉</div>
-      <div class="success-title">Payment Successful!</div>
-      <div class="success-sub" id="success-message">Your school subscription is now active. You'll receive login codes by email within the hour.</div>
-      <div class="success-actions" style="padding:0 32px 32px">
-        <button class="pay-btn" onclick="closePayment();showPage('dashboard')">Open School Dashboard →</button>
+      <div style="font-size:64px;margin-bottom:16px">🎉</div>
+      <div style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#1e293b;margin-bottom:10px">Request Received!</div>
+      <div style="font-size:14px;color:#64748b;line-height:1.7;max-width:360px;margin:0 auto 24px" id="success-message">We're sending you a payment link now.</div>
+      <div style="background:#f0fdf4;border:2px solid #bbf7d0;border-radius:14px;padding:18px;margin:0 24px 8px;text-align:left">
+        <div style="font-size:13px;font-weight:700;color:#14532d;margin-bottom:10px">What happens next:</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:#15803d">
+          <div>📱 <strong>Step 1:</strong> We WhatsApp you a secure PayFast payment link</div>
+          <div>💳 <strong>Step 2:</strong> You pay safely via PayFast (card, EFT, instant EFT)</div>
+          <div>🔑 <strong>Step 3:</strong> Your access code is sent immediately after payment</div>
+          <div>🚀 <strong>Step 4:</strong> Enter the code in the app and you're in!</div>
+          <div id="expiry-note-success" style="margin-top:4px;padding-top:8px;border-top:1px solid #bbf7d0">📅 <strong>Expiry:</strong> <span id="expiry-text-success">Your code is valid until end of this month.</span></div>
+        </div>
+      </div>
+      <div style="padding:16px 24px 8px;display:flex;flex-direction:column;gap:10px">
+        <a href="https://wa.me/27685438227?text=Hi%20Stablym!%20I%20just%20submitted%20a%20subscription%20request." target="_blank" class="pay-btn" style="text-align:center;background:linear-gradient(135deg,#25D366,#128C7E)">💬 WhatsApp Us Now — 068 543 8227</a>
         <button style="padding:12px;background:#f1f5f9;color:#334155;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="closePayment()">Close</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- FLOATING WHATSAPP BUTTON -->
-<a href="https://wa.me/27685438227?text=Hi%20Stablym!%20I%20need%20my%20login%20code%20please." target="_blank" style="
-  position:fixed;bottom:24px;left:24px;z-index:9999;
-  background:#25D366;color:#fff;
-  width:56px;height:56px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:28px;text-decoration:none;
-  box-shadow:0 4px 20px rgba(37,211,102,.5);
-  transition:transform .2s;
-" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-  💬
-</a>
+<!-- FLOATING WHATSAPP -->
+<a href="https://wa.me/27685438227?text=Hi%20Stablym!%20I%20need%20my%20login%20code%20please." target="_blank" style="position:fixed;bottom:24px;left:24px;z-index:9999;background:#25D366;color:#fff;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;text-decoration:none;box-shadow:0 4px 20px rgba(37,211,102,.5);transition:transform .2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">💬</a>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ── STATE ────────────────────────────────────────────────────────────────────
+<script>
+// ── STATE ──
 let currentPlan = null;
-let isLoggedIn  = false;
+var adminUnlocked = false;
+var adminFailCount = 0;
 
 const PLANS = {
-  'school-starter':  { name:'Starter School Plan', desc:'Up to 50 students · Full platform access', amount:'R2,500', monthly:2500, type:'school', students:50 },
-  'school-standard': { name:'Standard School Plan', desc:'Up to 100 students · Full platform access + Past Papers', amount:'R5,000', monthly:5000, type:'school', students:100 },
-  'school-pro':      { name:'Pro School Plan', desc:'Up to 180 students · Full platform + Analytics + Custom branding', amount:'R9,000', monthly:9000, type:'school', students:180 },
-  'student-plus':    { name:'Student Plus', desc:'Individual student · Full app access', amount:'R50', monthly:50, type:'student', students:1 },
-  'matric-booster':  { name:'Matric Booster', desc:'Individual student · Full access + APS tracker + Unlimited past papers', amount:'R89', monthly:89, type:'student', students:1 },
+  'school-starter':  { name:'Starter School Plan', desc:'Up to 50 students · Full platform access', amount:'R2,500', monthly:2500, type:'school' },
+  'school-standard': { name:'Standard School Plan', desc:'Up to 100 students · Full platform + Past Papers', amount:'R5,000', monthly:5000, type:'school' },
+  'school-pro':      { name:'Pro School Plan', desc:'Up to 180 students · Full platform + Analytics', amount:'R9,000', monthly:9000, type:'school' },
+  'student-plus':    { name:'Student Plus', desc:'Individual student · Full app access', amount:'R50', monthly:50, type:'student' },
+  'matric-booster':  { name:'Matric Booster', desc:'Individual student · Full access + APS tracker', amount:'R89', monthly:89, type:'student' },
 };
 
-// ── NAVIGATION ────────────────────────────────────────────────────────────────
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  window.scrollTo(0,0);
+// ── SESSION EXPIRY ──
+function checkSession() {
+  try {
+    const raw = sessionStorage.getItem('stablym_access');
+    if (!raw) return false;
+    const session = JSON.parse(raw);
+    if (new Date() > new Date(session.expiry)) {
+      sessionStorage.removeItem('stablym_access');
+      return false;
+    }
+    return session;
+  } catch(e) {
+    sessionStorage.removeItem('stablym_access');
+    return false;
+  }
 }
 
-// ── PAYMENT MODAL ─────────────────────────────────────────────────────────────
+function enforceExpiry() {
+  const session = checkSession();
+  if (!session) return;
+  const msLeft = new Date(session.expiry) - new Date();
+  if (msLeft <= 0) {
+    sessionStorage.removeItem('stablym_access');
+    _doShowPage('login');
+    showExpiredBanner(session);
+    return;
+  }
+  clearTimeout(window._expiryTimer);
+  window._expiryTimer = setTimeout(function() {
+    sessionStorage.removeItem('stablym_access');
+    _doShowPage('login');
+    const s = JSON.parse('{"type":"' + session.type + '"}');
+    showExpiredBanner(s);
+  }, Math.min(msLeft, 2147483647));
+}
+
+function showExpiredBanner(session) {
+  const typeLabel = session.type === 'school'
+    ? 'Your school access code has expired.'
+    : session.type === 'pilot'
+    ? 'Your 7-day pilot has ended.'
+    : 'Your monthly access has expired.';
+  const renewMsg = session.type === 'school'
+    ? 'Your teacher will share a new code once the school renews for next month.'
+    : session.type === 'pilot'
+    ? 'Subscribe to keep your access going — from R50/month.'
+    : 'Simply pay again next month. No forms, no cancellation — just pay when you want access.';
+  var existing = document.getElementById('expired-banner');
+  if (existing) existing.remove();
+  var banner = document.createElement('div');
+  banner.id = 'expired-banner';
+  banner.style.cssText = 'background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:14px;padding:16px 20px;margin-bottom:20px;text-align:left;max-width:520px;width:100%';
+  banner.innerHTML = '<div style="font-size:13px;font-weight:700;color:#fca5a5;margin-bottom:5px">⏰ ' + typeLabel + '</div>'
+    + '<div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:12px">' + renewMsg + '</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    + '<a href="https://wa.me/27685438227?text=Hi%20Stablym!%20My%20code%20expired.%20I%20want%20to%20renew." target="_blank" style="background:#25D366;color:#fff;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;text-decoration:none">💬 WhatsApp to Renew</a>'
+    + (session.type !== 'school' ? '<button onclick="openPayment(\'student-plus\')" style="background:rgba(14,165,233,.2);color:#7dd3fc;font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;border:none;cursor:pointer;font-family:\'DM Sans\',sans-serif">⭐ Subscribe Again</button>' : '')
+    + '</div>';
+  var wall = document.querySelector('#page-login .access-wall');
+  if (wall) wall.insertBefore(banner, wall.firstChild);
+  showToast('⏰ Access expired — please renew to continue.');
+}
+
+// ── NAVIGATION ──
+function _doShowPage(id) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  var pg = document.getElementById('page-' + id);
+  if (pg) { pg.classList.add('active'); window.scrollTo(0,0); }
+}
+
+function showPage(id) {
+  // Guard: dashboard and student-app require valid session
+  if ((id === 'dashboard' || id === 'student-app') && !checkSession()) {
+    id = 'login';
+    showToast('🔒 Please enter your access code to continue.');
+  }
+  // Guard: admin requires password
+  if (id === 'admin') {
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+    var pg = document.getElementById('page-admin');
+    if (pg) { pg.classList.add('active'); window.scrollTo(0,0); }
+    if (!adminUnlocked) {
+      document.getElementById('admin-lock').style.display = 'flex';
+      document.getElementById('admin-content').style.display = 'none';
+    } else {
+      document.getElementById('admin-lock').style.display = 'none';
+      document.getElementById('admin-content').style.display = 'block';
+    }
+    return;
+  }
+  _doShowPage(id);
+  if (id === 'student-app') {
+    var s = checkSession();
+    if (s && s.name) {
+      var greet = document.getElementById('student-app-greeting');
+      var sub   = document.getElementById('student-app-sub');
+      var teacherCard = document.getElementById('teacher-dash-card');
+      if (greet) greet.textContent = 'Welcome, ' + s.name.split(' ')[0] + '! 👋';
+      if (sub)   sub.textContent = s.grade
+        ? 'Grade ' + s.grade + ' · Choose what you\'d like to do today'
+        : 'Choose what you\'d like to do today';
+      // Show teacher dashboard card only for teachers
+      if (teacherCard) teacherCard.style.display = s.type === 'teacher' ? 'block' : 'none';
+      var navUser = document.getElementById('nav-user-name');
+      if (navUser) { navUser.textContent = (s.type==='teacher'?'👩‍🏫 ':'👤 ') + s.name; navUser.style.display='inline-flex'; }
+    }
+  }
+  if (id !== 'login') enforceExpiry();
+}
+
+function logoutUser() {
+  sessionStorage.removeItem('stablym_access');
+  sessionStorage.removeItem('stablym_pending');
+  var navUser = document.getElementById('nav-user-name');
+  if (navUser) { navUser.style.display='none'; navUser.textContent=''; }
+  // Reset login form
+  var i1 = document.getElementById('login-step-1');
+  var i2 = document.getElementById('login-step-2');
+  if (i1) i1.style.display='block';
+  if (i2) i2.style.display='none';
+  var ci = document.getElementById('code-input');
+  if (ci) ci.value='';
+  showPage('login');
+  showToast('👋 Logged out successfully.');
+}
+
+// ── PAYFAST CONFIG ──
+// ── SWITCH BETWEEN SANDBOX AND LIVE ──
+// When PayFast approves your account:
+// 1. Set SANDBOX = false
+// 2. Replace merchantId and merchantKey with your real ones below
+const SANDBOX = true;
+
+const PF = {
+  merchantId:  SANDBOX ? '10000100'          : '34129067',
+  merchantKey: SANDBOX ? '46f0cd694581a'     : 'tgki9qvkzzhr1',
+  passphrase:  SANDBOX ? ''                  : 'mmathapelo/1S',
+  notifyEmail: 'mmathapelosebela@gmail.com',
+  whatsapp:    '27685438227',
+  baseUrl:     window.location.origin || 'https://stablym.co.za',
+};
+
+// VAT-inclusive amounts in Rands (2 decimal string for PayFast)
+const PLAN_AMOUNTS = {
+  'school-starter':  '2875.00',
+  'school-standard': '5750.00',
+  'school-pro':      '10350.00',
+  'student-plus':    '57.50',
+  'matric-booster':  '102.35',
+};
+
+// ── MD5 for PayFast signature (pure JS) ──
+function md5(str) {
+  function safeAdd(x,y){var lsw=(x&0xFFFF)+(y&0xFFFF),msw=(x>>16)+(y>>16)+(lsw>>16);return(msw<<16)|(lsw&0xFFFF)}
+  function bitRotateLeft(num,cnt){return(num<<cnt)|(num>>>(32-cnt))}
+  function md5cmn(q,a,b,x,s,t){return safeAdd(bitRotateLeft(safeAdd(safeAdd(a,q),safeAdd(x,t)),s),b)}
+  function md5ff(a,b,c,d,x,s,t){return md5cmn((b&c)|((~b)&d),a,b,x,s,t)}
+  function md5gg(a,b,c,d,x,s,t){return md5cmn((b&d)|(c&(~d)),a,b,x,s,t)}
+  function md5hh(a,b,c,d,x,s,t){return md5cmn(b^c^d,a,b,x,s,t)}
+  function md5ii(a,b,c,d,x,s,t){return md5cmn(c^(b|(~d)),a,b,x,s,t)}
+  var i,x=[];str=unescape(encodeURIComponent(str));
+  var bs=[];for(i=0;i<str.length;i++)bs[i>>2]|=str.charCodeAt(i)<<((i%4)*8);
+  bs[str.length>>2]|=0x80<<((str.length%4)*8);
+  bs[(((str.length+8)>>6)+1)*16+14]=str.length*8;
+  var a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+  for(i=0;i<bs.length;i+=16){
+    var olda=a,oldb=b,oldc=c,oldd=d;
+    a=md5ff(a,b,c,d,bs[i+0],7,-680876936);d=md5ff(d,a,b,c,bs[i+1],12,-389564586);c=md5ff(c,d,a,b,bs[i+2],17,606105819);b=md5ff(b,c,d,a,bs[i+3],22,-1044525330);
+    a=md5ff(a,b,c,d,bs[i+4],7,-176418897);d=md5ff(d,a,b,c,bs[i+5],12,1200080426);c=md5ff(c,d,a,b,bs[i+6],17,-1473231341);b=md5ff(b,c,d,a,bs[i+7],22,-45705983);
+    a=md5ff(a,b,c,d,bs[i+8],7,1770035416);d=md5ff(d,a,b,c,bs[i+9],12,-1958414417);c=md5ff(c,d,a,b,bs[i+10],17,-42063);b=md5ff(b,c,d,a,bs[i+11],22,-1990404162);
+    a=md5ff(a,b,c,d,bs[i+12],7,1804603682);d=md5ff(d,a,b,c,bs[i+13],12,-40341101);c=md5ff(c,d,a,b,bs[i+14],17,-1502002290);b=md5ff(b,c,d,a,bs[i+15],22,1236535329);
+    a=md5gg(a,b,c,d,bs[i+1],5,-165796510);d=md5gg(d,a,b,c,bs[i+6],9,-1069501632);c=md5gg(c,d,a,b,bs[i+11],14,643717713);b=md5gg(b,c,d,a,bs[i+0],20,-373897302);
+    a=md5gg(a,b,c,d,bs[i+5],5,-701558691);d=md5gg(d,a,b,c,bs[i+10],9,38016083);c=md5gg(c,d,a,b,bs[i+15],14,-660478335);b=md5gg(b,c,d,a,bs[i+4],20,-405537848);
+    a=md5gg(a,b,c,d,bs[i+9],5,568446438);d=md5gg(d,a,b,c,bs[i+14],9,-1019803690);c=md5gg(c,d,a,b,bs[i+3],14,-187363961);b=md5gg(b,c,d,a,bs[i+8],20,1163531501);
+    a=md5gg(a,b,c,d,bs[i+13],5,-1444681467);d=md5gg(d,a,b,c,bs[i+2],9,-51403784);c=md5gg(c,d,a,b,bs[i+7],14,1735328473);b=md5gg(b,c,d,a,bs[i+12],20,-1926607734);
+    a=md5hh(a,b,c,d,bs[i+5],4,-378558);d=md5hh(d,a,b,c,bs[i+8],11,-2022574463);c=md5hh(c,d,a,b,bs[i+11],16,1839030562);b=md5hh(b,c,d,a,bs[i+14],23,-35309556);
+    a=md5hh(a,b,c,d,bs[i+1],4,-1530992060);d=md5hh(d,a,b,c,bs[i+4],11,1272893353);c=md5hh(c,d,a,b,bs[i+7],16,-155497632);b=md5hh(b,c,d,a,bs[i+10],23,-1094730640);
+    a=md5hh(a,b,c,d,bs[i+13],4,681279174);d=md5hh(d,a,b,c,bs[i+0],11,-358537222);c=md5hh(c,d,a,b,bs[i+3],16,-722521979);b=md5hh(b,c,d,a,bs[i+6],23,76029189);
+    a=md5hh(a,b,c,d,bs[i+9],4,-640364487);d=md5hh(d,a,b,c,bs[i+12],11,-421815835);c=md5hh(c,d,a,b,bs[i+15],16,530742520);b=md5hh(b,c,d,a,bs[i+2],23,-995338651);
+    a=md5ii(a,b,c,d,bs[i+0],6,-198630844);d=md5ii(d,a,b,c,bs[i+7],10,1126891415);c=md5ii(c,d,a,b,bs[i+14],15,-1416354905);b=md5ii(b,c,d,a,bs[i+5],21,-57434055);
+    a=md5ii(a,b,c,d,bs[i+12],6,1700485571);d=md5ii(d,a,b,c,bs[i+3],10,-1894986606);c=md5ii(c,d,a,b,bs[i+10],15,-1051523);b=md5ii(b,c,d,a,bs[i+1],21,-2054922799);
+    a=md5ii(a,b,c,d,bs[i+8],6,1873313359);d=md5ii(d,a,b,c,bs[i+15],10,-30611744);c=md5ii(c,d,a,b,bs[i+6],15,-1560198380);b=md5ii(b,c,d,a,bs[i+13],21,1309151649);
+    a=md5ii(a,b,c,d,bs[i+4],6,-145523070);d=md5ii(d,a,b,c,bs[i+11],10,-1120210379);c=md5ii(c,d,a,b,bs[i+2],15,718787259);b=md5ii(b,c,d,a,bs[i+9],21,-343485551);
+    a=safeAdd(a,olda);b=safeAdd(b,oldb);c=safeAdd(c,oldc);d=safeAdd(d,oldd);
+  }
+  function hex(n){var s='',v;for(i=0;i<4;i++){v=(n>>>(i*8))&0xFF;s+='0123456789abcdef'[(v>>4)&0x0F]+'0123456789abcdef'[v&0x0F];}return s;}
+  return hex(a)+hex(b)+hex(c)+hex(d);
+}
+
+function generatePayFastSignature(params) {
+  // Build query string in exact order, skip empty values
+  var str = Object.keys(params)
+    .filter(function(k){ return params[k] !== '' && params[k] !== null && params[k] !== undefined; })
+    .map(function(k){ return k + '=' + encodeURIComponent(params[k]).replace(/%20/g,'+'); })
+    .join('&');
+  if (PF.passphrase) str += '&passphrase=' + encodeURIComponent(PF.passphrase).replace(/%20/g,'+');
+  return md5(str);
+}
+
+function generatePaymentId(planKey, firstName) {
+  var now = new Date();
+  var mm = String(now.getMonth()+1).padStart(2,'0');
+  var yy = String(now.getFullYear()).slice(-2);
+  var rand = Math.random().toString(36).substring(2,6).toUpperCase();
+  return 'STB-' + planKey.toUpperCase().replace(/-/g,'') + '-' + rand + '-' + mm + yy;
+}
+
+function generateAccessCode(planKey, firstName, org) {
+  var now = new Date();
+  var mm = String(now.getMonth()+1).padStart(2,'0');
+  var yy = String(now.getFullYear()).slice(-2);
+  var name = (planKey.startsWith('school') ? (org||firstName) : firstName)
+    .toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,8);
+  var type = planKey.startsWith('school') ? 'SCH' : 'STU';
+  return 'STABLYM-' + type + '-' + name + '-' + mm + yy;
+}
+
+// ── PAYMENT MODAL ──
 function openPayment(planKey) {
   currentPlan = PLANS[planKey];
   if (!currentPlan) return;
+  currentPlan.key = planKey;
+  const amount = PLAN_AMOUNTS[planKey];
+  const vatAmt = (parseFloat(amount) - parseFloat(amount)/1.15).toFixed(2);
+  const baseAmt = (parseFloat(amount)/1.15).toFixed(2);
 
-  const vat  = Math.round(currentPlan.monthly * 0.15);
-  const total = currentPlan.monthly + vat;
-
-  document.getElementById('modal-title').textContent   = currentPlan.type==='school' ? 'School Subscription' : 'Student Subscription';
-  document.getElementById('modal-subtitle').textContent = 'Secure payment via PayFast · SA\'s most trusted payment gateway';
-
+  document.getElementById('modal-title').textContent =
+    currentPlan.type === 'school' ? '🏫 School Subscription' : '⭐ Student Subscription';
+  document.getElementById('modal-subtitle').textContent = "Fill in your details — you'll go straight to PayFast to pay";
   document.getElementById('payment-summary').innerHTML = `
-    <div class="payment-summary-row"><span>${currentPlan.name}</span><span>${currentPlan.amount}/mo</span></div>
+    <div class="payment-summary-row"><span>${currentPlan.name}</span><span>R${baseAmt}/mo</span></div>
     <div class="payment-summary-row"><span>${currentPlan.desc}</span><span></span></div>
-    <div class="payment-summary-row"><span>VAT (15%)</span><span>R${vat.toLocaleString()}</span></div>
-    <div class="payment-summary-row total"><span>Total per month</span><span>R${total.toLocaleString()}</span></div>
+    <div class="payment-summary-row"><span>VAT (15%)</span><span>R${vatAmt}</span></div>
+    <div class="payment-summary-row total"><span>Total per month</span><span>R${amount}</span></div>
   `;
-  document.getElementById('pay-btn-text').textContent = `🔒 Pay R${total.toLocaleString()} Securely`;
-
+  document.getElementById('pay-btn-text').textContent = '💳 Pay Now via PayFast';
   document.getElementById('payment-form-wrap').style.display = 'block';
   document.getElementById('payment-success').classList.remove('show');
   document.getElementById('payment-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Always scroll overlay and modal to top
+  var overlay = document.getElementById('payment-overlay');
+  var modal = overlay.querySelector('.payment-modal');
+  overlay.scrollTop = 0;
+  if (modal) modal.scrollTop = 0;
+  // Show sandbox warning if in test mode
+  var sb = document.getElementById('sandbox-banner');
+  if (sb) sb.style.display = SANDBOX ? 'block' : 'none';
 }
 
 function closePayment() {
   document.getElementById('payment-overlay').classList.remove('open');
   document.body.style.overflow = '';
-  // reset form
-  ['pay-first','pay-last','pay-email','pay-org','card-number','card-expiry','card-cvv'].forEach(id => {
-    const el = document.getElementById(id);
+  ['pay-first','pay-last','pay-email','pay-phone','pay-org'].forEach(function(id){
+    var el = document.getElementById(id);
     if (el) el.value = '';
   });
 }
 
-function processPayment() {
-  const first  = document.getElementById('pay-first').value.trim();
-  const last   = document.getElementById('pay-last').value.trim();
-  const email  = document.getElementById('pay-email').value.trim();
-  const card   = document.getElementById('card-number').value.trim();
-  const expiry = document.getElementById('card-expiry').value.trim();
-  const cvv    = document.getElementById('card-cvv').value.trim();
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('payment-overlay')) closePayment();
+}
 
-  if (!first || !last || !email || !card || !expiry || !cvv) {
-    showToast('⚠️ Please fill in all required fields');
+function processPayment() {
+  var first = document.getElementById('pay-first').value.trim();
+  var last  = document.getElementById('pay-last').value.trim();
+  var email = document.getElementById('pay-email').value.trim();
+  var phone = document.getElementById('pay-phone').value.trim();
+  var org   = document.getElementById('pay-org').value.trim();
+
+  if (!first || !last || !email || !phone) { showToast('⚠️ Please fill in all required fields'); return; }
+  if (!/\S+@\S+\.\S+/.test(email)) { showToast('⚠️ Please enter a valid email address'); return; }
+
+  var btn = document.getElementById('pay-submit-btn');
+  btn.disabled = true;
+  document.getElementById('pay-btn-text').textContent = '⏳ Preparing PayFast checkout...';
+
+  var planKey    = currentPlan.key;
+  var amount     = PLAN_AMOUNTS[planKey];
+  var paymentId  = generatePaymentId(planKey, first);
+  var accessCode = generateAccessCode(planKey, first, org);
+  var itemName   = currentPlan.name + ' - Stablym';
+  var itemDesc   = currentPlan.desc + ' | Code: ' + accessCode;
+  var returnUrl  = PF.baseUrl + '?payment=success&code=' + encodeURIComponent(accessCode) + '&plan=' + encodeURIComponent(currentPlan.name) + '&email=' + encodeURIComponent(email) + '&phone=' + encodeURIComponent(phone) + '&first=' + encodeURIComponent(first);
+  var cancelUrl  = PF.baseUrl + '?payment=cancelled';
+  var notifyUrl  = 'https://stablym.co.za/payfast-notify'; // ITN endpoint (needs backend)
+
+  // Build PayFast params in required order
+  var pfParams = {
+    merchant_id:          PF.merchantId,
+    merchant_key:         PF.merchantKey,
+    return_url:           returnUrl,
+    cancel_url:           cancelUrl,
+    notify_url:           notifyUrl,
+    name_first:           first,
+    name_last:            last,
+    email_address:        email,
+    cell_number:          phone.replace(/\s/g,''),
+    m_payment_id:         paymentId,
+    amount:               amount,
+    item_name:            itemName,
+    item_description:     itemDesc,
+    custom_str1:          accessCode,
+    custom_str2:          planKey,
+    custom_str3:          phone,
+    email_confirmation:   '1',
+    confirmation_address: PF.notifyEmail,
+  };
+
+  var sig = generatePayFastSignature(pfParams);
+
+  // Fill hidden form fields
+  Object.keys(pfParams).forEach(function(k){
+    var el = document.getElementById('pf-' + k.replace(/_/g,'-').replace('merchant-id','merchant-id').replace('merchant-key','merchant-key'));
+    // map field names to element ids
+  });
+
+  // Set PayFast endpoint based on mode
+  var form = document.getElementById('payfast-form');
+  form.action = SANDBOX
+    ? 'https://sandbox.payfast.co.za/eng/process'
+    : 'https://www.payfast.co.za/eng/process';
+  form.innerHTML = '';
+  Object.keys(pfParams).forEach(function(k){
+    var inp = document.createElement('input');
+    inp.type = 'hidden';
+    inp.name = k;
+    inp.value = pfParams[k];
+    form.appendChild(inp);
+  });
+  var sigInp = document.createElement('input');
+  sigInp.type = 'hidden';
+  sigInp.name = 'signature';
+  sigInp.value = sig;
+  form.appendChild(sigInp);
+
+  // Store code in sessionStorage so return page can show it
+  sessionStorage.setItem('pending_code', JSON.stringify({
+    code: accessCode, plan: currentPlan.name, type: currentPlan.type,
+    first: first, email: email, phone: phone
+  }));
+
+  setTimeout(function(){
+    btn.disabled = false;
+    document.getElementById('pay-btn-text').textContent = '💳 Pay Now via PayFast';
+    form.submit();
+  }, 800);
+}
+
+
+// ── ACCESS CODE SYSTEM ──
+// Format: STABLYM-[TYPE]-[SCHOOLCODE]-[MMYY]
+// TYPE: SCH = school, STU = student, PIL = pilot
+// Examples: STABLYM-SCH-JBURG-0325  |  STABLYM-STU-THABO-0325  |  STABLYM-PIL-TEST7-0325
+
+
+function getMonthEnd() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0); // last day of current month
+}
+
+function formatDate(d) {
+  return d.toLocaleDateString('en-ZA', { day:'numeric', month:'long', year:'numeric' });
+}
+
+function testLogin(type) {
+  const now = new Date();
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const yy = String(now.getFullYear()).slice(-2);
+  const codes = {
+    school:  'STABLYM-SCH-TEST-' + mm + yy,
+    student: 'STABLYM-STU-TEST-' + mm + yy,
+    pilot:   'STABLYM-PIL-TEST-' + mm + yy,
+    teacher: 'STABLYM-TCH-TEST-' + mm + yy,
+  };
+  const input = document.getElementById('code-input');
+  if (input) input.value = codes[type] || codes.school;
+  validateCode();
+}
+
+function validateCode() {
+  const raw = document.getElementById('code-input').value.trim().toUpperCase();
+  const errBox = document.getElementById('code-error');
+  if (errBox) errBox.style.display = 'none';
+
+  if (!raw) { showCodeError('Please enter your access code.'); return; }
+
+  const parts = raw.split('-');
+  if (parts.length < 2 || parts[0] !== 'STABLYM') {
+    showCodeError('Invalid code. Must start with STABLYM-. WhatsApp 068 543 8227 for help.');
     return;
   }
-  if (!/\S+@\S+\.\S+/.test(email)) { showToast('⚠️ Please enter a valid email address'); return; }
-  if (card.replace(/\s/g,'').length < 16) { showToast('⚠️ Please enter a valid 16-digit card number'); return; }
 
-  const btn = document.getElementById('pay-submit-btn');
-  btn.disabled = true;
-  document.getElementById('pay-btn-text').textContent = '⏳ Processing payment...';
+  const type = parts[1];
+  const now  = new Date();
+  const monthEnd = new Date(now.getFullYear(), now.getMonth()+1, 0);
+  let expiryDate, codeType;
 
-  setTimeout(() => {
-    btn.disabled = false;
-    document.getElementById('pay-btn-text').textContent = '🔒 Pay Securely';
-    document.getElementById('payment-form-wrap').style.display = 'none';
+  if      (type === 'PIL') { expiryDate = new Date(now.getTime()+7*24*60*60*1000); codeType='pilot'; }
+  else if (type === 'STU') { expiryDate = monthEnd; codeType='student'; }
+  else if (type === 'TCH') { expiryDate = monthEnd; codeType='teacher'; }
+  else                     { expiryDate = monthEnd; codeType='school';  }
 
-    const msg = currentPlan.type==='school'
-      ? `Payment received! WhatsApp us on 068 543 8227 or email mmathapelosebela@gmail.com and we will send your login codes for up to ${currentPlan.students} students immediately.`
-      : 'Payment received! WhatsApp us on 068 543 8227 or email mmathapelosebela@gmail.com and we will send your login code immediately.';
-    document.getElementById('success-message').textContent = msg;
-    document.getElementById('payment-success').classList.add('show');
+  // Check expiry from MMYY suffix
+  if (parts.length >= 4 && type !== 'PIL') {
+    const mmyy = parts[3];
+    if (mmyy && mmyy.length === 4) {
+      const codeMonth = new Date(parseInt('20'+mmyy.substring(2),10), parseInt(mmyy.substring(0,2),10), 0);
+      if (now > codeMonth) {
+        showCodeError('This code expired on ' + formatDate(codeMonth) + '. Please renew — WhatsApp 068 543 8227.');
+        return;
+      }
+      expiryDate = codeMonth;
+    }
+  }
 
-    isLoggedIn = true;
-    showToast('✅ Payment successful! WhatsApp 068 543 8227 for your code now!');
-  }, 2200);
+  // TEACHER → straight to student-app (with teacher view)
+  if (codeType === 'teacher') {
+    sessionStorage.setItem('stablym_access', JSON.stringify({
+      code: raw, type: 'teacher', name: 'Teacher', expiry: expiryDate.toISOString()
+    }));
+    showPage('student-app');
+    showToast('👩‍🏫 Teacher access granted! Valid until ' + formatDate(expiryDate));
+    return;
+  }
+
+  // STUDENT/SCHOOL/PILOT → ask for name next
+  sessionStorage.setItem('stablym_pending', JSON.stringify({
+    code: raw, type: codeType, expiry: expiryDate.toISOString()
+  }));
+  document.getElementById('login-step-1').style.display = 'none';
+  document.getElementById('login-step-2').style.display = 'block';
+  setTimeout(function(){ document.getElementById('student-firstname').focus(); }, 100);
 }
 
-// ── CARD FORMATTING ───────────────────────────────────────────────────────────
-function formatCard(el) {
-  let v = el.value.replace(/\D/g,'').substring(0,16);
-  el.value = v.replace(/(.{4})/g,'$1 ').trim();
-}
-function formatExpiry(el) {
-  let v = el.value.replace(/\D/g,'').substring(0,4);
-  if (v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2);
-  el.value = v;
+function completeStudentLogin() {
+  const first = document.getElementById('student-firstname').value.trim();
+  const last  = document.getElementById('student-lastname').value.trim();
+  const grade = document.getElementById('student-grade').value;
+  const nameErr = document.getElementById('name-error');
+  nameErr.style.display = 'none';
+  if (!first || !last) { nameErr.textContent='Please enter your first and last name.'; nameErr.style.display='block'; return; }
+  if (!grade)          { nameErr.textContent='Please select your grade.';              nameErr.style.display='block'; return; }
+  const pending = JSON.parse(sessionStorage.getItem('stablym_pending')||'{}');
+  sessionStorage.removeItem('stablym_pending');
+  sessionStorage.setItem('stablym_access', JSON.stringify({
+    code: pending.code, type: pending.type,
+    name: first+' '+last, grade: grade, expiry: pending.expiry
+  }));
+  showPage('student-app');
+  showToast('✅ Welcome '+first+'! Valid until '+formatDate(new Date(pending.expiry)));
 }
 
-// ── DEMO OPTION SELECTION ─────────────────────────────────────────────────────
-function selectOption(input) {
-  const name = input.name;
-  document.querySelectorAll(`input[name="${name}"]`).forEach(i => {
-    i.closest('.demo-option').classList.remove('selected');
+
+
+function showCodeError(msg) {
+  const errBox = document.getElementById('code-error');
+  if (!errBox) return;
+  errBox.textContent = msg;
+  errBox.style.display = 'block';
+  document.getElementById('code-input').style.borderColor = '#ef4444';
+  setTimeout(() => { document.getElementById('code-input').style.borderColor = 'rgba(255,255,255,.15)'; }, 3000);
+}
+
+// Update expiry note in payment success based on plan type
+function updateExpiryNote() {
+  const el = document.getElementById('expiry-text-success');
+  if (!el || !currentPlan) return;
+  const monthEnd = getMonthEnd();
+  if (currentPlan.type === 'student') {
+    el.textContent = `Your code is valid until ${formatDate(monthEnd)}. To keep access, simply pay again next month — no cancellation needed if you stop.`;
+  } else {
+    el.textContent = `School code is valid until ${formatDate(monthEnd)}. Teacher shares it with all students. A new code is issued when you renew next month.`;
+  }
+}
+
+// ── ADMIN PASSWORD ──
+// Change this to your own password — only you should know it
+var ADMIN_PASSWORD = 'Stablym@Admin1';
+
+function checkAdminPassword() {
+  var input = document.getElementById('admin-password-input').value;
+  var errBox = document.getElementById('admin-password-error');
+  if (input === ADMIN_PASSWORD) {
+    adminUnlocked = true;
+    document.getElementById('admin-lock').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    document.getElementById('admin-password-input').value = '';
+    errBox.style.display = 'none';
+    var now = new Date();
+    var mEl = document.getElementById('admin-month');
+    var yEl = document.getElementById('admin-year');
+    if (mEl) mEl.value = String(now.getMonth()+1).padStart(2,'0');
+    if (yEl) yEl.value = String(now.getFullYear()).slice(-2);
+  } else {
+    errBox.style.display = 'block';
+    document.getElementById('admin-password-input').value = '';
+    document.getElementById('admin-password-input').focus();
+    adminFailCount++;
+    if (adminFailCount >= 3) {
+      document.getElementById('admin-password-input').disabled = true;
+      errBox.textContent = '🔒 Too many attempts. Refresh the page to try again.';
+    }
+  }
+}
+
+// ── ADMIN CODE GENERATOR ──
+var adminType = 'SCH';
+var adminCodeLog = [];
+
+function selectAdminType(type) {
+  adminType = type;
+  ['SCH','STU','TCH','PIL'].forEach(function(t) {
+    var btn = document.getElementById('type-' + t);
+    if (!btn) return;
+    if (t === type) {
+      btn.style.border = '2px solid #0ea5e9';
+      btn.style.background = 'rgba(14,165,233,.15)';
+      btn.style.color = '#7dd3fc';
+    } else {
+      btn.style.border = '1px solid rgba(255,255,255,.1)';
+      btn.style.background = 'rgba(255,255,255,.04)';
+      btn.style.color = 'rgba(255,255,255,.5)';
+    }
   });
-  input.closest('.demo-option').classList.add('selected');
+  var label = document.getElementById('admin-name-label');
+  if (label) label.textContent = type === 'STU' ? 'Student First Name' : 'School Name / Short Code';
+  generateAdminCode();
 }
 
-// ── PILOT FORM SUBMIT ─────────────────────────────────────────────────────────
+function generateAdminCode() {
+  var name = (document.getElementById('admin-name') ? document.getElementById('admin-name').value : '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  var month = document.getElementById('admin-month') ? document.getElementById('admin-month').value : '01';
+  var year  = document.getElementById('admin-year')  ? document.getElementById('admin-year').value  : '26';
+  var display = document.getElementById('admin-code-display');
+  var placeholder = document.getElementById('admin-code-placeholder');
+  if (!display) return;
+  if (!name) {
+    display.style.display = 'none';
+    if (placeholder) placeholder.style.display = 'block';
+    return;
+  }
+  var code = 'STABLYM-' + adminType + '-' + name + '-' + month + year;
+  var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var expiryText = adminType === 'PIL'
+    ? '7 days from date you issue it'
+    : 'Valid until end of ' + monthNames[parseInt(month,10)-1] + ' 20' + year;
+  document.getElementById('admin-code-text').textContent = code;
+  document.getElementById('admin-code-expiry').textContent = expiryText;
+  display.style.display = 'block';
+  if (placeholder) placeholder.style.display = 'none';
+}
+
+function copyAdminCode() {
+  var code = document.getElementById('admin-code-text').textContent;
+  if (!code) return;
+  var doLog = function() { showToast('✅ Copied: ' + code); logCode(code); };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(doLog).catch(function() {
+      fallbackCopy(code); doLog();
+    });
+  } else { fallbackCopy(code); doLog(); }
+}
+
+function fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+}
+
+function whatsappAdminCode() {
+  var code = document.getElementById('admin-code-text').textContent;
+  var expiry = document.getElementById('admin-code-expiry').textContent;
+  if (!code) return;
+  var msg = 'Your Stablym code: ' + code + ' — ' + expiry + '. Enter at School Login.';
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  logCode(code);
+}
+
+function logCode(code) {
+  if (adminCodeLog.indexOf(code) !== -1) return;
+  adminCodeLog.unshift(code);
+  renderCodeLog();
+}
+
+function renderCodeLog() {
+  var log = document.getElementById('admin-code-log');
+  if (!log) return;
+  if (adminCodeLog.length === 0) {
+    log.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,.25);text-align:center;padding:16px">No codes generated yet this session</div>';
+    return;
+  }
+  log.innerHTML = adminCodeLog.map(function(c) {
+    var parts = c.split('-');
+    var typeLabel = parts[1] === 'SCH' ? '🏫' : parts[1] === 'STU' ? '⭐' : '🧪';
+    var waMsg = encodeURIComponent('Your Stablym code: ' + c + '. Enter at School Login.');
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);flex-wrap:wrap;gap:8px">'
+      + '<span style="font-size:14px">' + typeLabel + '</span>'
+      + '<span style="font-family:\'DM Mono\',monospace;font-size:12px;color:#7dd3fc;flex:1;margin:0 8px;word-break:break-all">' + c + '</span>'
+      + '<div style="display:flex;gap:6px;flex-shrink:0">'
+      + '<button onclick="fallbackCopy(\'' + c + '\');showToast(\'✅ Copied!\')" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:none;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:\'DM Sans\',sans-serif">Copy</button>'
+      + '<a href="https://wa.me/?text=' + waMsg + '" target="_blank" style="background:#25D366;color:#fff;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;text-decoration:none">WA</a>'
+      + '</div></div>';
+  }).join('');
+}
+
+function clearCodeLog() {
+  adminCodeLog = [];
+  renderCodeLog();
+}
+
+// Set default month/year on admin page to current month
+(function setAdminDefaults() {
+  var now = new Date();
+  var mm = String(now.getMonth()+1).padStart(2,'0');
+  var yy = String(now.getFullYear()).slice(-2);
+  var mEl = document.getElementById('admin-month');
+  var yEl = document.getElementById('admin-year');
+  if (mEl) mEl.value = mm;
+  if (yEl) yEl.value = yy;
+})();
+
+const DEMO_QUESTIONS = {
+  9: [
+    { subject:"Mathematics", q:"What is the value of x if 3x + 6 = 21?", options:["3","5","7","9"], answer:1, explanation:"3x + 6 = 21 → 3x = 15 → x = 5. Subtract 6 from both sides, then divide by 3." },
+    { subject:"Natural Sciences", q:"Which of the following is NOT a renewable energy source?", options:["Solar energy","Wind energy","Coal","Hydropower"], answer:2, explanation:"Coal is a fossil fuel — it takes millions of years to form and cannot be renewed. Solar, wind, and hydropower are all naturally replenished." },
+    { subject:"English", q:"Which word is a synonym for 'diligent'?", options:["Lazy","Hardworking","Careless","Slow"], answer:1, explanation:"Diligent means careful and steady effort. Hardworking is the closest synonym." }
+  ],
+  10: [
+    { subject:"Mathematics", q:"Simplify: (x² − 9) ÷ (x − 3)", options:["x − 3","x + 3","x² + 3","x − 9"], answer:1, explanation:"x² − 9 is a difference of squares: (x+3)(x−3). Dividing by (x−3) cancels it, leaving x + 3." },
+    { subject:"Physical Sciences", q:"What is the SI unit of electric current?", options:["Volt (V)","Watt (W)","Ampere (A)","Ohm (Ω)"], answer:2, explanation:"The Ampere (A) is the SI base unit of electric current. Volt measures potential difference, Watt measures power, and Ohm measures resistance." },
+    { subject:"Accounting", q:"Which accounting equation is correct?", options:["Assets = Liabilities − Equity","Assets = Liabilities + Owner's Equity","Liabilities = Assets + Equity","Equity = Assets + Liabilities"], answer:1, explanation:"The fundamental accounting equation is: Assets = Liabilities + Owner's Equity." }
+  ],
+  11: [
+    { subject:"Mathematics", q:"What is the derivative of f(x) = 3x² + 2x?", options:["6x + 2","3x + 2","6x²","3x² + 2"], answer:0, explanation:"Using the power rule: d/dx(3x²) = 6x and d/dx(2x) = 2. So f'(x) = 6x + 2." },
+    { subject:"Life Sciences", q:"During meiosis, how many daughter cells are produced from one parent cell?", options:["2","4","8","1"], answer:1, explanation:"Meiosis produces 4 genetically unique haploid daughter cells through two rounds of division." },
+    { subject:"Business Studies", q:"Which business form has unlimited liability?", options:["Private Company (Pty Ltd)","Public Company (Ltd)","Sole Trader","Close Corporation"], answer:2, explanation:"A Sole Trader has unlimited liability — the owner is personally responsible for all business debts." }
+  ],
+  12: [
+    { subject:"Mathematics", q:"Evaluate: ∑(k=1 to 5) of 2k", options:["20","25","30","15"], answer:2, explanation:"∑2k = 2(1) + 2(2) + 2(3) + 2(4) + 2(5) = 2 + 4 + 6 + 8 + 10 = 30." },
+    { subject:"Physical Sciences", q:"A car accelerates from 0 to 30 m/s in 6 seconds. What is its acceleration?", options:["3 m/s²","5 m/s²","6 m/s²","180 m/s²"], answer:1, explanation:"a = Δv/Δt = (30 − 0) / 6 = 5 m/s²." },
+    { subject:"Accounting", q:"Gross Profit is calculated as:", options:["Net Sales − Cost of Sales","Net Sales + Cost of Sales","Net Sales − Operating Expenses","Total Revenue − Total Expenses"], answer:0, explanation:"Gross Profit = Net Sales − Cost of Sales. It shows profit before operating expenses are deducted." }
+  ]
+};
+
+let demoGrade = null;
+let demoAnswered = {};
+
+function loadDemoGrade(grade, btn) {
+  demoGrade = grade;
+  demoAnswered = {};
+  document.querySelectorAll('.demo-grade-btn').forEach(b => {
+    b.style.background = 'rgba(255,255,255,.05)';
+    b.style.borderColor = 'rgba(255,255,255,.15)';
+    b.style.color = '#fff';
+  });
+  if (btn) { btn.style.background='rgba(14,165,233,.2)'; btn.style.borderColor='#0ea5e9'; btn.style.color='#7dd3fc'; }
+  document.getElementById('demo-prompt').style.display = 'none';
+  document.getElementById('demo-quiz-card').style.display = 'block';
+  document.getElementById('demo-quiz-title').textContent = '📝 Grade ' + grade + ' — Past Paper Demo';
+  document.getElementById('demo-quiz-badge').textContent = '3 questions · answers shown instantly';
+  document.getElementById('demo-results-strip').style.display = 'none';
+  const qs = DEMO_QUESTIONS[grade];
+  const list = document.getElementById('demo-q-list');
+  list.innerHTML = qs.map((q, i) => `
+    <div id="demo-q-${i}" style="border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+      <div style="background:#f8fafc;padding:14px 18px;border-bottom:1px solid #f1f5f9;display:flex;gap:10px;align-items:center">
+        <span style="background:#2563eb;color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:99px">${q.subject}</span>
+        <span style="font-size:11px;color:#94a3b8">Question ${i+1} of 3</span>
+      </div>
+      <div style="padding:16px 18px 12px;font-size:15px;font-weight:600;color:#1e293b;line-height:1.6">${q.q}</div>
+      <div style="padding:0 18px 16px;display:flex;flex-direction:column;gap:8px">
+        ${q.options.map((opt, j) => `
+          <label id="demo-opt-${i}-${j}" onclick="selectDemoOpt(${i},${j})" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border:2px solid #e2e8f0;border-radius:10px;cursor:pointer;font-size:14px;color:#374151;background:#fff;transition:all .15s">
+            <span style="width:22px;height:22px;border-radius:50%;border:2px solid #cbd5e1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0" id="demo-radio-${i}-${j}"></span>
+            ${opt}
+          </label>
+        `).join('')}
+      </div>
+      <div id="demo-explain-${i}" style="display:none;margin:0 18px 18px;padding:14px 16px;border-radius:10px;font-size:13px;line-height:1.7"></div>
+    </div>
+  `).join('');
+}
+
+function selectDemoOpt(qIdx, optIdx) {
+  if (demoAnswered[qIdx] !== undefined) return;
+  demoAnswered[qIdx] = optIdx;
+  const q = DEMO_QUESTIONS[demoGrade][qIdx];
+  const correct = q.answer === optIdx;
+  q.options.forEach((_, j) => {
+    const lbl = document.getElementById(`demo-opt-${qIdx}-${j}`);
+    const radio = document.getElementById(`demo-radio-${qIdx}-${j}`);
+    if (j === q.answer) {
+      lbl.style.borderColor='#16a34a'; lbl.style.background='#f0fdf4'; lbl.style.color='#14532d';
+      radio.style.background='#16a34a'; radio.style.borderColor='#16a34a'; radio.style.color='#fff'; radio.textContent='✓';
+    } else if (j === optIdx && !correct) {
+      lbl.style.borderColor='#ef4444'; lbl.style.background='#fff5f5'; lbl.style.color='#991b1b';
+      radio.style.background='#ef4444'; radio.style.borderColor='#ef4444'; radio.style.color='#fff'; radio.textContent='✗';
+    } else { lbl.style.opacity='0.5'; }
+    lbl.style.cursor='default';
+  });
+  const exp = document.getElementById(`demo-explain-${qIdx}`);
+  exp.style.display='block';
+  exp.style.background = correct ? '#f0fdf4' : '#fff5f5';
+  exp.style.border = `1px solid ${correct ? '#bbf7d0' : '#fca5a5'}`;
+  exp.style.color = correct ? '#14532d' : '#991b1b';
+  exp.innerHTML = `<strong>${correct ? '✅ Correct!' : '❌ Not quite.'}</strong> ${q.explanation}`;
+  if (Object.keys(demoAnswered).length === DEMO_QUESTIONS[demoGrade].length) showDemoScore();
+}
+
+function showDemoScore() {
+  const qs = DEMO_QUESTIONS[demoGrade];
+  const correct = qs.filter((q, i) => demoAnswered[i] === q.answer).length;
+  const total = qs.length;
+  const strip = document.getElementById('demo-results-strip');
+  strip.style.display = 'block';
+  const box = document.getElementById('demo-score-box');
+  const msg = correct===3 ? '🏆 Perfect score!' : correct===2 ? '👍 Good effort!' : '📚 Keep practising!';
+  box.style.background = correct===3 ? '#f0fdf4' : correct===2 ? '#fffbeb' : '#fff5f5';
+  box.style.borderColor = correct===3 ? '#bbf7d0' : correct===2 ? '#fcd34d' : '#fca5a5';
+  document.getElementById('demo-score-text').style.color = correct===3 ? '#14532d' : correct===2 ? '#92400e' : '#991b1b';
+  document.getElementById('demo-score-text').textContent = `${msg} You got ${correct}/${total} correct`;
+  document.getElementById('demo-score-sub').style.color = correct===3 ? '#15803d' : correct===2 ? '#a16207' : '#b91c1c';
+  document.getElementById('demo-score-sub').textContent = 'The full app has 510+ questions like these across all your subjects.';
+}
+
+// ── PILOT FORM ──
 function submitPilot() {
-  const name   = document.getElementById('contact-name').value.trim();
+  const name = document.getElementById('contact-name').value.trim();
   const school = document.getElementById('school-name').value.trim();
-  const email  = document.getElementById('contact-email').value.trim();
+  const email = document.getElementById('contact-email').value.trim();
+  const phone = document.getElementById('contact-phone').value.trim();
   if (!name || !school || !email) { showToast('⚠️ Please fill in your name, school, and email'); return; }
   if (!/\S+@\S+\.\S+/.test(email)) { showToast('⚠️ Please enter a valid email address'); return; }
+  const templateParams = {
+    to_email:'mmathapelosebela@gmail.com', from_name:name, from_email:email,
+    phone:phone||'Not provided', school, plan:'Pilot Request', amount:'FREE 7-day pilot',
+    message:`Pilot request from ${name} at ${school}\nEmail: ${email}\nPhone: ${phone||'Not provided'}`
+  };
+  if (window.emailjs && window.EMAILJS_SERVICE_ID && window.EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID') {
+    emailjs.send(window.EMAILJS_SERVICE_ID, window.EMAILJS_TEMPLATE_ID, templateParams).catch(()=>{});
+  }
   document.getElementById('pilot-form-wrap').style.display = 'none';
   document.getElementById('pilot-success').classList.add('show');
-  showToast('✅ Request submitted! We\'ll WhatsApp you within 1 business day.');
+  showToast("✅ Request submitted! We'll WhatsApp you within 1 business day.");
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────────────────────
-function attemptLogin() {
-  const code  = document.getElementById('login-school-code').value.trim();
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-password').value.trim();
-
-  if (!code || !email || !pass) { showToast('⚠️ Please enter your school code, email, and password'); return; }
-
-  // Demo: any filled fields go to dashboard
-  showToast('🔄 Verifying credentials...');
-  setTimeout(() => {
-    isLoggedIn = true;
-    showPage('dashboard');
-    showToast('✅ Welcome back! School dashboard loaded.');
-  }, 1200);
-}
-
-// ── TOAST ─────────────────────────────────────────────────────────────────────
+// ── TOAST ──
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -1221,58 +1854,51 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-// ── DASHBOARD DATA ────────────────────────────────────────────────────────────
+// ── DASHBOARD ──
 const DEMO_STUDENTS = [
-  { name:'Thabo Nkosi',    grade:9,  aps:32, stream:'Science',     apsCol:'#16a34a' },
-  { name:'Lerato Dlamini', grade:10, aps:28, stream:'Commerce',    apsCol:'#0ea5e9' },
-  { name:'Sipho Mahlangu', grade:11, aps:22, stream:'Engineering', apsCol:'#f59e0b' },
-  { name:'Nomsa Sithole',  grade:12, aps:34, stream:'Science',     apsCol:'#16a34a' },
-  { name:'Kagiso Modise',  grade:9,  aps:18, stream:'Humanities',  apsCol:'#dc2626' },
+  {name:'Thabo Nkosi', grade:9, aps:32, stream:'Science', col:'#16a34a'},
+  {name:'Lerato Dlamini', grade:10, aps:28, stream:'Commerce', col:'#0ea5e9'},
+  {name:'Sipho Mahlangu', grade:11, aps:22, stream:'Engineering', col:'#f59e0b'},
+  {name:'Nomsa Sithole', grade:12, aps:34, stream:'Science', col:'#16a34a'},
+  {name:'Kagiso Modise', grade:9, aps:18, stream:'Humanities', col:'#dc2626'},
 ];
 const STREAM_DIST = [
-  { stream:'Science',     pct:38, col:'#2563eb' },
-  { stream:'Commerce',    pct:28, col:'#16a34a' },
-  { stream:'Engineering', pct:21, col:'#ea580c' },
-  { stream:'Humanities',  pct:13, col:'#9333ea' },
+  {stream:'Science', pct:38, col:'#2563eb'},
+  {stream:'Commerce', pct:28, col:'#16a34a'},
+  {stream:'Engineering', pct:21, col:'#ea580c'},
+  {stream:'Humanities', pct:13, col:'#9333ea'},
 ];
 
 function buildDashboard() {
-  const sWrap = document.getElementById('dash-students');
-  if (sWrap) {
-    sWrap.innerHTML = DEMO_STUDENTS.map(s => `
-      <div class="dash-student-row">
-        <span class="dash-student-name">${s.name}</span>
-        <span style="font-size:12px;color:#64748b">Gr${s.grade}</span>
-        <span class="dash-aps-pill" style="background:${s.apsCol}18;color:${s.apsCol};border:1px solid ${s.apsCol}30">${s.aps}/42</span>
-        <span style="font-size:11px;color:#94a3b8">${s.stream}</span>
+  const sw = document.getElementById('dash-students');
+  if (sw) sw.innerHTML = DEMO_STUDENTS.map(s=>`
+    <div class="dash-student-row">
+      <span class="dash-student-name">${s.name}</span>
+      <span style="font-size:12px;color:#64748b">Gr${s.grade}</span>
+      <span class="dash-aps-pill" style="background:${s.col}18;color:${s.col};border:1px solid ${s.col}30">${s.aps}/42</span>
+      <span style="font-size:11px;color:#94a3b8">${s.stream}</span>
+    </div>`).join('');
+  const stw = document.getElementById('dash-streams');
+  if (stw) stw.innerHTML = STREAM_DIST.map(d=>`
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px">
+        <span style="font-weight:600;color:#1e293b">${d.stream}</span><span style="color:#64748b">${d.pct}%</span>
       </div>
-    `).join('');
-  }
-  const stWrap = document.getElementById('dash-streams');
-  if (stWrap) {
-    stWrap.innerHTML = STREAM_DIST.map(d => `
-      <div style="margin-bottom:12px">
-        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px">
-          <span style="font-weight:600;color:#1e293b">${d.stream}</span>
-          <span style="color:#64748b">${d.pct}%</span>
-        </div>
-        <div style="height:8px;background:#f1f5f9;border-radius:99px;overflow:hidden">
-          <div style="height:100%;width:${d.pct}%;background:${d.col};border-radius:99px"></div>
-        </div>
+      <div style="height:8px;background:#f1f5f9;border-radius:99px;overflow:hidden">
+        <div style="height:100%;width:${d.pct}%;background:${d.col};border-radius:99px"></div>
       </div>
-    `).join('');
-  }
+    </div>`).join('');
 }
 
-// ── FAQ ───────────────────────────────────────────────────────────────────────
+// ── FAQ ──
 const FAQS = [
-  { q:'Can students access the app without paying?', a:'No. Students can try 3 demo questions only. Full access requires a valid school subscription code or an individual student subscription. There is no way to bypass this — the entire platform is behind authentication.' },
-  { q:'How does the R50 per student work exactly?', a:'We offer fixed school packages: R2,500/mo (50 students), R5,000/mo (100 students), R9,000/mo (180 students). This works out to R50 per student. Larger schools contact us for custom pricing.' },
-  { q:'What payment methods do you accept?', a:'We accept all major credit and debit cards (Visa, Mastercard), EFT, and instant EFT via PayFast — South Africa\'s most trusted payment gateway. Monthly subscriptions are auto-renewed.' },
-  { q:'Can we cancel anytime?', a:'Yes. You can cancel your school subscription at any time from your dashboard. Your access remains active until the end of the current billing month.' },
-  { q:'How do students get their login codes?', a:'After your school subscribes, you receive a school access code by email within 1 hour. Teachers share this code with students, who then register on the platform.' },
-  { q:'Is the APS calculator accurate per DBE rules?', a:'Yes. Our APS uses the official DBE formula: your best 6 subjects, Life Orientation excluded, NSC symbols (A=7 to G=1). The scale is hard-coded and regularly verified.' },
-  { q:'Do you offer a free trial?', a:'Yes — schools can request a free 7-day pilot with full access. No payment required upfront. Contact us via the Request Pilot page.' },
+  {q:'Can students access the app without paying?', a:'No. Students can try 3 demo questions only. Full access requires a valid school subscription code or an individual student subscription.'},
+  {q:'How does the R50 per student work exactly?', a:'We offer fixed school packages: R2,500/mo (50 students), R5,000/mo (100 students), R9,000/mo (180 students). Larger schools contact us for custom pricing.'},
+  {q:'What payment methods do you accept?', a:"We accept all major credit and debit cards (Visa, Mastercard), EFT, and instant EFT via PayFast — South Africa's most trusted payment gateway."},
+  {q:'Can we cancel anytime?', a:'Yes. You can cancel your school subscription at any time from your dashboard. Your access remains active until the end of the current billing month.'},
+  {q:'How do students get their login codes?', a:'After your school subscribes, you receive a school access code by email within 1 hour. Teachers share this code with students.'},
+  {q:'Is the APS calculator accurate per DBE rules?', a:'Yes. Our APS uses the official DBE formula: your best 6 subjects, Life Orientation excluded, NSC symbols (A=7 to G=1).'},
+  {q:'Do you offer a free trial?', a:'Yes — schools can request a free 7-day pilot with full access. No payment required upfront. Contact us via the Request Pilot page.'},
 ];
 
 function buildFAQ() {
@@ -1285,21 +1911,98 @@ function buildFAQ() {
         <span id="faq-icon-${i}" style="font-size:18px;color:#94a3b8;flex-shrink:0">+</span>
       </button>
       <div id="faq-ans-${i}" style="display:none;padding-bottom:18px;font-size:14px;color:#64748b;line-height:1.7">${f.a}</div>
-    </div>
-  `).join('');
-}
-function toggleFAQ(i) {
-  const ans  = document.getElementById('faq-ans-' + i);
-  const icon = document.getElementById('faq-icon-' + i);
-  const open = ans.style.display !== 'none';
-  ans.style.display  = open ? 'none' : 'block';
-  icon.textContent   = open ? '+' : '−';
-  icon.style.color   = open ? '#94a3b8' : '#0ea5e9';
+    </div>`).join('');
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+function toggleFAQ(i) {
+  const ans = document.getElementById('faq-ans-'+i);
+  const icon = document.getElementById('faq-icon-'+i);
+  const open = ans.style.display !== 'none';
+  ans.style.display = open ? 'none' : 'block';
+  icon.textContent = open ? '+' : '−';
+  icon.style.color = open ? '#94a3b8' : '#0ea5e9';
+}
+
 buildDashboard();
 buildFAQ();
+enforceExpiry();
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') enforceExpiry();
+});
+
+// ── HANDLE PAYFAST RETURN ──
+(function handlePayFastReturn() {
+  var params = new URLSearchParams(window.location.search);
+  var payment = params.get('payment');
+  if (!payment) return;
+
+  if (payment === 'success') {
+    var code  = params.get('code');
+    var plan  = params.get('plan');
+    var email = params.get('email');
+    var phone = params.get('phone');
+    var first = params.get('first');
+
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+
+    // Show success modal
+    showPaymentReturnSuccess(first, code, plan, email, phone);
+
+  } else if (payment === 'cancelled') {
+    window.history.replaceState({}, '', window.location.pathname);
+    showToast('❌ Payment was cancelled. Try again when ready.');
+  }
+})();
+
+function showPaymentReturnSuccess(first, code, plan, email, phone) {
+  var now = new Date();
+  var monthEnd = new Date(now.getFullYear(), now.getMonth()+1, 0);
+  var expiry = monthEnd.toLocaleDateString('en-ZA',{day:'numeric',month:'long',year:'numeric'});
+  var waMsg = 'Hi ' + first + '! Your Stablym code: ' + code + ' (valid till ' + expiry + ') Enter at School Login.';
+
+  // Open overlay with success
+  document.getElementById('payment-form-wrap').style.display = 'none';
+  document.getElementById('modal-title').textContent = '🎉 Payment Successful!';
+  document.getElementById('modal-subtitle').textContent = 'Your access code is ready';
+
+  var successDiv = document.getElementById('payment-success');
+  successDiv.innerHTML = `
+    <div style="font-size:56px;margin-bottom:12px">🎉</div>
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#1e293b;margin-bottom:8px">Payment Confirmed!</div>
+    <div style="font-size:14px;color:#64748b;margin-bottom:20px">Hi ${first}! Here is your access code:</div>
+
+    <div style="background:#0f172a;border:2px solid #0ea5e9;border-radius:14px;padding:20px;margin:0 24px 20px;text-align:center">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Your Access Code</div>
+      <div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:700;color:#7dd3fc;letter-spacing:2px;margin-bottom:8px">${code}</div>
+      <button onclick="navigator.clipboard.writeText('${code}').then(function(){showToast('✅ Code copied!')})" style="background:rgba(14,165,233,.2);color:#7dd3fc;border:1px solid rgba(14,165,233,.3);border-radius:8px;padding:6px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📋 Copy Code</button>
+      <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:8px">Valid until ${expiry}</div>
+    </div>
+
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin:0 24px 16px;text-align:left;font-size:13px;color:#14532d">
+      <strong>How to use your code:</strong><br/>
+      1. Click <strong>School Login</strong> in the nav above<br/>
+      2. Enter your code: <strong>${code}</strong><br/>
+      3. Click <strong>Unlock Access</strong> — you're in! ✅
+    </div>
+
+    <div style="padding:0 24px 8px;display:flex;flex-direction:column;gap:10px">
+      <a id="wa-confirm-link" href="#" target="_blank" style="display:block;text-align:center;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;padding:13px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none">💬 WhatsApp Us — We'll confirm your code</a>
+      <button onclick="closePayment();showPage('login')" style="padding:12px;background:#f1f5f9;color:#334155;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">🔑 Go to Login → Enter My Code</button>
+    </div>
+  `;
+  successDiv.classList.add('show');
+
+  // Set WhatsApp link correctly after DOM is updated
+  var waLink = document.getElementById('wa-confirm-link');
+  if (waLink) waLink.href = 'https://wa.me/' + PF.whatsapp + '?text=' + encodeURIComponent(waMsg);
+  document.getElementById('payment-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Also pre-fill the login code input for convenience
+  var codeInput = document.getElementById('code-input');
+  if (codeInput) codeInput.value = code;
+}
 </script>
 </body>
 </html>

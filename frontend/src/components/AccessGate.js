@@ -166,7 +166,7 @@ export default function AccessGate({ children }) {
           <input
             style={{ ...s.codeInput, borderColor: error ? "#ef4444" : input ? "#0ea5e9" : "rgba(255,255,255,.15)" }}
             type="text"
-            placeholder="e.g. STB-JHB-001"
+            placeholder="Enter your access code"
             value={input}
             onChange={e => { setInput(e.target.value.toUpperCase()); setError(""); }}
             onKeyDown={e => e.key === "Enter" && handleSubmit()}
@@ -217,11 +217,11 @@ export default function AccessGate({ children }) {
 
         {showHelp && (
           <div style={s.helpBox}>
-            <div style={s.helpRow}><span style={s.helpDot("blue")} /><div><strong>School code</strong> — e.g. STB-JHB-001 · Shared by your teacher with your whole class</div></div>
-            <div style={s.helpRow}><span style={s.helpDot("green")} /><div><strong>Student code</strong> — e.g. STB-STU-1001 · For individual R50/month subscribers</div></div>
-            <div style={s.helpRow}><span style={s.helpDot("amber")} /><div><strong>Pilot code</strong> — e.g. STB-PILOT-01 · Free 7-day trial for schools</div></div>
+            <div style={s.helpRow}><span style={s.helpDot("blue")} /><div><strong>School code</strong> — Given to you by your teacher. Share with your class.</div></div>
+            <div style={s.helpRow}><span style={s.helpDot("green")} /><div><strong>Student code</strong> — For individual subscribers. WhatsApp us to get one.</div></div>
+            <div style={s.helpRow}><span style={s.helpDot("amber")} /><div><strong>Pilot code</strong> — Free 7-day trial for schools. Request via WhatsApp.</div></div>
             <div style={{ marginTop: 12, fontSize: 12, color: "rgba(255,255,255,.35)", lineHeight: 1.6 }}>
-              Codes are case-insensitive. Your code is saved so you only need to enter it once per device.
+              Your code is saved so you only need to enter it once per device.
             </div>
           </div>
         )}
