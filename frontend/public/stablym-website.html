@@ -244,7 +244,6 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
 @media(max-width:768px){
   .hero-inner,.steps,.features-grid,.pricing-grid,.student-grid,.dash-stats,.dash-cards,.contact-perks,.form-row{grid-template-columns:1fr}
   .nav-links .nav-link{display:none}
-  .mobile-admin-btn{display:block !important}
   .hero{padding:60px 20px 60px}
   .section,.pricing-bg,.student-pricing,.contact-wrap,.dash-body{padding-left:20px;padding-right:20px}
   .step::after{display:none}
@@ -261,11 +260,9 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
     <button class="nav-link" onclick="showPage('demo')">Demo</button>
     <button class="nav-link" onclick="showPage('pricing')">Pricing</button>
     <button class="nav-link" onclick="showPage('contact')">Request Pilot</button>
-    <button class="nav-link" onclick="showPage('admin')" style="color:#fbbf24">⚙ Admin</button>
     <span id="nav-user-name" style="display:none;font-size:13px;font-weight:600;color:#a3e635;padding:6px 12px;background:rgba(132,204,22,.1);border-radius:8px;border:1px solid rgba(132,204,22,.2)"></span>
     <button class="nav-cta" onclick="showPage('login')">School Login →</button>
-    <!-- Mobile admin button — always visible -->
-    <button onclick="showPage('admin')" style="background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:none" class="mobile-admin-btn">⚙</button>
+
   </div>
 </nav>
 
@@ -681,6 +678,7 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
             <div class="form-group"><label class="form-label">Message (optional)</label><textarea class="form-input textarea-input" id="contact-message" placeholder="Tell us anything about your school's needs — we read every message."></textarea></div>
             <button class="submit-pilot" onclick="submitPilot()">🚀 Request My Free 7-Day Pilot</button>
             <div style="text-align:center;font-size:12px;color:#94a3b8;margin-top:12px">We'll respond within 1 business day · No spam, ever</div>
+            <div style="text-align:center;margin-top:12px;font-size:13px;color:#64748b">Or email us directly: <a href="/cdn-cgi/l/email-protection#b8d5d5d9ccd0d9c8ddd4d7cbdddaddd4d9f8dfd5d9d1d496dbd7d5" style="color:#0ea5e9;font-weight:600"><span class="__cf_email__" data-cfemail="761b1b17021e1706131a19051314131a1736111b171f1a5815191b">[email&#160;protected]</span></a></div>
           </div>
         </div>
         <div class="pilot-success" id="pilot-success">
@@ -877,117 +875,6 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
   </div>
 </div>
 
-<!-- ══ ADMIN CODE GENERATOR ══ -->
-<div id="page-admin" class="page">
-  <div style="background:#0a0e1a;min-height:100vh;padding:40px">
-    <div style="max-width:640px;margin:0 auto">
-
-      <!-- ── ADMIN LOGIN WALL ── -->
-      <div id="admin-lock" style="display:flex;align-items:center;justify-content:center;min-height:80vh">
-        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:40px;max-width:360px;width:100%;text-align:center">
-          <div style="font-size:48px;margin-bottom:16px">🔐</div>
-          <h3 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:8px">Admin Access</h3>
-          <p style="font-size:14px;color:rgba(255,255,255,.4);margin-bottom:24px;line-height:1.6">This area is for Stablym staff only. Enter your admin password to continue.</p>
-          <input id="admin-password-input" type="password" placeholder="Enter admin password"
-            style="width:100%;padding:13px 16px;border:2px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.07);color:#fff;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:10px;text-align:center"
-            onfocus="this.style.borderColor='#0ea5e9'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"
-            onkeydown="if(event.key==='Enter')checkAdminPassword()"/>
-          <div id="admin-password-error" style="display:none;font-size:12px;color:#fca5a5;margin-bottom:10px">❌ Wrong password. Try again.</div>
-          <button onclick="checkAdminPassword()" style="width:100%;padding:13px;background:#0ea5e9;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Unlock Admin →</button>
-          <button onclick="showPage('home')" style="width:100%;padding:10px;background:none;color:rgba(255,255,255,.3);border:none;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px">← Go back</button>
-        </div>
-      </div>
-
-      <!-- ── ADMIN CONTENT (hidden until password entered) ── -->
-      <div id="admin-content" style="display:none">
-
-      <!-- Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px">
-        <div>
-          <div style="font-size:11px;font-weight:700;color:#0ea5e9;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Admin Panel</div>
-          <h2 style="font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#fff;letter-spacing:-1px">Code Generator</h2>
-        </div>
-        <button onclick="showPage('home')" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 16px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">← Back</button>
-      </div>
-
-      <!-- Generator Card -->
-      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;margin-bottom:24px">
-        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:20px">Generate a New Code</div>
-
-        <!-- Type selector -->
-        <div style="margin-bottom:16px">
-          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Subscription Type</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
-            <button onclick="selectAdminType('SCH')" id="type-SCH" style="padding:10px;border-radius:10px;border:2px solid #0ea5e9;background:rgba(14,165,233,.15);color:#7dd3fc;font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🏫 School</button>
-            <button onclick="selectAdminType('STU')" id="type-STU" style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">⭐ Student</button>
-            <button onclick="selectAdminType('TCH')" id="type-TCH" style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">👩‍🏫 Teacher</button>
-            <button onclick="selectAdminType('PIL')" id="type-PIL" style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);font-size:12px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">🧪 Pilot</button>
-          </div>
-        </div>
-
-        <!-- Name input -->
-        <div style="margin-bottom:16px">
-          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px" id="admin-name-label">School Name / Short Code</div>
-          <input id="admin-name" type="text" placeholder="e.g. SOWETO or THABO" maxlength="8"
-            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');generateAdminCode()"
-            style="width:100%;padding:12px 16px;border:2px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.07);color:#fff;font-size:16px;font-family:'DM Mono',monospace;font-weight:600;outline:none;letter-spacing:1px"
-            onfocus="this.style.borderColor='#0ea5e9'" onblur="this.style.borderColor='rgba(255,255,255,.12)'"/>
-          <div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:5px">Max 8 characters, letters and numbers only — no spaces</div>
-        </div>
-
-        <!-- Month selector -->
-        <div style="margin-bottom:20px">
-          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Valid Until</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <select id="admin-month" onchange="generateAdminCode()" style="padding:11px 14px;border:2px solid rgba(255,255,255,.12);border-radius:10px;background:#1e293b;color:#fff;font-size:14px;font-family:'DM Sans',sans-serif;outline:none">
-              <option value="01">January</option><option value="02">February</option>
-              <option value="03">March</option><option value="04">April</option>
-              <option value="05">May</option><option value="06">June</option>
-              <option value="07">July</option><option value="08">August</option>
-              <option value="09">September</option><option value="10">October</option>
-              <option value="11">November</option><option value="12">December</option>
-            </select>
-            <select id="admin-year" onchange="generateAdminCode()" style="padding:11px 14px;border:2px solid rgba(255,255,255,.12);border-radius:10px;background:#1e293b;color:#fff;font-size:14px;font-family:'DM Sans',sans-serif;outline:none">
-              <option value="26">2026</option><option value="27">2027</option><option value="28">2028</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Generated code display -->
-        <div id="admin-code-display" style="display:none">
-          <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Generated Code</div>
-          <div style="background:#0f172a;border:2px solid #0ea5e9;border-radius:14px;padding:20px;text-align:center;margin-bottom:14px">
-            <div id="admin-code-text" style="font-family:'DM Mono',monospace;font-size:22px;font-weight:700;color:#7dd3fc;letter-spacing:2px;word-break:break-all"></div>
-            <div id="admin-code-expiry" style="font-size:12px;color:rgba(255,255,255,.4);margin-top:8px"></div>
-          </div>
-
-          <!-- Action buttons -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <button onclick="copyAdminCode()" style="padding:12px;background:rgba(14,165,233,.2);color:#7dd3fc;border:1px solid rgba(14,165,233,.3);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">📋 Copy Code</button>
-            <button onclick="whatsappAdminCode()" style="padding:12px;background:#25D366;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">💬 Send via WhatsApp</button>
-          </div>
-        </div>
-
-        <div id="admin-code-placeholder" style="background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.1);border-radius:12px;padding:20px;text-align:center;color:rgba(255,255,255,.25);font-size:14px">
-          Fill in the name above to generate a code
-        </div>
-      </div>
-
-      <!-- Recent codes log -->
-      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <div style="font-size:14px;font-weight:700;color:#fff">Recently Generated</div>
-          <button onclick="clearCodeLog()" style="font-size:11px;color:rgba(255,255,255,.3);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif">Clear all</button>
-        </div>
-        <div id="admin-code-log">
-          <div style="font-size:13px;color:rgba(255,255,255,.25);text-align:center;padding:16px">No codes generated yet this session</div>
-        </div>
-      </div>
-
-      </div><!-- end admin-content -->
-    </div>
-  </div>
-</div>
 <div class="payment-overlay" id="payment-overlay" onclick="handleOverlayClick(event)">
   <div class="payment-modal" onclick="event.stopPropagation()">
     <div class="payment-modal-header">
@@ -1080,7 +967,7 @@ footer .footer-link:hover{color:rgba(255,255,255,.8)}
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── STATE ──
 let currentPlan = null;
 var adminUnlocked = false;
@@ -1170,20 +1057,6 @@ function showPage(id) {
     id = 'login';
     showToast('🔒 Please enter your access code to continue.');
   }
-  // Guard: admin requires password
-  if (id === 'admin') {
-    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
-    var pg = document.getElementById('page-admin');
-    if (pg) { pg.classList.add('active'); window.scrollTo(0,0); }
-    if (!adminUnlocked) {
-      document.getElementById('admin-lock').style.display = 'flex';
-      document.getElementById('admin-content').style.display = 'none';
-    } else {
-      document.getElementById('admin-lock').style.display = 'none';
-      document.getElementById('admin-content').style.display = 'block';
-    }
-    return;
-  }
   _doShowPage(id);
   if (id === 'student-app') {
     var s = checkSession();
@@ -1233,7 +1106,7 @@ const PF = {
   passphrase:  SANDBOX ? ''                  : 'mmathapelo/1S',
   notifyEmail: 'mmathapelosebela@gmail.com',
   whatsapp:    '27685438227',
-  baseUrl:     window.location.origin || 'https://stablym.co.za',
+  baseUrl:     'https://sthablymsubject-stream.surge.sh',
 };
 
 // VAT-inclusive amounts in Rands (2 decimal string for PayFast)
@@ -1284,12 +1157,29 @@ function md5(str) {
 }
 
 function generatePayFastSignature(params) {
-  // Build query string in exact order, skip empty values
-  var str = Object.keys(params)
-    .filter(function(k){ return params[k] !== '' && params[k] !== null && params[k] !== undefined; })
-    .map(function(k){ return k + '=' + encodeURIComponent(params[k]).replace(/%20/g,'+'); })
-    .join('&');
-  if (PF.passphrase) str += '&passphrase=' + encodeURIComponent(PF.passphrase).replace(/%20/g,'+');
+  // PayFast requires: alphabetical order NOT needed — use submission order
+  // Encode exactly as PHP: urlencode() = spaces as +, special chars as %XX
+  function pfEncode(val) {
+    return encodeURIComponent(String(val))
+      .replace(/%20/g, '+')      // spaces → +
+      .replace(/!/g, '%21')
+      .replace(/'/g, '%27')
+      .replace(/\(/g, '%28')
+      .replace(/\)/g, '%29')
+      .replace(/\*/g, '%2A');
+  }
+  var parts = [];
+  Object.keys(params).forEach(function(k) {
+    var v = params[k];
+    if (v !== '' && v !== null && v !== undefined) {
+      parts.push(k + '=' + pfEncode(v));
+    }
+  });
+  var str = parts.join('&');
+  // Only add passphrase for live mode — sandbox ignores it
+  if (!SANDBOX && PF.passphrase) {
+    str += '&passphrase=' + pfEncode(PF.passphrase);
+  }
   return md5(str);
 }
 
@@ -1381,35 +1271,19 @@ function processPayment() {
   var cancelUrl  = PF.baseUrl + '?payment=cancelled';
   var notifyUrl  = 'https://stablym.co.za/payfast-notify'; // ITN endpoint (needs backend)
 
-  // Build PayFast params in required order
+  // Build PayFast params — keep minimal for sandbox testing
   var pfParams = {
-    merchant_id:          PF.merchantId,
-    merchant_key:         PF.merchantKey,
-    return_url:           returnUrl,
-    cancel_url:           cancelUrl,
-    notify_url:           notifyUrl,
-    name_first:           first,
-    name_last:            last,
-    email_address:        email,
-    cell_number:          phone.replace(/\s/g,''),
-    m_payment_id:         paymentId,
-    amount:               amount,
-    item_name:            itemName,
-    item_description:     itemDesc,
-    custom_str1:          accessCode,
-    custom_str2:          planKey,
-    custom_str3:          phone,
-    email_confirmation:   '1',
-    confirmation_address: PF.notifyEmail,
+    merchant_id:  PF.merchantId,
+    merchant_key: PF.merchantKey,
+    return_url:   returnUrl,
+    cancel_url:   cancelUrl,
+    name_first:   first,
+    name_last:    last,
+    email_address: email,
+    m_payment_id: paymentId,
+    amount:       amount,
+    item_name:    itemName,
   };
-
-  var sig = generatePayFastSignature(pfParams);
-
-  // Fill hidden form fields
-  Object.keys(pfParams).forEach(function(k){
-    var el = document.getElementById('pf-' + k.replace(/_/g,'-').replace('merchant-id','merchant-id').replace('merchant-key','merchant-key'));
-    // map field names to element ids
-  });
 
   // Set PayFast endpoint based on mode
   var form = document.getElementById('payfast-form');
@@ -1417,18 +1291,25 @@ function processPayment() {
     ? 'https://sandbox.payfast.co.za/eng/process'
     : 'https://www.payfast.co.za/eng/process';
   form.innerHTML = '';
-  Object.keys(pfParams).forEach(function(k){
+
+  // Add all params as hidden inputs
+  Object.keys(pfParams).forEach(function(k) {
     var inp = document.createElement('input');
     inp.type = 'hidden';
     inp.name = k;
     inp.value = pfParams[k];
     form.appendChild(inp);
   });
-  var sigInp = document.createElement('input');
-  sigInp.type = 'hidden';
-  sigInp.name = 'signature';
-  sigInp.value = sig;
-  form.appendChild(sigInp);
+
+  // Only add signature in live mode — sandbox doesn't need it
+  if (!SANDBOX) {
+    var sig = generatePayFastSignature(pfParams);
+    var sigInp = document.createElement('input');
+    sigInp.type = 'hidden';
+    sigInp.name = 'signature';
+    sigInp.value = sig;
+    form.appendChild(sigInp);
+  }
 
   // Store code in sessionStorage so return page can show it
   sessionStorage.setItem('pending_code', JSON.stringify({
@@ -1998,8 +1879,6 @@ function showPaymentReturnSuccess(first, code, plan, email, phone) {
   if (waLink) waLink.href = 'https://wa.me/' + PF.whatsapp + '?text=' + encodeURIComponent(waMsg);
   document.getElementById('payment-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
-
-  // Also pre-fill the login code input for convenience
   var codeInput = document.getElementById('code-input');
   if (codeInput) codeInput.value = code;
 }
