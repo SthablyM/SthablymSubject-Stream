@@ -28,5 +28,5 @@
     <circle cx="47" cy="18" r="1.5" fill="#a78bfa"/>
   </g>
   <text x="32" y="56" font-family="Georgia,serif" font-size="9" font-weight="700"
-        fill="#cbd5e1" text-anchor="middle" letter-spacing="1.5">STABLYM</text>
+        fill="#cbd5e1" text-anchor="middle" letter-spacing="1.5">STHABLYM</text>
 </svg>

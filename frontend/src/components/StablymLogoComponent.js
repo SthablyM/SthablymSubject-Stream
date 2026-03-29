@@ -86,7 +86,7 @@ function IconMark({ id = "", ox = 0, oy = 0 }) {
 function FullLogoDark({ width, height }) {
   const id = "d";
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" width={width} height={height} role="img" aria-label="Stablym logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" width={width} height={height} role="img" aria-label="Sthablym logo">
       <Defs id={id} />
       {/* Background */}
       <rect x="0" y="0" width="320" height="100" rx="18" fill={`url(#bgGrad${id})`} />
@@ -129,7 +129,7 @@ function FullLogoDark({ width, height }) {
 function FullLogoLight({ width, height }) {
   const id = "l";
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" width={width} height={height} role="img" aria-label="Stablym logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" width={width} height={height} role="img" aria-label="Sthablym logo">
       <defs>
         <linearGradient id={`iconGrad${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#2563eb" />
@@ -149,7 +149,7 @@ function FullLogoLight({ width, height }) {
         fontFamily="Georgia, Palatino, serif"
         fontSize="32" fontWeight="700" letterSpacing="3"
         fill="#1e293b">
-        STABLYM
+        STHABLYM
       </text>
 
       <text x="85" y="68"
@@ -175,7 +175,7 @@ function FullLogoLight({ width, height }) {
 function IconOnly({ size }) {
   const id = "i";
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width={size} height={size} role="img" aria-label="Stablym icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width={size} height={size} role="img" aria-label="Sthablym icon">
       <defs>
         <linearGradient id={`bgG${id}`} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%"   stopColor="#0f172a" />
@@ -211,7 +211,7 @@ function IconOnly({ size }) {
         fontFamily="Georgia, serif"
         fontSize="9" fontWeight="700"
         fill="#cbd5e1" textAnchor="middle" letterSpacing="1.5">
-        STABLYM
+        STHABLYM
       </text>
     </svg>
   );
