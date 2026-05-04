@@ -1,20 +1,43 @@
-# backend/app.py
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import io
+import hashlib
+import urllib.parse
 
-# Import the PDF generator (place generate_report.py in the same folder as app.py)
+# ─────────────────────────────────────────────
+# PDF IMPORT
+# ─────────────────────────────────────────────
 try:
     from generate_report import generate_pdf
     PDF_ENABLED = True
 except ImportError:
     PDF_ENABLED = False
-    print("⚠️  generate_report.py not found — PDF download will be disabled.")
+    print("⚠️ generate_report.py not found — PDF disabled")
 
 app = Flask(__name__)
 CORS(app)
+active_subscriptions = set()
+# ─────────────────────────────────────────────
+# PAYFAST CONFIG
+# ─────────────────────────────────────────────
+PAYFAST_PASSPHRASE = "mmathapelo/1S"
 
-# Map quiz answers to scores
+# ─────────────────────────────────────────────
+# SIGNATURE GENERATOR
+# ─────────────────────────────────────────────
+def generate_signature(data, passphrase=""):
+    data = {k: v for k, v in data.items() if k != "signature"}
+    sorted_items = sorted(data.items())
+    query_string = urllib.parse.urlencode(sorted_items)
+
+    if passphrase:
+        query_string += f"&passphrase={passphrase}"
+
+    return hashlib.md5(query_string.encode()).hexdigest()
+
+# ─────────────────────────────────────────────
+# SCORE MAP
+# ─────────────────────────────────────────────
 score_map = {
     "Strongly Agree": 5,
     "Agree": 4,
@@ -23,39 +46,46 @@ score_map = {
     "Strongly Disagree": 1
 }
 
-# ─── HOME ─────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# HOME
+# ─────────────────────────────────────────────
 @app.route("/")
 def home():
-    return "Stablym Subject Stream API is running ✅"
+    return "Sthablym Subject Stream API is running ✅"
 
-# ─── SUBMIT QUIZ ──────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# QUIZ LOGIC
+# ─────────────────────────────────────────────
 @app.route("/api/submit-quiz", methods=["POST"])
 def submit_quiz():
-    data   = request.json  # { "answers": { category: [answers...] } }
+    data = request.json or {}
     scores = {}
 
     for category, answers in data.get("answers", {}).items():
-        if not answers:
-            scores[category] = 0
-        else:
-            total = 0
-            for ans in answers:
-                try:
-                    total += int(ans)
-                except (ValueError, TypeError):
-                    total += score_map.get(ans, 3)
-            scores[category] = total
+        total = 0
 
-    # Recommended streams (exclude Maths Aptitude category)
-    stream_scores = {k: v for k, v in scores.items() if k != "Maths Aptitude & Interest"}
+        for ans in answers:
+            try:
+                total += int(ans)
+            except:
+                total += score_map.get(ans, 3)
+
+        scores[category] = total
+
+    stream_scores = {
+        k: v for k, v in scores.items()
+        if k != "Maths Aptitude & Interest"
+    }
+
+    recommended_streams = []
     if stream_scores:
-        max_score          = max(stream_scores.values())
-        recommended_streams = [k for k, v in stream_scores.items() if v == max_score]
-    else:
-        recommended_streams = []
+        max_score = max(stream_scores.values())
+        recommended_streams = [
+            k for k, v in stream_scores.items() if v == max_score
+        ]
 
-    # Maths recommendation
     maths_score = scores.get("Maths Aptitude & Interest", 0)
+
     if maths_score >= 20:
         maths_recommendation = "PURE MATHS"
     elif maths_score >= 15:
@@ -64,61 +94,33 @@ def submit_quiz():
         maths_recommendation = "MATHS LITERACY"
 
     return jsonify({
-        "recommended_streams":  recommended_streams,
-        "maths_recommendation": maths_recommendation,
-        "scores":               scores
+        "scores": scores,
+        "recommended_streams": recommended_streams,
+        "maths_recommendation": maths_recommendation
     })
 
-# ─── GENERATE PDF REPORT ──────────────────────────────────────────────────────
-@app.route("/api/payfast/notify", methods=["POST"])
-def generate_report_route():
-    """
-    Expects JSON body:
-    {
-      "student": {
-          "name": "Thabo",
-          "surname": "Nkosi",
-          "school": "Soweto High School",
-          "grade": "9",
-          "province": "Gauteng",
-          "aps": 31,
-          "mathsLevel": "Pure Mathematics",
-          "marks": { "english": 72, "maths": 68, "science": 65, ... }
-      },
-      "streamScores": {
-          "Science Stream": 74,
-          "Commerce Stream": 52,
-          "Humanities Stream": 44,
-          "Engineering / Technical Stream": 61
-      },
-      "mathResults": {
-          "correct": 5,
-          "total": 7,
-          "pct": 71
-      }
-    }
-    Returns: PDF file as a download
-    """
+# ─────────────────────────────────────────────
+# PDF GENERATION
+# ─────────────────────────────────────────────
+@app.route("/api/generate-report", methods=["POST"])
+def generate_report():
     if not PDF_ENABLED:
-        return jsonify({
-            "error": "PDF generation is not available. "
-                     "Make sure generate_report.py is in the same folder as app.py "
-                     "and run: pip install reportlab"
-        }), 500
+        return jsonify({"error": "PDF disabled"}), 500
 
-    data          = request.get_json()
-    student       = data.get("student",      {})
+    data = request.get_json()
+
+    student = data.get("student", {})
     stream_scores = data.get("streamScores", {})
-    math_results  = data.get("mathResults",  None)
+    math_results = data.get("mathResults")
 
     try:
         pdf_bytes = generate_pdf(student, stream_scores, math_results)
     except Exception as e:
-        return jsonify({"error": f"PDF generation failed: {str(e)}"}), 500
+        return jsonify({"error": str(e)}), 500
 
-    name     = student.get("name",    "Student")
-    surname  = student.get("surname", "")
-    filename = f"Stablym_Report_{name}_{surname}.pdf".replace(" ", "_")
+    name = student.get("name", "Student")
+    surname = student.get("surname", "")
+    filename = f"Sthablym_Report_{name}_{surname}.pdf".replace(" ", "_")
 
     return send_file(
         io.BytesIO(pdf_bytes),
@@ -127,6 +129,36 @@ def generate_report_route():
         download_name=filename
     )
 
-# ─── RUN ──────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# PAYFAST WEBHOOK (SECURE)
+# ─────────────────────────────────────────────
+@app.route("/api/payfast/notify", methods=["POST"])
+def payfast_notify():
+    data = request.form.to_dict() or request.json or {}
+
+    print("💰 PAYFAST RAW DATA:", data)
+
+    # ───── VERIFY SIGNATURE ─────
+    received_signature = data.get("signature")
+    calculated_signature = generate_signature(data, PAYFAST_PASSPHRASE)
+
+    if received_signature != calculated_signature:
+        print("❌ Invalid PayFast signature")
+        return jsonify({"status": "invalid signature"}), 400
+
+    # ───── CHECK PAYMENT STATUS ─────
+    if data.get("payment_status") == "COMPLETE":
+        print("✅ Payment completed for:", data.get("item_name"))
+
+        # OPTIONAL: activate subscription
+        email = data.get("email_address") or data.get("customer_email")
+
+        if email:
+            active_subscriptions.add(email)
+            print(f"🎉 Subscription activated for {email}")
+
+    return jsonify({"status": "ok"}), 200
+# RUN APP
+# ─────────────────────────────────────────────
 if __name__ == "__main__":
     app.run(debug=True)
