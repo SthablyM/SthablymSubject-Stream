@@ -134,18 +134,20 @@ def generate_report():
 # ─────────────────────────────
 # PAYFAST WEBHOOK (FINAL FIXED VERSION)
 # ─────────────────────────────
-@app.route("/api/payfast/notify", methods=["POST"])
+@app.route("/api/payfast/notify", methods=["GET", "POST"])
 def payfast_notify():
+    if request.method == "GET":
+        return "PayFast webhook is live ✅", 200
+
     try:
-        # PayFast sends FORM data ONLY
-        data = request.form.to_dict(flat=True)
+        data = request.form.to_dict() if request.form else {}
+        data.update(request.get_json(silent=True) or {})
 
         print("💰 PAYFAST RAW DATA:", data)
 
         if not data:
             return jsonify({"status": "no data received"}), 400
 
-        # ───── VERIFY SIGNATURE ─────
         received_signature = data.get("signature", "")
         calculated_signature = generate_signature(data, PAYFAST_PASSPHRASE)
 
@@ -153,10 +155,9 @@ def payfast_notify():
             print("❌ Invalid PayFast signature")
             return jsonify({"status": "invalid signature"}), 400
 
-        # ───── PAYMENT STATUS ─────
         payment_status = data.get("payment_status", "").upper()
 
-        if payment_status in ["COMPLETE", "SUCCESS"]:
+        if payment_status == "COMPLETE":
             print("✅ Payment completed")
 
             email = data.get("email_address") or data.get("customer_email")
@@ -170,7 +171,6 @@ def payfast_notify():
     except Exception as e:
         print("🔥 WEBHOOK ERROR:", str(e))
         return jsonify({"error": str(e)}), 500
-
 # ─────────────────────────────
 # RUN APP
 # ─────────────────────────────
