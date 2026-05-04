@@ -126,6 +126,8 @@ export default function StudentProfile({ onComplete }) {
 
   const update     = (field, val) => setForm((f) => ({ ...f, [field]: val }));
   const gradeNum   = parseInt(form.grade) || 0;
+  // Grade 9 & 10 get the subject stream preview before the form
+  // Grade 8 goes straight to the form (they skip preview — will go to Past Papers after)
   const showPreview = gradeNum === 9 || gradeNum === 10;
 
   // ── Mark helpers ─────────────────────────────────────────────────────────
@@ -216,7 +218,11 @@ export default function StudentProfile({ onComplete }) {
       marks: cleanMarks,
       aps,
       mathsLevel: mathsLevel(),
-      skipQuiz: gradeNum >= 10,
+      // Grade 8 → go straight to Past Papers (skipQuiz=true, goToPastPapers=true)
+      // Grade 9 → take the stream quiz (skipQuiz=false)
+      // Grade 10+ → skip quiz, go to university options (skipQuiz=true)
+      skipQuiz:      gradeNum >= 10 || gradeNum === 8,
+      goToPastPapers: gradeNum === 8,
     });
   };
 
@@ -351,7 +357,7 @@ export default function StudentProfile({ onComplete }) {
                     Grade {g}
                   </div>
                   <div style={{ fontSize: 11, color: "#6b7280", marginTop: 2 }}>
-                    {g === "8"  ? "Exploring options" :
+                    {g === "8"  ? "Practice past questions" :
                      g === "9"  ? "Choose Grade 10 subjects" :
                      g === "10" ? "In your stream" :
                      g === "11" ? "Building your future" :
@@ -362,13 +368,24 @@ export default function StudentProfile({ onComplete }) {
             </div>
 
             {/* Grade-specific info banners */}
+            {form.grade === "8" && (
+              <div style={{ background: "#f0fdfa", border: "1.5px solid #99f6e4", borderRadius: 12, padding: "14px 16px", marginBottom: 20, display: "flex", gap: 10 }}>
+                <span style={{ fontSize: 20 }}>🌱</span>
+                <div>
+                  <b style={{ color: "#0f766e", fontSize: 13 }}>You're in Grade 8!</b>
+                  <p style={{ margin: "4px 0 0", fontSize: 13, color: "#0f766e", lineHeight: 1.6 }}>
+                    Fill in your profile and marks, then we'll take you straight to <b>practice questions</b> for your Grade 8 subjects — great for test and exam preparation!
+                  </p>
+                </div>
+              </div>
+            )}
             {form.grade === "9" && (
               <div style={{ background: "#f0fdf4", border: "1.5px solid #bbf7d0", borderRadius: 12, padding: "14px 16px", marginBottom: 20, display: "flex", gap: 10 }}>
-                <span style={{ fontSize: 20 }}>✅</span>
+                <span style={{ fontSize: 20 }}>🌿</span>
                 <div>
-                  <b style={{ color: "#14532d", fontSize: 13 }}>Perfect! You're in Grade 9.</b>
+                  <b style={{ color: "#14532d", fontSize: 13 }}>You're in Grade 9 — perfect timing!</b>
                   <p style={{ margin: "4px 0 0", fontSize: 13, color: "#14532d", lineHeight: 1.6 }}>
-                    We'll first show you <b>what each subject stream involves</b> and what careers they lead to — then you'll take the quiz to find your best match.
+                    We'll first show you <b>what each subject stream involves</b> and where each career leads — then you'll take the quiz to find your best match for Grade 10.
                   </p>
                 </div>
               </div>
@@ -406,7 +423,9 @@ export default function StudentProfile({ onComplete }) {
                 cursor: form.grade ? "pointer" : "not-allowed",
               }}
             >
-              {form.grade === "9"
+              {form.grade === "8"
+                ? "Fill in my profile →"
+                : form.grade === "9"
                 ? "Explore subject streams first →"
                 : form.grade === "10"
                 ? "See my subjects →"
@@ -660,7 +679,11 @@ export default function StudentProfile({ onComplete }) {
           <p style={{ color: "#dc2626", fontSize: 13, textAlign: "center", margin: "8px 40px 0" }}>⚠️ {errors.english}</p>
         )}
         <button style={s.submitBtn} onClick={handleSubmit}>
-          {gradeNum >= 10 ? "View My University Options →" : "Begin Stream Quiz →"}
+          {gradeNum === 8
+            ? "Take me to practice questions →"
+            : gradeNum >= 10
+            ? "View My University Options →"
+            : "Begin Stream Quiz →"}
         </button>
       </div>
     </div>

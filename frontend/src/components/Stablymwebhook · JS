@@ -1,0 +1,320 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// STABLYM — StablymWebhook.js
+// PayFast ITN Webhook + Firestore Security Rules + 8-Step Setup Guide
+// ═══════════════════════════════════════════════════════════════════════════
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OPTION A: Firebase Cloud Function  (recommended — free tier covers Stablym's scale)
+//
+//   Setup:
+//     npm install -g firebase-tools
+//     firebase login && firebase init functions
+//     Paste this into functions/index.js
+//     firebase deploy --only functions
+//
+//   Your webhook URL will be:
+//     https://us-central1-YOUR_PROJECT_ID.cloudfunctions.net/payfastNotify
+// ─────────────────────────────────────────────────────────────────────────────
+
+const functions = require("firebase-functions");
+const admin     = require("firebase-admin");
+const crypto    = require("crypto");
+
+admin.initializeApp();
+const db = admin.firestore();
+
+const PAYFAST_PASSPHRASE = "mmathapelo/1S";  // keep this secret — move to env var in production
+const PLAN_DURATIONS = {                      // how many days each plan gives
+  premium_monthly: 31,
+  premium_annual:  366,
+  parent:          31,
+  school_starter:  31,
+  school_standard: 31,
+  school_pro:      31,
+  uni_listed:      31,
+  uni_featured:    31,
+};
+
+exports.payfastNotify = functions.https.onRequest(async (req, res) => {
+  // 1. Only accept POST
+  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
+
+  const data = req.body;
+
+  // 2. Verify PayFast signature
+  const pfParamString = Object.keys(data)
+    .filter(k => k !== "signature")
+    .map(k => `${k}=${encodeURIComponent(String(data[k])).replace(/%20/g, "+")}`)
+    .join("&");
+
+  const toHash = PAYFAST_PASSPHRASE
+    ? `${pfParamString}&passphrase=${encodeURIComponent(PAYFAST_PASSPHRASE)}`
+    : pfParamString;
+
+  const expectedSig = crypto.createHash("md5").update(toHash).digest("hex");
+
+  if (data.signature !== expectedSig) {
+    console.error("PayFast ITN: signature mismatch", { got: data.signature, expected: expectedSig });
+    return res.status(400).send("Invalid signature");
+  }
+
+  // 3. Check payment status
+  if (data.payment_status !== "COMPLETE") {
+    console.log("PayFast ITN: payment not complete →", data.payment_status);
+    return res.status(200).send("OK");  // always 200 so PayFast doesn't retry
+  }
+
+  // 4. Extract our custom fields (set in initiatePayFastPayment)
+  const uid    = data.custom_str1;  // Firebase UID
+  const planId = data.custom_str2;  // e.g. "premium_monthly"
+
+  if (!uid || !planId) {
+    console.error("PayFast ITN: missing custom_str1 or custom_str2", data);
+    return res.status(200).send("OK");
+  }
+
+  // 5. Activate plan in Firestore
+  const days = PLAN_DURATIONS[planId] || 31;
+  const expiresAt = Date.now() + days * 24 * 60 * 60 * 1000;
+
+  try {
+    await db.collection("users").doc(uid).set({
+      plan:              planId,
+      expiresAt,
+      lastPaymentAt:     Date.now(),
+      lastPaymentId:     data.m_payment_id,
+      lastPaymentAmount: data.amount_gross,
+      updatedAt:         Date.now(),
+    }, { merge: true });
+
+    // Optional: log payment to separate collection for auditing
+    await db.collection("payments").doc(data.m_payment_id).set({
+      uid,
+      planId,
+      amount:    data.amount_gross,
+      paidAt:    Date.now(),
+      payfastId: data.pf_payment_id,
+      email:     data.email_address,
+    });
+
+    console.log(`✅ Plan activated: uid=${uid} plan=${planId} expires=${new Date(expiresAt).toISOString()}`);
+  } catch(e) {
+    console.error("Firestore write failed:", e);
+    // Still return 200 — we don't want PayFast to retry forever
+  }
+
+  return res.status(200).send("OK");
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// OPTION B: Vercel / Next.js API route
+//   File: pages/api/payfast-notify.js
+//   Set env vars in Vercel dashboard (see bottom of this file)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/*
+import admin from "firebase-admin";
+import crypto from "crypto";
+
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId:   process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    }),
+  });
+}
+const db = admin.firestore();
+
+const PLAN_DURATIONS = {
+  premium_monthly:31, premium_annual:366, parent:31,
+  school_starter:31, school_standard:31, school_pro:31,
+  uni_listed:31, uni_featured:31,
+};
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") return res.status(405).end();
+
+  const data = req.body;
+  const passphrase = process.env.PAYFAST_PASSPHRASE;
+
+  const pfStr = Object.keys(data)
+    .filter(k => k !== "signature")
+    .map(k => `${k}=${encodeURIComponent(String(data[k])).replace(/%20/g,"+")}`)
+    .join("&");
+
+  const toHash = passphrase ? `${pfStr}&passphrase=${encodeURIComponent(passphrase)}` : pfStr;
+  const expected = crypto.createHash("md5").update(toHash).digest("hex");
+
+  if (data.signature !== expected) return res.status(400).end();
+  if (data.payment_status !== "COMPLETE") return res.status(200).end();
+
+  const uid    = data.custom_str1;
+  const planId = data.custom_str2;
+  if (!uid || !planId) return res.status(200).end();
+
+  const days      = PLAN_DURATIONS[planId] || 31;
+  const expiresAt = Date.now() + days * 86400000;
+
+  await db.collection("users").doc(uid).set(
+    { plan:planId, expiresAt, lastPaymentAt:Date.now(), lastPaymentId:data.m_payment_id, updatedAt:Date.now() },
+    { merge:true }
+  );
+
+  res.status(200).send("OK");
+}
+*/
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// FIRESTORE SECURITY RULES
+// Paste into: Firebase Console → Firestore Database → Rules tab
+// ═══════════════════════════════════════════════════════════════════════════
+
+/*
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can read + update their own profile only
+    match /users/{userId} {
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;  // only via Admin SDK
+    }
+
+    // Payment records — users can read their own, never write
+    match /payments/{paymentId} {
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow write: if false;  // only written by server via Admin SDK
+    }
+
+    // Block everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+*/
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENVIRONMENT VARIABLES
+// ═══════════════════════════════════════════════════════════════════════════
+
+/*
+For Vercel: add these in Project → Settings → Environment Variables
+For Firebase Functions: firebase functions:config:set payfast.passphrase="mmathapelo/1S"
+
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxx@your-project.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nYOUR_KEY_HERE\n-----END PRIVATE KEY-----\n
+PAYFAST_PASSPHRASE=mmathapelo/1S
+*/
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 8-STEP PRODUCTION SETUP GUIDE
+// ═══════════════════════════════════════════════════════════════════════════
+
+/*
+──────────────────────────────────────────────────────────────
+STEP 1 — Create Firebase project
+──────────────────────────────────────────────────────────────
+  → https://console.firebase.google.com
+  → Add project → name it "stablym" (or anything)
+  → Google Analytics: your choice
+
+──────────────────────────────────────────────────────────────
+STEP 2 — Enable Firebase Authentication
+──────────────────────────────────────────────────────────────
+  → Firebase Console → Authentication → Get started
+  → Sign-in method → Email/Password → Enable → Save
+
+──────────────────────────────────────────────────────────────
+STEP 3 — Create Firestore Database
+──────────────────────────────────────────────────────────────
+  → Firestore Database → Create database
+  → Choose production mode
+  → Pick a region close to SA (e.g. europe-west1 is closest)
+  → Click the Rules tab → paste the security rules above → Publish
+
+──────────────────────────────────────────────────────────────
+STEP 4 — Get your Firebase config
+──────────────────────────────────────────────────────────────
+  → Project Settings (gear icon) → Your apps → Add app → Web (</>)
+  → Give it a nickname (e.g. "stablym-web")
+  → Copy the firebaseConfig object
+  → Paste into FIREBASE_CONFIG in SubscriptionGate.js
+
+──────────────────────────────────────────────────────────────
+STEP 5 — Create your admin account
+──────────────────────────────────────────────────────────────
+  → Firebase Console → Authentication → Users → Add user
+  → Email: admin@stablym.co.za
+  → Password: (choose something strong — this is NOT in any code file)
+  → This email is already in ADMIN_EMAILS so they get full admin access
+
+  Want to add more admins later?
+  → Add their email to ADMIN_EMAILS in SubscriptionGate.js
+  → Create their Firebase Auth account in the console
+
+──────────────────────────────────────────────────────────────
+STEP 6 — Deploy the PayFast webhook
+──────────────────────────────────────────────────────────────
+  Option A — Firebase Cloud Functions (easiest, free tier):
+    npm install -g firebase-tools
+    firebase login
+    firebase init functions  (choose your project, JavaScript)
+    cp StablymWebhook.js functions/index.js
+    npm install crypto  (inside functions/)
+    firebase deploy --only functions
+    → Webhook URL: https://us-central1-YOUR_PROJECT.cloudfunctions.net/payfastNotify
+
+  Option B — Vercel/Next.js:
+    Create pages/api/payfast-notify.js (code in Option B section above)
+    Add environment variables in Vercel dashboard
+    → Webhook URL: https://your-domain.vercel.app/api/payfast-notify
+
+──────────────────────────────────────────────────────────────
+STEP 7 — Update URLs in SubscriptionGate.js
+──────────────────────────────────────────────────────────────
+  PAYFAST_CONFIG.notifyUrl  = "https://YOUR_WEBHOOK_URL"
+  PAYFAST_CONFIG.returnUrl  = "https://YOUR_STABLYM_DOMAIN?payment=success"
+  PAYFAST_CONFIG.cancelUrl  = "https://YOUR_STABLYM_DOMAIN?payment=cancelled"
+
+──────────────────────────────────────────────────────────────
+STEP 8 — Test then go live
+──────────────────────────────────────────────────────────────
+  Testing:
+    → Set sandbox: true in PAYFAST_CONFIG
+    → Create sandbox merchant at https://sandbox.payfast.co.za
+    → Run a test payment → check Firestore for plan activation
+
+  Going live:
+    → Set sandbox: false in PAYFAST_CONFIG
+    → Deploy your app
+    → Register a real user → upgrade them → confirm plan activates
+
+  University Partner plans (uni_listed, uni_featured):
+    → These use an email contact flow rather than direct PayFast
+    → After agreeing with the institution, manually set their plan
+      from the Admin Dashboard → Users tab → click their plan badge
+
+──────────────────────────────────────────────────────────────
+ALL TIERS ACTIVE:
+──────────────────────────────────────────────────────────────
+  free            R0          (7-day trial, Grades 8–9)
+  premium_monthly R49/month   (all grades, unlimited)
+  premium_annual  R399/year   (all grades, save R189)
+  parent          R79/month   (Premium + parent dashboard)
+  school_starter  R500/month  (50 students, teacher portal)
+  school_standard R1000/month (200 students, analytics)
+  school_pro      R2000/month (500 students, custom branding)
+  uni_listed      R1000/month (listed on APS result screens)
+  uni_featured    R5000/month (featured placement + lead tracking)
+  admin           internal    (full access, no payment)
+*/
