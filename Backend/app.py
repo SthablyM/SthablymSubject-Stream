@@ -70,7 +70,7 @@ def submit_quiz():
     })
 
 # ─── GENERATE PDF REPORT ──────────────────────────────────────────────────────
-@app.route("/api/generate-report", methods=["POST"])
+@app.route("/api/payfast/notify", methods=["POST"])
 def generate_report_route():
     """
     Expects JSON body:
