@@ -8,8 +8,7 @@ import StablymLogo from "./StablymLogoComponent";
 
 // ── YOUR BACKEND URL ──────────────────────────────────────────────────────────
 // In development: http://127.0.0.1:5000
-// In production:  your Railway / Render / Fly URL (no trailing slash)
-const API_BASE = process.env.REACT_APP_API_URL || "http://127.0.0.1:5000";
+const API_BASE = "https://sthablymsubject-stream.onrender.com";
 
 // ─────────────────────────────────────────────────────────────────────────────
 const VALID_CODES = {
@@ -114,9 +113,9 @@ export default function AccessGate({ children }) {
   }
 
   // ── Subscribe: redirect browser through Flask → PayFast ─────────────────────
-  const handleSubscribe = (plan) => {
-    window.location.href = `${API_BASE}/api/subscribe?plan=${plan}`;
-  };
+const handleSubscribe = (plan, userEmail = "") => {
+  window.location.href = `${API_BASE}/api/subscribe?plan=${plan}&email=${encodeURIComponent(userEmail)}`;
+};
 
   // ── Code entry submit ────────────────────────────────────────────────────────
   const handleSubmit = () => {
