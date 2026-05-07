@@ -26,7 +26,7 @@ PAYFAST_MERCHANT_KEY = "tgki9qvkzzhr1"
 PAYFAST_PASSPHRASE   = "mmathapelo/1S"
 
 FRONTEND_URL = "https://sthablymsubject-stream.surge.sh"
-BACKEND_URL  = "https://your-backend.railway.app"  # ← Update this to your actual Railway URL
+BACKEND_URL  = "https://sthablymsubject-stream.onrender.com"  # ← Update this to your actual Railway URL
 
 SANDBOX = False  # Set to True for testing with PayFast Sandbox credentials
 PAYFAST_BASE = (

@@ -1335,33 +1335,22 @@ function processPayment() {
   var last  = document.getElementById('pay-last').value.trim();
   var email = document.getElementById('pay-email').value.trim();
   var phone = document.getElementById('pay-phone').value.trim();
-  if (!first || !last || !email || !phone) { showToast('⚠️ Please fill in all required fields', true); return; }
-  if (!/\S+@\S+\.\S+/.test(email)) { showToast('⚠️ Please enter a valid email address', true); return; }
-  var btn = document.getElementById('pay-submit-btn');
-  btn.disabled = true;
-  document.getElementById('pay-btn-text').textContent = '⏳ Preparing PayFast checkout...';
-  var planKey = currentPlan.key;
-  var amount  = PLAN_AMOUNTS[planKey];
-  var now     = new Date();
-  var mm      = String(now.getMonth()+1).padStart(2,'0');
-  var yy      = String(now.getFullYear()).slice(-2);
-  var rand    = Math.random().toString(36).substring(2,6).toUpperCase();
-  var paymentId  = 'STB-'+planKey.toUpperCase().replace(/-/g,'')+'-'+rand+'-'+mm+yy;
-  var itemName   = currentPlan.name + ' - Stablym';
-  var org        = document.getElementById('pay-org').value.trim();
-  var nameCode   = (planKey.startsWith('school') ? (org||first) : first).toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,8);
-  var accessCode = 'STABLYM-'+(planKey.startsWith('school')?'SCH':'STU')+'-'+nameCode+'-'+mm+yy;
-  var returnUrl  = PF.baseUrl+'?payment=success&code='+encodeURIComponent(accessCode)+'&plan='+encodeURIComponent(currentPlan.name)+'&email='+encodeURIComponent(email)+'&phone='+encodeURIComponent(phone)+'&first='+encodeURIComponent(first);
-  var cancelUrl  = PF.baseUrl+'?payment=cancelled';
-  var pfParams   = { merchant_id:PF.merchantId, merchant_key:PF.merchantKey, return_url:returnUrl, cancel_url:cancelUrl, name_first:first, name_last:last, email_address:email, m_payment_id:paymentId, amount:amount, item_name:itemName };
-  if (PF.passphrase) { pfParams.passphrase = PF.passphrase; }
-  var form = document.getElementById('payfast-form');
-  form.action = 'https://www.payfast.co.za/eng/process';
-  form.innerHTML = '';
-  Object.keys(pfParams).forEach(function(k){ var inp=document.createElement('input'); inp.type='hidden'; inp.name=k; inp.value=pfParams[k]; form.appendChild(inp); });
-  setTimeout(function(){ btn.disabled=false; document.getElementById('pay-btn-text').textContent='💳 Pay Now via PayFast'; form.submit(); }, 800);
-}
 
+  if (!first || !last || !email || !phone) {
+    showToast('⚠️ Please fill in all required fields', true);
+    return;
+  }
+
+  var planKey = currentPlan.key;
+  var backendUrl = 'https://sthablymsubject-stream.onrender.com';  // ← your Render URL
+
+  // Redirect to backend — Flask will build the signed PayFast form and submit it
+  window.location.href = backendUrl + '/api/subscribe' +
+    '?plan=' + encodeURIComponent(planKey) +
+    '&email=' + encodeURIComponent(email) +
+    '&first=' + encodeURIComponent(first) +
+    '&last='  + encodeURIComponent(last);
+}
 // ═══════════════════ LOGIN ═══════════════════
 function testLogin(type) {
   var now = new Date(); var mm=String(now.getMonth()+1).padStart(2,'0'); var yy=String(now.getFullYear()).slice(-2);
