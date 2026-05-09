@@ -4,6 +4,7 @@ import UniversityFinder from "./UniversityFinder";
 import APSCalculator, { calcAPS, markToAPS, markToSymbol, mathsLabel } from "./APSCalculator";
 import PastPapersQuiz from "./PastPapersQuiz";
 import StablymLogo from "./StablymLogoComponent";
+import TeacherDashboard from "./TeacherDashboard"; // ← replaces the inline stub
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STREAM DATA
@@ -149,9 +150,6 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
   };
 
   // ── Navigation ─────────────────────────────────────────────────────────────
-  // Grade 8: only Past Papers + Advice
-  // Grade 9: Results + Past Papers + Advice (no APS/Universities yet)
-  // Grade 10+: full nav
   const isHighSchool = grade >= 10;
 
   const NAV = isGrade8
@@ -226,7 +224,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
 
       <div style={{ ...s.content, maxWidth: activeSection === "teacher" ? 1100 : 800 }}>
 
-        {/* ══ GRADE 8 WELCOME (shown above past papers for grade 8) ══ */}
+        {/* ══ GRADE 8 WELCOME ══ */}
         {activeSection === "pastpapers" && isGrade8 && (
           <div style={{ background:"#f0fdfa", border:"1px solid #99f6e4", borderRadius:12, padding:"14px 16px", marginBottom:16, display:"flex", gap:12, alignItems:"flex-start" }}>
             <span style={{ fontSize:24, flexShrink:0 }}>🌱</span>
@@ -390,7 +388,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
           </div>
         )}
 
-        {/* ══ PAST PAPERS — available to ALL grades (8, 9, 10, 11, 12) ══ */}
+        {/* ══ PAST PAPERS ══ */}
         {activeSection === "pastpapers" && (
           <PastPapersQuiz
             student={{ ...student, marks:activeMarks, aps:displayAPS }}
@@ -400,7 +398,11 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
 
         {/* ══ TEACHER PORTAL ══ */}
         {activeSection === "teacher" && isHighSchool && (
-          <TeacherPortal student={{ ...student, marks:activeMarks, aps:displayAPS }} streamColor={info.color}/>
+          <TeacherDashboard
+            student={{ ...student, marks: activeMarks, aps: displayAPS }}
+            streamColor={info.color}
+            stream={topStream}
+          />
         )}
 
         {/* ══ ADVICE ══ */}
@@ -466,17 +468,6 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
 
         <button style={s.retakeBtn} onClick={() => window.location.reload()}>🔄 {isGrade8 || isGrade9 ? "Start Over" : "Retake Quiz"}</button>
       </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TEACHER PORTAL stub
-// ─────────────────────────────────────────────────────────────────────────────
-function TeacherPortal({ student, streamColor }) {
-  return (
-    <div style={{ padding:"20px", background:"#f8fafc", borderRadius:16, textAlign:"center", color:"#6b7280", fontSize:14 }}>
-      <p>🎓 Teacher Portal — copy the TeacherPortal component from the previous EnhancedResults.js into this file.</p>
     </div>
   );
 }

@@ -200,7 +200,7 @@ const handleSubscribe = (plan, userEmail = "") => {
               <div style={s.planDesc}>Individual · All subjects</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={s.planPrice}>R49<span style={s.planPer}>/mo</span></div>
+              <div style={s.planPrice}>R29<span style={s.planPer}>/mo</span></div>
               <button
                 onClick={() => handleSubscribe("student_plus")}
                 style={{ ...s.planBadge, background: "rgba(14,165,233,.18)", color: "#0ea5e9", border: "none", cursor: "pointer" }}

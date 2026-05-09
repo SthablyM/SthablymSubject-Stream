@@ -1,5 +1,5 @@
 // src/components/StudentProfile.js
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import StablymLogo from "./StablymLogoComponent";
 import SubjectPreview from "./SubjectPreview";
 
@@ -109,8 +109,80 @@ const APS_GUIDE = [
 
 // ─── STEP CONSTANTS ───────────────────────────────────────────────────────────
 const STEP_GRADE   = "grade";
-const STEP_PREVIEW = "preview";   // Grade 9 & 10 only — subject stream explorer
-const STEP_FORM    = "form";      // Full profile + marks form
+const STEP_PREVIEW = "preview";
+const STEP_FORM    = "form";
+
+// ─── STABLE MARK INPUT ───────────────────────────────────────────────────────
+// Uncontrolled during typing; commits to parent state only on blur or Enter.
+// This prevents the cursor from jumping mid-input.
+function MarkInput({ subId, committedValue, onCommit, borderColor, accentColor }) {
+  const [localVal, setLocalVal] = useState(
+    committedValue !== null && committedValue !== undefined ? String(committedValue) : ""
+  );
+  const inputRef = useRef(null);
+
+  // Sync local display if the committed value changes externally (e.g. N/A toggle)
+  useEffect(() => {
+    const external =
+      committedValue !== null && committedValue !== undefined ? String(committedValue) : "";
+    setLocalVal(external);
+  }, [committedValue]);
+
+  const commit = (raw) => {
+    if (raw === "" || raw === null) {
+      onCommit(null);
+      return;
+    }
+    const num = parseInt(raw, 10);
+    if (!isNaN(num)) {
+      const clamped = Math.min(100, Math.max(0, num));
+      onCommit(clamped);
+      setLocalVal(String(clamped));
+    } else {
+      // Invalid input — revert display to last committed
+      setLocalVal(
+        committedValue !== null && committedValue !== undefined ? String(committedValue) : ""
+      );
+    }
+  };
+
+  return (
+    <input
+      ref={inputRef}
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      placeholder="%"
+      value={localVal}
+      onChange={(e) => {
+        // Only allow digits (and empty)
+        const v = e.target.value.replace(/[^0-9]/g, "");
+        setLocalVal(v);
+      }}
+      onBlur={(e) => commit(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          commit(localVal);
+          inputRef.current?.blur();
+        }
+      }}
+      style={{
+        width: 68,
+        padding: "7px 8px",
+        border: `2px solid ${borderColor}`,
+        borderRadius: 8,
+        fontSize: 14,
+        textAlign: "center",
+        outline: "none",
+        fontWeight: 700,
+        background: "#f0f9ff",
+        color: "#1e293b",
+        transition: "border-color .2s",
+      }}
+    />
+  );
+}
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 export default function StudentProfile({ onComplete }) {
@@ -126,20 +198,15 @@ export default function StudentProfile({ onComplete }) {
 
   const update     = (field, val) => setForm((f) => ({ ...f, [field]: val }));
   const gradeNum   = parseInt(form.grade) || 0;
-  // Grade 9 & 10 get the subject stream preview before the form
-  // Grade 8 goes straight to the form (they skip preview — will go to Past Papers after)
   const showPreview = gradeNum === 9 || gradeNum === 10;
 
   // ── Mark helpers ─────────────────────────────────────────────────────────
-  const updateMark = (id, val) => {
-    if (val === "" || val === null || val === undefined) {
+  const commitMark = (id, val) => {
+    if (val === null || val === undefined || val === "") {
       setMarks((m) => { const n = { ...m }; delete n[id]; return n; });
       return;
     }
-    const num = parseInt(val, 10);
-    if (!isNaN(num)) {
-      setMarks((m) => ({ ...m, [id]: Math.min(100, Math.max(0, num)) }));
-    }
+    setMarks((m) => ({ ...m, [id]: val }));
   };
 
   const toggleNA = (id) => {
@@ -186,7 +253,7 @@ export default function StudentProfile({ onComplete }) {
   const apsColorHex = (a) =>
     a >= 6 ? "#16a34a" : a >= 5 ? "#22c55e" : a >= 4 ? "#d97706" : a >= 3 ? "#f97316" : a >= 2 ? "#dc2626" : "#94a3b8";
 
-  // ── Grade confirm → decide next step ─────────────────────────────────────
+  // ── Grade confirm ─────────────────────────────────────────────────────────
   const handleGradeConfirm = () => {
     if (!form.grade) return;
     if (showPreview) {
@@ -218,9 +285,6 @@ export default function StudentProfile({ onComplete }) {
       marks: cleanMarks,
       aps,
       mathsLevel: mathsLevel(),
-      // Grade 8 → go straight to Past Papers (skipQuiz=true, goToPastPapers=true)
-      // Grade 9 → take the stream quiz (skipQuiz=false)
-      // Grade 10+ → skip quiz, go to university options (skipQuiz=true)
       skipQuiz:      gradeNum >= 10 || gradeNum === 8,
       goToPastPapers: gradeNum === 8,
     });
@@ -234,6 +298,7 @@ export default function StudentProfile({ onComplete }) {
     const apsVal = numVal !== null && !sub.lo ? markToAPS(numVal) : null;
     const sym    = numVal !== null ? symbolLabel(numVal) : null;
     const ac     = apsVal ? apsColorHex(apsVal) : "#e2e8f0";
+    const borderColor = numVal !== null ? ac : "#e2e8f0";
 
     return (
       <div style={{
@@ -253,17 +318,12 @@ export default function StudentProfile({ onComplete }) {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
           {!isNA && (
-            <input
-              type="number" min="0" max="100" placeholder="%"
-              value={numVal ?? ""}
-              onChange={(e) => updateMark(sub.id, e.target.value)}
-              style={{
-                width: 68, padding: "7px 8px",
-                border: `2px solid ${numVal !== null ? ac : "#e2e8f0"}`,
-                borderRadius: 8, fontSize: 14, textAlign: "center", outline: "none",
-                fontWeight: 700, background: "#f0f9ff", color: "#1e293b",
-                transition: "border-color .2s",
-              }}
+            <MarkInput
+              subId={sub.id}
+              committedValue={numVal}
+              onCommit={(v) => commitMark(sub.id, v)}
+              borderColor={borderColor}
+              accentColor={ac}
             />
           )}
           {apsVal !== null && numVal !== null && (
@@ -367,7 +427,6 @@ export default function StudentProfile({ onComplete }) {
               ))}
             </div>
 
-            {/* Grade-specific info banners */}
             {form.grade === "8" && (
               <div style={{ background: "#f0fdfa", border: "1.5px solid #99f6e4", borderRadius: 12, padding: "14px 16px", marginBottom: 20, display: "flex", gap: 10 }}>
                 <span style={{ fontSize: 20 }}>🌱</span>
@@ -592,7 +651,7 @@ export default function StudentProfile({ onComplete }) {
             <span style={{ fontSize: 16 }}>💡</span>
             <div>
               <b>How to fill this in:</b> Type your latest mark (0–100) for each subject you take.
-              Hit <b>N/A</b> for subjects you don't do. Your <b>APS updates live</b> as you type.
+              Hit <b>N/A</b> for subjects you don't do. Your <b>APS updates</b> when you finish typing each mark (press Enter or click away).
             </div>
           </div>
 

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 // ─── APS helpers ──────────────────────────────────────────────────────────────
 const markToAPS   = m => m>=80?7:m>=70?6:m>=60?5:m>=50?4:m>=40?3:m>=30?2:1;
@@ -71,8 +71,8 @@ const GradePill = ({ g }) => {
 };
 
 // ─── FORM FIELD ──────────────────────────────────────────────────────────────
-const Field = ({ label, error, children, half }) => (
-  <div style={{ display:"flex", flexDirection:"column", gap:5, gridColumn: half?"span 1":"span 1" }}>
+const Field = ({ label, error, children }) => (
+  <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
     <label style={{ fontSize:12, fontWeight:700, color:"#475569", textTransform:"uppercase", letterSpacing:".5px" }}>{label}</label>
     {children}
     {error && <span style={{ fontSize:11, color:"#dc2626" }}>⚠ {error}</span>}
@@ -80,7 +80,7 @@ const Field = ({ label, error, children, half }) => (
 );
 
 const inp = { padding:"9px 12px", border:"2px solid #e2e8f0", borderRadius:8, fontSize:13,
-  outline:"none", fontFamily:"inherit", background:"#f8fafc", width:"100%", color:"#1e293b" };
+  outline:"none", fontFamily:"inherit", background:"#f8fafc", width:"100%", color:"#1e293b", boxSizing:"border-box" };
 const inpErr = { ...inp, borderColor:"#fca5a5", background:"#fff5f5" };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -256,7 +256,7 @@ function ExamPanel({ student, onAdd }) {
         </div>
       )}
 
-      {recs.map((rec, i) => (
+      {recs.map((rec) => (
         <div key={rec.id} style={{ background:"#fff", border:"1px solid #e2e8f0", borderRadius:14,
           padding:"16px 20px", marginBottom:12, boxShadow:"0 1px 3px rgba(0,0,0,.05)" }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
@@ -598,41 +598,101 @@ function ReportPanel({ student }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// MAIN DASHBOARD
-// ─────────────────────────────────────────────────────────────────────────────
-export default function TeacherDashboard() {
-  const [students, setStudents] = useState(INITIAL_STUDENTS);
-  const [selected, setSelected] = useState(null);
-  const [tab,      setTab]      = useState("marks");
-  const [newName,  setNewName]  = useState("");
-  const [newGrade, setNewGrade] = useState("9");
-  const [adding,   setAdding]   = useState(false);
+// ─── AUTH GATE ───────────────────────────────────────────────────────────────
+const TEACHER_PIN = "stablym2025";
+let _sessionGranted = false;
 
-  const student = students.find(s => s.id===selected);
+function AuthGate({ onUnlock }) {
+  const [pin,   setPin]   = useState("");
+  const [error, setError] = useState("");
+  const [busy,  setBusy]  = useState(false);
 
+  const attempt = () => {
+    setBusy(true);
+    setTimeout(() => {
+      if (pin === TEACHER_PIN) {
+        _sessionGranted = true;
+        onUnlock();
+      } else {
+        setError("Incorrect PIN. Contact your school administrator.");
+        setPin("");
+      }
+      setBusy(false);
+    }, 600);
+  };
+
+  return (
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center",
+      background:"#f0f4f8", fontFamily:"system-ui,-apple-system,sans-serif" }}>
+      <div style={{ background:"#fff", borderRadius:16, padding:"40px 36px", maxWidth:400, width:"100%",
+        boxShadow:"0 4px 24px rgba(0,0,0,.09)", border:"1px solid #e2e8f0", textAlign:"center" }}>
+        <div style={{ fontSize:40, marginBottom:12 }}>🔒</div>
+        <h2 style={{ fontSize:20, fontWeight:800, color:"#0f172a", margin:"0 0 6px" }}>Teacher Portal</h2>
+        <p style={{ fontSize:13, color:"#64748b", margin:"0 0 24px" }}>
+          This area is restricted to authorised staff only.
+        </p>
+        <input
+          type="password"
+          placeholder="Enter teacher PIN"
+          value={pin}
+          onChange={e => { setPin(e.target.value); setError(""); }}
+          onKeyDown={e => e.key==="Enter" && attempt()}
+          style={{ width:"100%", padding:"11px 14px", fontSize:15, border:"2px solid #e2e8f0",
+            borderRadius:10, outline:"none", fontFamily:"inherit", marginBottom:12, boxSizing:"border-box" }}
+          autoFocus
+        />
+        {error && <p style={{ fontSize:12, color:"#dc2626", margin:"0 0 12px" }}>⚠ {error}</p>}
+        <button onClick={attempt} disabled={busy || !pin}
+          style={{ width:"100%", padding:"12px", background:"#0f172a", color:"#fff", border:"none",
+            borderRadius:10, fontSize:14, fontWeight:700,
+            cursor: busy || !pin ? "not-allowed" : "pointer",
+            opacity: busy || !pin ? .6 : 1 }}>
+          {busy ? "Checking…" : "Unlock Portal"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INNER DASHBOARD (only rendered after auth)
+// ─────────────────────────────────────────────────────────────────────────────
+function TeacherDashboardInner() {
+  const [students,  setStudents]  = useState(INITIAL_STUDENTS);
+  const [selected,  setSelected]  = useState(null);   // student id or null
+  const [tab,       setTab]       = useState("marks"); // "marks"|"exam"|"report"
+  const [adding,    setAdding]    = useState(false);
+  const [newName,   setNewName]   = useState("");
+  const [newGrade,  setNewGrade]  = useState("9");
+
+  const student = students.find(s => s.id === selected) || null;
+
+  // ── helpers ──────────────────────────────────────────────────────────────
   const updateStudent = (id, fn) =>
-    setStudents(ss => ss.map(s => s.id===id ? fn(s) : s));
+    setStudents(ss => ss.map(s => s.id === id ? fn(s) : s));
 
-  const setMark = (id, subId, val) => updateStudent(id, s => ({
-    ...s, marks:{ ...s.marks,
-      [subId]: val===undefined ? undefined : Math.min(100,Math.max(0,parseInt(val)||0)) }
-  }));
+  const setMark = (id, subId, val) =>
+    updateStudent(id, s => ({
+      ...s,
+      marks: val === undefined
+        ? (() => { const m={...s.marks}; delete m[subId]; return m; })()
+        : { ...s.marks, [subId]: val }
+    }));
 
-  const addExamRecord = (id, rec) => updateStudent(id, s => ({
-    ...s, examRecords:[...(s.examRecords||[]), rec]
-  }));
+  const addExamRecord = (id, rec) =>
+    updateStudent(id, s => ({ ...s, examRecords:[...(s.examRecords||[]), rec] }));
 
   const addStudent = () => {
-    if(!newName.trim()) return;
+    if (!newName.trim()) return;
     setStudents(ss => [...ss, {
-      id:Date.now(), name:newName.trim(), grade:parseInt(newGrade), marks:{}, examRecords:[]
+      id: Date.now(), name: newName.trim(), grade: parseInt(newGrade), marks:{}, examRecords:[]
     }]);
     setNewName(""); setAdding(false);
   };
 
   const openStudent = id => { setSelected(id); setTab("marks"); };
 
+  // ─────────────────────────────────────────────────────────────────────────
   return (
     <div style={{ display:"flex", minHeight:"100vh", background:"#f0f4f8",
       fontFamily:"system-ui,-apple-system,sans-serif" }}>
@@ -646,11 +706,11 @@ export default function TeacherDashboard() {
             textTransform:"uppercase", marginTop:2 }}>Teacher Portal</div>
         </div>
         <div style={{ borderTop:"1px solid #1e293b", padding:"8px 8px" }}>
-          <button onClick={()=>{ setSelected(null); }}
+          <button onClick={()=>setSelected(null)}
             style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"10px 10px",
               border:"none", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600,
-              background: !selected?"#1e3a5f":"transparent", color: !selected?"#e2e8f0":"#64748b",
-              textAlign:"left" }}>
+              background: !selected?"#1e3a5f":"transparent",
+              color: !selected?"#e2e8f0":"#64748b", textAlign:"left" }}>
             <span>👥</span> Class Roster
           </button>
         </div>
@@ -661,9 +721,9 @@ export default function TeacherDashboard() {
               {student.name.split(" ")[0]}
             </div>
             {[
-              { icon:"📝", label:"Enter Marks",   t:"marks"  },
-              { icon:"🔒", label:"Exam Records",  t:"exam"   },
-              { icon:"📄", label:"Print Report",  t:"report" },
+              { icon:"📝", label:"Enter Marks",  t:"marks"  },
+              { icon:"🔒", label:"Exam Records", t:"exam"   },
+              { icon:"📄", label:"Print Report", t:"report" },
             ].map(({icon,label,t}) => (
               <button key={t} onClick={()=>setTab(t)}
                 style={{ display:"flex", alignItems:"center", gap:8, width:"100%", padding:"10px 10px",
@@ -697,10 +757,10 @@ export default function TeacherDashboard() {
             {/* Stats */}
             <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:24 }}>
               {[
-                { label:"Total Students", value:students.length, color:"#2563eb" },
-                { label:"Marks Entered",  value:students.filter(s=>Object.values(s.marks).some(v=>typeof v==="number")).length, color:"#16a34a" },
-                { label:"Exams Recorded", value:students.filter(s=>s.examRecords?.length>0).length, color:"#7c3aed" },
-                { label:"Reports Ready",  value:students.filter(s=>calcAPS(s.marks)>0).length, color:"#ea580c" },
+                { label:"Total Students", value:students.length,                                                                      color:"#2563eb" },
+                { label:"Marks Entered",  value:students.filter(s=>Object.values(s.marks).some(v=>typeof v==="number")).length,        color:"#16a34a" },
+                { label:"Exams Recorded", value:students.filter(s=>s.examRecords?.length>0).length,                                   color:"#7c3aed" },
+                { label:"Reports Ready",  value:students.filter(s=>calcAPS(s.marks)>0).length,                                        color:"#ea580c" },
               ].map(({label,value,color})=>(
                 <div key={label} style={{ background:"#fff", borderRadius:12, padding:"14px 18px",
                   borderTop:`3px solid ${color}`, boxShadow:"0 1px 4px rgba(0,0,0,.06)",
@@ -747,9 +807,9 @@ export default function TeacherDashboard() {
                 ))}
               </div>
               {students.map((st,i) => {
-                const aps = calcAPS(st.marks);
+                const aps     = calcAPS(st.marks);
                 const entered = Object.values(st.marks).filter(v=>typeof v==="number"&&v>=0).length;
-                const col = aps>=30?"#16a34a":aps>=22?"#d97706":aps>0?"#dc2626":null;
+                const col     = aps>=30?"#16a34a":aps>=22?"#d97706":aps>0?"#dc2626":null;
                 return (
                   <div key={st.id} style={{ display:"grid", gridTemplateColumns:"2fr .8fr 1.2fr 1fr 1.3fr .8fr",
                     padding:"12px 18px", borderBottom: i<students.length-1?"1px solid #f8fafc":"none",
@@ -759,10 +819,11 @@ export default function TeacherDashboard() {
                     <span style={{ fontSize:13, color: entered>0?"#16a34a":"#94a3b8", fontWeight:600 }}>
                       {entered>0?`${entered} subjects`:"—"}
                     </span>
-                    <span>{aps>0
-                      ? <span style={{ background:col+"1a", color:col, fontWeight:800,
-                          padding:"3px 10px", borderRadius:99, fontSize:13, border:`1px solid ${col}33` }}>{aps}/42</span>
-                      : <span style={{ color:"#94a3b8",fontSize:13 }}>—</span>}
+                    <span>
+                      {aps>0
+                        ? <span style={{ background:col+"1a", color:col, fontWeight:800,
+                            padding:"3px 10px", borderRadius:99, fontSize:13, border:`1px solid ${col}33` }}>{aps}/42</span>
+                        : <span style={{ color:"#94a3b8",fontSize:13 }}>—</span>}
                     </span>
                     <span style={{ fontSize:13, color: st.examRecords?.length>0?"#7c3aed":"#94a3b8", fontWeight:600 }}>
                       {st.examRecords?.length>0?`✓ ${st.examRecords.length} recorded`:"None yet"}
@@ -802,9 +863,9 @@ export default function TeacherDashboard() {
             <div style={{ display:"flex", gap:3, background:"#f1f5f9", padding:3,
               borderRadius:11, marginBottom:26, width:"fit-content" }}>
               {[
-                {t:"marks", label:"📝 Enter Marks"},
-                {t:"exam",  label:"🔒 Exam Records"},
-                {t:"report",label:"📄 Print Report"},
+                {t:"marks",  label:"📝 Enter Marks"},
+                {t:"exam",   label:"🔒 Exam Records"},
+                {t:"report", label:"📄 Print Report"},
               ].map(({t,label})=>(
                 <button key={t} onClick={()=>setTab(t)}
                   style={{ padding:"9px 18px", border:"none", borderRadius:8, fontSize:13,
@@ -825,4 +886,13 @@ export default function TeacherDashboard() {
       </main>
     </div>
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROOT EXPORT — auth gate wrapping the dashboard
+// ─────────────────────────────────────────────────────────────────────────────
+export default function TeacherDashboard() {
+  const [unlocked, setUnlocked] = useState(_sessionGranted);
+  if (!unlocked) return <AuthGate onUnlock={() => setUnlocked(true)} />;
+  return <TeacherDashboardInner />;
 }
