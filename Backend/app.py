@@ -71,29 +71,14 @@ def is_subscribed(email):
 
 # ── SIGNATURE — THE CRITICAL FUNCTION ────────────────────────────────────────
 def generate_signature(data: dict) -> str:
-    """
-    PayFast signature rules (all must match exactly):
-    1. Exclude the 'signature' key itself
-    2. Exclude any key whose value is empty string or None
-    3. Sort keys alphabetically
-    4. urllib.parse.urlencode — this uses quote_plus (spaces → +)
-    5. Append &passphrase=<url-encoded passphrase> if passphrase is set
-    6. MD5 of the resulting string
-    """
-    # Step 1 & 2: filter out 'signature' and empty values
+    EXCLUDE = {"signature", "merchant_key"}   # ← add merchant_key here
     filtered = {
         k: v for k, v in data.items()
-        if k != "signature" and v is not None and str(v).strip() != ""
+        if k not in EXCLUDE and v is not None and str(v).strip() != ""
     }
-
-    # Step 3 & 4: sort alphabetically then urlencode (quote_plus)
     query_string = urllib.parse.urlencode(sorted(filtered.items()))
-
-    # Step 5: append passphrase — it must also be quote_plus encoded
     if PAYFAST_PASSPHRASE:
         query_string += "&passphrase=" + urllib.parse.quote_plus(PAYFAST_PASSPHRASE)
-
-    # Step 6: MD5
     return hashlib.md5(query_string.encode("utf-8")).hexdigest()
 
 # ── ROUTES ────────────────────────────────────────────────────────────────────
@@ -125,23 +110,19 @@ def subscribe():
     # An empty field included here but absent from PayFast's copy = mismatch.
     pf = {
         "merchant_id":  PAYFAST_MERCHANT_ID,
-        "merchant_key": PAYFAST_MERCHANT_KEY,
-        "return_url":   f"{FRONTEND_URL}?payment=success&plan={plan_key}&email={urllib.parse.quote(email)}",
+        "merchant_key": PAYFAST_MERCHANT_KEY,   # stays in form
+        "return_url":   f"{FRONTEND_URL}?payment=success&email={urllib.parse.quote_plus(email)}",
         "cancel_url":   f"{FRONTEND_URL}?payment=cancelled",
         "notify_url":   f"{BACKEND_URL}/api/payfast/notify",
         "m_payment_id": payment_id,
         "amount":       plan["amount"],
         "item_name":    plan["name"],
     }
-
-    # Only add these if non-empty — blank fields break the signature
     if first:  pf["name_first"]    = first
     if last:   pf["name_last"]     = last
     if email:  pf["email_address"] = email
-    if phone:  pf["cell_number"]   = phone
 
-    # ── Generate signature AFTER the final dict is built ──────────────────
-    pf["signature"] = generate_signature(pf)
+    pf["signature"] = generate_signature(pf)   # merchant_key excluded inside the function
 
     # ── Build auto-submit HTML form ────────────────────────────────────────
     hidden_fields = "\n".join(

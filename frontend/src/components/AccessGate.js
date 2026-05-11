@@ -365,7 +365,7 @@ export default function AccessGate({ children }) {
             <div style={{ textAlign: "right" }}>
               <div style={s.planPrice}>R69<span style={s.planPer}>/mo</span></div>
               <button
-                onClick={() =>  handleSubscribe("student_premium"}
+                onClick={() =>  handleSubscribe("student_premium")}
                 style={{ ...s.planBadge, background: "rgba(245,158,11,.18)", color: "#f59e0b", border: "none", cursor: "pointer" }}
               >
                 Subscribe →
