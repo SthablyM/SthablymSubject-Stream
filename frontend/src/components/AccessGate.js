@@ -209,7 +209,7 @@ export default function AccessGate({ children }) {
 
             <div style={s.heroCtas}>
               <button onClick={() => setView("plans")} style={s.ctaPrimary}>
-                Get Started — from R29/mo →
+                Get Started →
               </button>
               <a
                 href="https://wa.me/27685438227?text=Hi%20Stablym!%20I%27m%20a%20school%20and%20would%20like%20to%20find%20out%20more."
@@ -347,7 +347,7 @@ export default function AccessGate({ children }) {
               <div style={s.planDesc}>Individual · All subjects</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={s.planPrice}>R29<span style={s.planPer}>/mo</span></div>
+              <div style={s.planPrice}>coming soon<span style={s.planPer}>/mo</span></div>
               <button
                 onClick={() => handleSubscribe("student_basic")}
                 style={{ ...s.planBadge, background: "rgba(14,165,233,.18)", color: "#0ea5e9", border: "none", cursor: "pointer" }}
@@ -363,7 +363,7 @@ export default function AccessGate({ children }) {
               <div style={s.planDesc}>Grade 12 · Exam prep</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={s.planPrice}>R69<span style={s.planPer}>/mo</span></div>
+              <div style={s.planPrice}>coming soon<span style={s.planPer}>/mo</span></div>
               <button
                 onClick={() =>  handleSubscribe("student_premium")}
                 style={{ ...s.planBadge, background: "rgba(245,158,11,.18)", color: "#f59e0b", border: "none", cursor: "pointer" }}
