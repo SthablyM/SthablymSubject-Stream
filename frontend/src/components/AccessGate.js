@@ -203,7 +203,7 @@ export default function AccessGate({ children }) {
             </h1>
 
             <p style={s.heroSub}>
-              South African schools offer four main subject streams. Stablym helps every learner
+              South African schools offer four main subject streams. Sthablym helps every learner
               discover which path aligns with their strengths, interests, and career goals.
             </p>
 
@@ -269,11 +269,11 @@ export default function AccessGate({ children }) {
           <div style={s.quoteBlock}>
             <div style={{ fontSize: 32, marginBottom: 12, opacity: 0.4 }}>"</div>
             <p style={{ fontSize: 16, color: "rgba(255,255,255,.75)", lineHeight: 1.8, margin: "0 0 16px", fontStyle: "italic" }}>
-              Choosing the wrong subjects in Grade 9 costs learners years. Stablym gives
+              Choosing the wrong subjects in Grade 9 costs learners years. Sthablym gives
               them the information they need before it's too late — in plain language, instantly.
             </p>
             <div style={{ fontSize: 13, color: "rgba(255,255,255,.35)", fontWeight: 600, letterSpacing: .5 }}>
-              — Stablym · Made in South Africa
+              — Sthablym · Made in South Africa
             </div>
           </div>
 
@@ -349,7 +349,7 @@ export default function AccessGate({ children }) {
             <div style={{ textAlign: "right" }}>
               <div style={s.planPrice}>R29<span style={s.planPer}>/mo</span></div>
               <button
-                onClick={() => handleSubscribe("student_plus")}
+                onClick={() => handleSubscribe("student_basic")}
                 style={{ ...s.planBadge, background: "rgba(14,165,233,.18)", color: "#0ea5e9", border: "none", cursor: "pointer" }}
               >
                 Subscribe →
@@ -365,7 +365,7 @@ export default function AccessGate({ children }) {
             <div style={{ textAlign: "right" }}>
               <div style={s.planPrice}>R69<span style={s.planPer}>/mo</span></div>
               <button
-                onClick={() => handleSubscribe("matric_booster")}
+                onClick={() =>  handleSubscribe("student_premium"}
                 style={{ ...s.planBadge, background: "rgba(245,158,11,.18)", color: "#f59e0b", border: "none", cursor: "pointer" }}
               >
                 Subscribe →
