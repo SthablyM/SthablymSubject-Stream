@@ -4,6 +4,7 @@ import hashlib
 import urllib.parse
 import uuid
 
+
 app = Flask(__name__)
 CORS(app, origins=["*"])
 
@@ -109,9 +110,9 @@ def subscribe():
 
     html = f"""<!DOCTYPE html>
 <html>
-<head><title>Redirecting to PayFast...</title></head>
-<body style="font-family:sans-serif;text-align:center;padding-top:80px;background:#0a0e1a;color:#fff">
-  <h2>Redirecting to secure payment...</h2>
+<head>
+  <meta charset="UTF-8"/>   <!-- add this line -->
+  <title>Redirecting to PayFast...</title>
 
   <!-- DEBUG TABLE — remove before go-live -->
   <details style="margin:20px auto;max-width:600px;text-align:left;background:#1e293b;padding:16px;border-radius:8px">
@@ -177,6 +178,6 @@ def test_signature():
         "tip": "Compare 'full_string_to_sign' against PayFast's own signature generator at https://sandbox.payfast.co.za/eng/process"
     })
 
-
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
+    
