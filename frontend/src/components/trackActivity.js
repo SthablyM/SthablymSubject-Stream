@@ -1,35 +1,42 @@
-// src/utils/trackActivity.js
+// src/components/trackActivity.js
 // ─────────────────────────────────────────────────────────────────────────────
-// Lightweight activity logger — sends events to a Google Sheet via Sheet.best
-// Fire-and-forget: never blocks the UI, never throws to the caller.
+// Sends one row per event to your Google Sheet through a Google Apps Script
+// web app.
+//
+// Sheet tab "Log", row 1 headers, exactly:
+//   timestamp | event | userId | userType | school | province | grade | firstName | detail
+//
+// Usage anywhere in the app:
+//   trackActivity("quiz_completed", user, { subject: "Maths", score: 3 });
+//   trackActivity("aps_calculated", user, { aps: 34 });
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SHEET_API = "https://api.sheetbest.com/sheets/5fcc21f1-ff3b-4b94-b639-dea3501c1228";
+const TRACKER_URL = "https://script.google.com/macros/s/AKfycbwOW4iGtiFxP-f8nMJWFY7hEzIbvVsNYvjDkAHG9xm7FsiHP_FUEX7G7Ky0Y-MUK2XF/exec";
 
-/**
- * Log an activity event to the tracking sheet.
- *
- * @param {string} event   - e.g. "code_entry", "quiz_completed", "aps_calculated", "report_printed"
- * @param {object} session - the access/session object (code, school, plan etc.) — pass null if unknown
- * @param {object} details - any extra info you want recorded (e.g. { stream: "Science", aps: 32 })
- */
-export function trackActivity(event, session = null, details = {}) {
+export function trackActivity(event, user = {}, detail = null) {
+  if (!TRACKER_URL) return;
+
+  const row = {
+    event,
+    userId:    (user && user.userId)    || "",
+    userType:  (user && user.userType)  || "",
+    school:    (user && user.school)    || "",
+    province:  (user && user.province)  || "",
+    grade:     (user && user.grade)     || "",
+    firstName: (user && user.firstName) || "",
+    detail:    detail ? JSON.stringify(detail) : "",
+  };
+
   try {
-    const payload = {
-      timestamp: new Date().toISOString(),
-      code:    session?.code   || "",
-      school:  session?.school || "",
-      plan:    session?.plan   || "",
-      event,
-      details: JSON.stringify(details),
-    };
-
-    fetch(SHEET_API, {
+    // text/plain + no-cors avoids the browser preflight that Apps Script cannot answer
+    fetch(TRACKER_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }).catch(() => {}); // silently ignore network errors — never break the app
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(row),
+      keepalive: true,
+    }).catch(() => {});
   } catch (_) {
-    // never let logging crash the app
+    // Tracking must never break the app
   }
 }
