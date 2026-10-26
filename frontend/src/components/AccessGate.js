@@ -1,18 +1,17 @@
 // src/components/AccessGate.js
-// ─────────────────────────────────────────────────────────────────────────────
-// FREE REGISTRATION GATE
-//   • No payments, no access codes.
-//   • One-time registration: user type, first name, school, province, grade.
-//   • Every person gets a permanent userId so repeat visits are counted once.
-//   • Events are logged through trackActivity (Google Sheets via Sheet.best).
-// ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 import React, { useState, useEffect } from "react";
 import StablymLogo from "./StablymLogoComponent";
 import { trackActivity } from "./trackActivity";
+import { registerAccount, loginAccount } from "./accountApi";
+import EnhancedResults from "./EnhancedResults";
 
-const STORAGE_KEY = "sthablym_user";
-const OLD_KEYS    = ["stablym_access"]; // from the paid/code version — cleared on load
+const STORAGE_KEY   = "sthablym_user";       // profile, kept after sign out
+const SIGNED_IN_KEY = "sthablym_signed_in";  // "1" while signed in
+const KNOWN_IDS_KEY = "sthablym_known_ids";  // ids already registered / logged in on this device
+const RESUMED_KEY   = "sthablym_resumed";    // sessionStorage: log resume once per tab session
+const OLD_KEYS      = ["stablym_access"];    // from the paid/code version — cleared on load
 
 const PROVINCES = [
   "Gauteng", "Western Cape", "KwaZulu-Natal", "Eastern Cape", "Limpopo",
@@ -22,13 +21,63 @@ const PROVINCES = [
 const USER_TYPES = {
   learner:    "Learner (through my school)",
   teacher:    "Teacher",
+  gapyear:    "Gap year (finished matric)",
   individual: "Individual (not through a school)",
 };
 
-const newId = () =>
-  (window.crypto && window.crypto.randomUUID
-    ? window.crypto.randomUUID()
-    : `u-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
+const WHATSAPP_RESET =
+  "https://wa.me/27685438227?text=Hi%20Sthablym!%20I%20forgot%20my%20PIN.%20Please%20help%20me%20reset%20it.";
+
+// ─── ID + FORM HELPERS ───────────────────────────────────────────────────────
+// small, fast, synchronous string hash
+const hashStr = (str) => {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+};
+
+// same person (name + school + province) => same id, always
+const makeUserId = (firstName, school, province) =>
+  "u-" +
+  hashStr(
+    [firstName, school, province]
+      .map((v) => String(v).trim().toLowerCase().replace(/\s+/g, " "))
+      .join("|")
+  );
+
+// learners and individuals pick a grade; teachers and gap year learners don't
+const needsGradeFor = (userType) => userType === "learner" || userType === "individual";
+
+// only learners and teachers belong to a school
+const isSchoolType = (userType) => userType === "learner" || userType === "teacher";
+
+const readJSON = (key, fallback) => {
+  try {
+    const v = JSON.parse(localStorage.getItem(key));
+    return v === null || v === undefined ? fallback : v;
+  } catch (_) {
+    return fallback;
+  }
+};
+
+const isValidPin = (pin) => /^\d{4}$/.test(pin);
+const digitsOnly = (v) => v.replace(/\D/g, "").slice(0, 4);
+
+const loginErrorText = (r) => {
+  switch (r.error) {
+    case "not_found": return "We couldn't find an account with those details. Check the spelling of your name and school (use exactly what you registered with), or create a new account.";
+    case "wrong_pin": return `That PIN is not right. ${r.attemptsLeft} ${r.attemptsLeft === 1 ? "try" : "tries"} left.`;
+    case "locked":    return `Too many wrong PINs. Please try again in ${r.minutes} minute${r.minutes === 1 ? "" : "s"}.`;
+    case "network":   return "We couldn't reach the server. Check your internet connection and try again.";
+    default:          return "Something went wrong. Please try again.";
+  }
+};
 
 // ─── CONTENT DATA ─────────────────────────────────────────────────────────────
 const STATS = [
@@ -54,6 +103,23 @@ const FEATURES = [
   { icon: "🖨️", title: "Teacher Dashboard",      desc: "See every learner's APS and stream in one place. Print reports for parent evenings." },
 ];
 
+// ─── WELCOME BACK (shown when a profile is remembered on this device) ────────
+function WelcomeBack({ savedUser, onContinue, onForget }) {
+  if (!savedUser) return null;
+  return (
+    <div style={s.welcomeBox}>
+      <button style={s.btnPrimary} onClick={onContinue}>
+        Continue as {savedUser.firstName} →
+      </button>
+      <div style={{ marginTop: 8 }}>
+        <button style={s.backBtn} onClick={onForget}>
+          Not you? Use a different account
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── SHELL (top-level so inputs keep focus while typing) ─────────────────────
 function Shell({ view, setView, children }) {
   return (
@@ -72,6 +138,12 @@ function Shell({ view, setView, children }) {
           >
             Schools
           </button>
+          <button
+            style={{ ...s.navLink, ...(view === "login" ? s.navLinkActive : {}) }}
+            onClick={() => setView("login")}
+          >
+            Log in
+          </button>
           <button style={s.navCta} onClick={() => setView("register")}>Get Started →</button>
         </div>
       </div>
@@ -82,17 +154,33 @@ function Shell({ view, setView, children }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function AccessGate({ children }) {
-  const [access, setAccess] = useState(null); // null = loading, false = gate, object = registered
-  const [view,   setView]   = useState("home"); // "home" | "schools" | "register"
-  const [error,  setError]  = useState("");
-  const [form,   setForm]   = useState({
+  const [access,    setAccess]    = useState(null);   // null = loading, false = gate, object = signed in
+  const [savedUser, setSavedUser] = useState(null);   // remembered profile on this device
+  const [view,      setViewRaw]   = useState("home"); // "home" | "schools" | "register" | "login"
+  const [error,     setError]     = useState("");
+  const [notice,    setNotice]    = useState("");
+  const [busy,      setBusy]      = useState(false);
+  const [form,      setForm]      = useState({
     userType: "learner",
     firstName: "",
     school: "",
     province: "",
     grade: "",
+    pin: "",
+    pin2: "",
     consent: false,
   });
+
+  // "Add a PIN" popup (for people who registered before PINs existed)
+  const [pinModal, setPinModal] = useState(false);
+  const [pinForm,  setPinForm]  = useState({ pin: "", pin2: "" });
+  const [pinError, setPinError] = useState("");
+
+  const setView = (v) => {
+    setViewRaw(v);
+    setError("");
+    setNotice("");
+  };
 
   const setField = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -102,49 +190,163 @@ export default function AccessGate({ children }) {
   // ── Restore session ──────────────────────────────────────────────────────
   useEffect(() => {
     try { OLD_KEYS.forEach((k) => localStorage.removeItem(k)); } catch (_) {}
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      if (saved && saved.userId) {
+
+    const saved = readJSON(STORAGE_KEY, null);
+    if (saved && saved.userId) {
+      setSavedUser(saved);
+
+      let signedIn = false;
+      try { signedIn = localStorage.getItem(SIGNED_IN_KEY) === "1"; } catch (_) {}
+
+      if (signedIn) {
         setAccess(saved);
-        trackActivity("session_resumed", saved);
+        // log "resumed" once per tab session, not on every reload / StrictMode double-run
+        try {
+          if (!sessionStorage.getItem(RESUMED_KEY)) {
+            sessionStorage.setItem(RESUMED_KEY, "1");
+            trackActivity("session_resumed", saved);
+          }
+        } catch (_) {}
         return;
       }
-    } catch (_) {}
+    }
     setAccess(false);
   }, []);
 
-  // ── Register ─────────────────────────────────────────────────────────────
-  function handleRegister() {
-    const isSchoolUser = form.userType !== "individual";
+  // ── Save the user on this device and sign in ─────────────────────────────
+  function finishSignIn(user, event) {
+    const known = readJSON(KNOWN_IDS_KEY, []);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+      localStorage.setItem(SIGNED_IN_KEY, "1");
+      if (!known.includes(user.userId)) {
+        localStorage.setItem(KNOWN_IDS_KEY, JSON.stringify([...known, user.userId]));
+      }
+    } catch (_) {}
+    setSavedUser(user);
+    setAccess(user);
+    setForm((f) => ({ ...f, pin: "", pin2: "" }));
+    trackActivity(event, user);
+  }
+
+  // ── Register (first time only) ───────────────────────────────────────────
+  async function handleRegister() {
+    const schoolUser = isSchoolType(form.userType);
 
     if (!form.firstName.trim())                         return setError("Please enter your first name.");
-    if (isSchoolUser && !form.school.trim())            return setError("Please enter your school name.");
+    if (schoolUser && !form.school.trim())              return setError("Please enter your school name.");
     if (!form.province)                                 return setError("Please select your province.");
-    if (form.userType !== "teacher" && !form.grade)     return setError("Please select your grade.");
+    if (needsGradeFor(form.userType) && !form.grade)    return setError("Please select your grade.");
+    if (!isValidPin(form.pin))                          return setError("Please choose a 4-digit PIN (numbers only).");
+    if (form.pin !== form.pin2)                         return setError("The two PINs don't match.");
     if (!form.consent)                                  return setError("Please tick the box to agree before continuing.");
 
+    const school = schoolUser ? form.school.trim() : "Individual";
+    const userId = makeUserId(form.firstName, school, form.province);
+
     const user = {
-      userId:       newId(),
+      userId,
       userType:     form.userType,
       firstName:    form.firstName.trim(),
-      school:       isSchoolUser ? form.school.trim() : "Individual",
+      school,
       province:     form.province,
-      grade:        form.userType === "teacher" ? "" : form.grade,
+      grade:        form.userType === "teacher" ? "" : form.userType === "gapyear" ? "Gap year" : form.grade,
       registeredAt: new Date().toISOString(),
     };
 
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(user)); } catch (_) {}
-    setAccess(user);
-    trackActivity("registration", user);
+    setBusy(true);
+    setError("");
+    const { userId: _omit, ...profile } = user; // the id is stored separately
+    const result = await registerAccount(userId, profile, form.pin);
+    setBusy(false);
+
+    // Someone with these exact details already has an account → send them to log in
+    if (result.error === "exists") {
+      setViewRaw("login");
+      setNotice("An account with these details already exists. Enter your PIN to log in.");
+      setForm((f) => ({ ...f, pin: "", pin2: "" }));
+      return;
+    }
+
+    // ok            → account saved online, PIN works on any device
+    // network/other → let them in anyway; the "Add PIN" button appears so they can retry later
+    finishSignIn({ ...user, hasPin: !!result.ok }, "registration");
   }
 
+  // ── Log in (any device) ──────────────────────────────────────────────────
+  async function handleLogin() {
+    const schoolUser = isSchoolType(form.userType);
+
+    if (!form.firstName.trim())            return setError("Please enter your first name.");
+    if (schoolUser && !form.school.trim()) return setError("Please enter your school name.");
+    if (!form.province)                    return setError("Please select your province.");
+    if (!isValidPin(form.pin))             return setError("Please enter your 4-digit PIN.");
+
+    const school = schoolUser ? form.school.trim() : "Individual";
+    const userId = makeUserId(form.firstName, school, form.province);
+
+    setBusy(true);
+    setError("");
+    const result = await loginAccount(userId, form.pin);
+    setBusy(false);
+
+    if (!result.ok) return setError(loginErrorText(result));
+
+    finishSignIn({ ...result.profile, userId, hasPin: true }, "sign_in");
+  }
+
+  // ── Continue as the remembered user (no PIN needed on their own device) ──
+  function continueAsSaved() {
+    if (!savedUser) return;
+    try { localStorage.setItem(SIGNED_IN_KEY, "1"); } catch (_) {}
+    setAccess(savedUser);
+    trackActivity("sign_in", savedUser);
+  }
+
+  // ── Sign out: ends the session but keeps the profile on this device ──────
   const handleLogout = () => {
     trackActivity("sign_out", access);
-    try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+    try {
+      localStorage.removeItem(SIGNED_IN_KEY);
+      sessionStorage.removeItem(RESUMED_KEY);
+    } catch (_) {}
     setAccess(false);
-    setError("");
     setView("home");
   };
+
+  // ── "Not you?" — someone else is using this device ───────────────────────
+  const forgetDevice = () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(SIGNED_IN_KEY);
+    } catch (_) {}
+    setSavedUser(null);
+  };
+
+  // ── Add a PIN to an existing local-only account ──────────────────────────
+  async function handleAddPin() {
+    if (!isValidPin(pinForm.pin))     return setPinError("Please choose a 4-digit PIN (numbers only).");
+    if (pinForm.pin !== pinForm.pin2) return setPinError("The two PINs don't match.");
+
+    setBusy(true);
+    setPinError("");
+    const { userId, hasPin: _h, ...profile } = access;
+    const result = await registerAccount(userId, profile, pinForm.pin);
+    setBusy(false);
+
+    if (result.error === "exists") {
+      return setPinError("An account with your details already exists online. Sign out, then choose Log in and use that PIN.");
+    }
+    if (!result.ok) return setPinError(loginErrorText(result));
+
+    const updated = { ...access, hasPin: true };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch (_) {}
+    setAccess(updated);
+    setSavedUser(updated);
+    setPinModal(false);
+    setPinForm({ pin: "", pin2: "" });
+    trackActivity("pin_added", updated);
+  }
 
   // ── Loading ──────────────────────────────────────────────────────────────
   if (access === null) {
@@ -155,10 +357,11 @@ export default function AccessGate({ children }) {
     );
   }
 
-  // ── Registered: show the app ─────────────────────────────────────────────
+  // ── Signed in: show the app ──────────────────────────────────────────────
   if (access) {
     const label =
-      access.userType === "teacher"    ? `👩‍🏫 ${access.firstName} · ${access.school}`
+      access.userType === "teacher"      ? `👩‍🏫 ${access.firstName} · ${access.school}`
+      : access.userType === "gapyear"    ? `🌍 ${access.firstName} · Gap year`
       : access.userType === "individual" ? `⭐ ${access.firstName} · Individual`
       :                                    `🎓 ${access.firstName} · ${access.school}`;
     return (
@@ -168,9 +371,79 @@ export default function AccessGate({ children }) {
             <span style={s.bannerDot} />
             {label}{access.province ? ` · ${access.province}` : ""}
           </span>
-          <button style={s.logoutBtn} onClick={handleLogout}>Sign Out</button>
+          <span style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {!access.hasPin && (
+              <button style={s.pinBtn} onClick={() => { setPinError(""); setPinModal(true); }}>
+                🔒 Add PIN
+              </button>
+            )}
+            <button style={s.logoutBtn} onClick={handleLogout}>Sign Out</button>
+          </span>
         </div>
-        {children}
+
+        {/* Gap year learners skip the grade picker, profile/marks page and quiz */}
+        {access.userType === "gapyear" ? (
+          <EnhancedResults
+            student={{
+              name:     access.firstName,
+              surname:  "",
+              school:   access.school,
+              province: access.province,
+              grade:    "Gap year",
+              userType: "gapyear",
+              userId:   access.userId,
+              marks:    {},
+            }}
+          />
+        ) : (
+          children
+        )}
+
+        {pinModal && (
+          <div style={s.modalBackdrop}>
+            <div style={s.modal}>
+              <h3 style={{ margin: "0 0 8px", fontSize: 18, color: "#fff" }}>Add a PIN to your account</h3>
+              <p style={{ margin: "0 0 4px", fontSize: 13, color: "rgba(255,255,255,.55)", lineHeight: 1.65 }}>
+                With a PIN you can log in on any phone or computer and find your account. Choose 4 numbers you will remember.
+              </p>
+
+              <label style={s.fieldLabel} htmlFor="addpin-1">Choose a 4-digit PIN</label>
+              <input
+                id="addpin-1"
+                style={s.field}
+                type="password"
+                inputMode="numeric"
+                autoComplete="new-password"
+                maxLength={4}
+                value={pinForm.pin}
+                onChange={(e) => { setPinForm((f) => ({ ...f, pin: digitsOnly(e.target.value) })); setPinError(""); }}
+              />
+
+              <label style={s.fieldLabel} htmlFor="addpin-2">Confirm PIN</label>
+              <input
+                id="addpin-2"
+                style={s.field}
+                type="password"
+                inputMode="numeric"
+                autoComplete="new-password"
+                maxLength={4}
+                value={pinForm.pin2}
+                onChange={(e) => { setPinForm((f) => ({ ...f, pin2: digitsOnly(e.target.value) })); setPinError(""); }}
+              />
+
+              {pinError && <div style={{ ...s.errorBox, marginTop: 14 }}>{pinError}</div>}
+
+              <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+                <button style={{ ...s.btnPrimary, flex: 1, opacity: busy ? 0.7 : 1 }} disabled={busy} onClick={handleAddPin}>
+                  {busy ? "Please wait…" : "Save PIN"}
+                </button>
+                <button style={{ ...s.btnGhost, padding: "13px 18px" }} onClick={() => setPinModal(false)}>
+                  Later
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </>
     );
   }
@@ -184,6 +457,8 @@ export default function AccessGate({ children }) {
     return (
       <Shell view={view} setView={setView}>
         <div style={s.hero}>
+          <WelcomeBack savedUser={savedUser} onContinue={continueAsSaved} onForget={forgetDevice} />
+
           <div style={s.eyebrow}>🇿🇦 Built for South African Schools</div>
           <h1 style={s.heroTitle}>
             Helping Grade 9 Learners<br />
@@ -204,6 +479,10 @@ export default function AccessGate({ children }) {
             <button style={s.btnGhost} onClick={() => setView("schools")}>
               🏫 For Schools
             </button>
+          </div>
+          <div style={{ marginBottom: 28, fontSize: 13, color: "rgba(255,255,255,.5)" }}>
+            Already have an account?{" "}
+            <button style={s.linkBtn} onClick={() => setView("login")}>Log in</button>
           </div>
           <div style={s.proofStrip}>
             {[
@@ -274,7 +553,7 @@ export default function AccessGate({ children }) {
               Ready to find the right stream?
             </div>
             <div style={{ fontSize: 13, color: "rgba(255,255,255,.5)", lineHeight: 1.65, marginBottom: 16 }}>
-              Free for every learner and every school. Register once and come back any time.
+              Free for every learner and every school. Register once and log in from any device.
             </div>
             <button style={s.btnPrimary} onClick={() => setView("register")}>Start Free →</button>
           </div>
@@ -341,23 +620,121 @@ export default function AccessGate({ children }) {
     );
   }
 
+  // ── LOGIN ────────────────────────────────────────────────────────────────
+  if (view === "login") {
+    const schoolUser = isSchoolType(form.userType);
+
+    return (
+      <Shell view={view} setView={setView}>
+        <div style={s.subscribeCard}>
+          <button style={s.backBtn} onClick={() => setView("home")}>← Back</button>
+
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+            <StablymLogo variant="dark" size="md" />
+          </div>
+
+          <WelcomeBack savedUser={savedUser} onContinue={continueAsSaved} onForget={forgetDevice} />
+
+          <h2 style={{ ...s.heroTitle, fontSize: 26, marginBottom: 8 }}>Log in</h2>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,.45)", textAlign: "center", marginBottom: 12, lineHeight: 1.7 }}>
+            Use the same details you registered with, on any phone or computer.
+          </p>
+
+          {notice && <div style={s.noticeBox}>{notice}</div>}
+
+          <label style={s.fieldLabel} htmlFor="log-type">I am a</label>
+          <select id="log-type" style={s.field} value={form.userType} onChange={(e) => setField("userType", e.target.value)}>
+            {Object.entries(USER_TYPES).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+
+          <label style={s.fieldLabel} htmlFor="log-name">First name</label>
+          <input
+            id="log-name"
+            style={s.field}
+            type="text"
+            autoComplete="given-name"
+            value={form.firstName}
+            onChange={(e) => setField("firstName", e.target.value)}
+          />
+
+          {schoolUser && (
+            <>
+              <label style={s.fieldLabel} htmlFor="log-school">School name</label>
+              <input
+                id="log-school"
+                style={s.field}
+                type="text"
+                placeholder="Exactly as you registered it"
+                value={form.school}
+                onChange={(e) => setField("school", e.target.value)}
+              />
+            </>
+          )}
+
+          <label style={s.fieldLabel} htmlFor="log-province">Province</label>
+          <select id="log-province" style={s.field} value={form.province} onChange={(e) => setField("province", e.target.value)}>
+            <option value="">Select your province…</option>
+            {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+
+          <label style={s.fieldLabel} htmlFor="log-pin">4-digit PIN</label>
+          <input
+            id="log-pin"
+            style={s.field}
+            type="password"
+            inputMode="numeric"
+            autoComplete="current-password"
+            maxLength={4}
+            value={form.pin}
+            onChange={(e) => setField("pin", digitsOnly(e.target.value))}
+            onKeyDown={(e) => { if (e.key === "Enter" && !busy) handleLogin(); }}
+          />
+
+          {error && <div style={{ ...s.errorBox, marginTop: 14 }}>{error}</div>}
+
+          <button
+            style={{ ...s.btnPrimary, width: "100%", marginTop: 16, opacity: busy ? 0.7 : 1 }}
+            disabled={busy}
+            onClick={handleLogin}
+          >
+            {busy ? "Please wait…" : "Log in →"}
+          </button>
+
+          <div style={{ marginTop: 14, fontSize: 13, color: "rgba(255,255,255,.5)", textAlign: "center", lineHeight: 1.8 }}>
+            New here?{" "}
+            <button style={s.linkBtn} onClick={() => setView("register")}>Create a free account</button>
+            <br />
+            Forgot your PIN?{" "}
+            <a href={WHATSAPP_RESET} target="_blank" rel="noreferrer" style={{ color: "#5dd85d" }}>WhatsApp us to reset it</a>
+          </div>
+        </div>
+      </Shell>
+    );
+  }
+
   // ── REGISTER ─────────────────────────────────────────────────────────────
-  const isSchoolUser = form.userType !== "individual";
-  const needsGrade   = form.userType !== "teacher";
+  const schoolUser = isSchoolType(form.userType);
+  const needsGrade = needsGradeFor(form.userType);
 
   return (
     <Shell view={view} setView={setView}>
       <div style={s.subscribeCard}>
-        <button style={s.backBtn} onClick={() => { setView("home"); setError(""); }}>← Back</button>
+        <button style={s.backBtn} onClick={() => setView("home")}>← Back</button>
 
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
           <StablymLogo variant="dark" size="md" />
         </div>
 
+        <WelcomeBack savedUser={savedUser} onContinue={continueAsSaved} onForget={forgetDevice} />
+
         <h2 style={{ ...s.heroTitle, fontSize: 26, marginBottom: 8 }}>Get Started — Free</h2>
         <p style={{ fontSize: 14, color: "rgba(255,255,255,.45)", textAlign: "center", marginBottom: 12, lineHeight: 1.7 }}>
-          Register once. We'll remember you next time you open the app on this device.
+          Register once, then log in from any phone or computer with your PIN.
         </p>
+
+        {notice && <div style={s.noticeBox}>{notice}</div>}
 
         <label style={s.fieldLabel} htmlFor="reg-type">I am a</label>
         <select id="reg-type" style={s.field} value={form.userType} onChange={(e) => setField("userType", e.target.value)}>
@@ -376,7 +753,7 @@ export default function AccessGate({ children }) {
           onChange={(e) => setField("firstName", e.target.value)}
         />
 
-        {isSchoolUser && (
+        {schoolUser && (
           <>
             <label style={s.fieldLabel} htmlFor="reg-school">School name</label>
             <input
@@ -406,6 +783,31 @@ export default function AccessGate({ children }) {
           </>
         )}
 
+        <label style={s.fieldLabel} htmlFor="reg-pin">Choose a 4-digit PIN</label>
+        <input
+          id="reg-pin"
+          style={s.field}
+          type="password"
+          inputMode="numeric"
+          autoComplete="new-password"
+          maxLength={4}
+          placeholder="4 numbers you will remember"
+          value={form.pin}
+          onChange={(e) => setField("pin", digitsOnly(e.target.value))}
+        />
+
+        <label style={s.fieldLabel} htmlFor="reg-pin2">Confirm PIN</label>
+        <input
+          id="reg-pin2"
+          style={s.field}
+          type="password"
+          inputMode="numeric"
+          autoComplete="new-password"
+          maxLength={4}
+          value={form.pin2}
+          onChange={(e) => setField("pin2", digitsOnly(e.target.value))}
+        />
+
         <label style={s.consentRow}>
           <input
             type="checkbox"
@@ -415,18 +817,27 @@ export default function AccessGate({ children }) {
           />
           <span>
             I agree that Sthablym may record my first name, school, province, grade and how I use the app,
-            to understand who the platform helps and to improve it. If I am under 18, a parent, guardian or
-            teacher knows I am registering.
+            and keep my account (with a protected PIN) so I can log in again on any device.
+            If I am under 18, a parent, guardian or teacher knows I am registering.
           </span>
         </label>
 
         {error && <div style={{ ...s.errorBox, marginTop: 14 }}>{error}</div>}
 
-        <button style={{ ...s.btnPrimary, width: "100%", marginTop: 16 }} onClick={handleRegister}>
-          Enter the App →
+        <button
+          style={{ ...s.btnPrimary, width: "100%", marginTop: 16, opacity: busy ? 0.7 : 1 }}
+          disabled={busy}
+          onClick={handleRegister}
+        >
+          {busy ? "Please wait…" : "Enter the App →"}
         </button>
 
-        <div style={{ marginTop: 14, fontSize: 12, color: "rgba(255,255,255,.3)", textAlign: "center", lineHeight: 1.65 }}>
+        <div style={{ marginTop: 14, fontSize: 13, color: "rgba(255,255,255,.5)", textAlign: "center", lineHeight: 1.8 }}>
+          Already registered?{" "}
+          <button style={s.linkBtn} onClick={() => setView("login")}>Log in</button>
+        </div>
+
+        <div style={{ marginTop: 6, fontSize: 12, color: "rgba(255,255,255,.3)", textAlign: "center", lineHeight: 1.65 }}>
           Need help? <a href="https://wa.me/27685438227" target="_blank" rel="noreferrer" style={{ color: "#5dd85d" }}>WhatsApp 068 543 8227</a>
         </div>
       </div>
@@ -463,9 +874,13 @@ const s = {
   eyebrow:     { display: "inline-block", background: "rgba(26,127,224,.14)", border: "1px solid rgba(26,127,224,.3)", color: "#7db8f5", fontSize: 11, fontWeight: 700, padding: "5px 14px", borderRadius: 99, marginBottom: 20, letterSpacing: 1, textTransform: "uppercase" },
   heroTitle:   { fontSize: 38, fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: "0 0 18px", letterSpacing: -1.2, textAlign: "center" },
   heroSub:     { fontSize: 15, color: "rgba(255,255,255,.55)", lineHeight: 1.8, maxWidth: 560, margin: "0 auto 28px" },
-  heroCtas:    { display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 },
+  heroCtas:    { display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 16 },
   btnPrimary:  { padding: "13px 26px", background: `linear-gradient(135deg,${SKY},#1368bf)`, color: "#fff", border: "none", borderRadius: 11, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" },
   btnGhost:    { padding: "13px 22px", background: "rgba(255,255,255,.07)", border: "1.5px solid rgba(255,255,255,.18)", color: "#fff", borderRadius: 11, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" },
+  linkBtn:     { background: "none", border: "none", color: "#7db8f5", fontSize: "inherit", fontWeight: 700, cursor: "pointer", padding: 0, fontFamily: "inherit", textDecoration: "underline" },
+
+  // Welcome back
+  welcomeBox:  { marginBottom: 24, textAlign: "center" },
 
   // Proof strip
   proofStrip:  { display: "inline-flex", alignItems: "center", gap: 20, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 14, padding: "14px 24px", flexWrap: "wrap", justifyContent: "center" },
@@ -508,19 +923,25 @@ const s = {
   schoolFeat:  { display: "flex", gap: 8, alignItems: "flex-start", fontSize: 13, color: "rgba(255,255,255,.65)", marginBottom: 7, lineHeight: 1.5 },
   schoolBtn:   { display: "block", marginTop: 20, padding: "13px 20px", background: "rgba(26,127,224,.18)", border: "1px solid rgba(26,127,224,.35)", color: "#7db8f5", borderRadius: 11, fontSize: 14, fontWeight: 700, textDecoration: "none", textAlign: "center", fontFamily: "inherit", cursor: "pointer", boxSizing: "border-box" },
 
-  // Register card
+  // Register / login card
   subscribeCard: { background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 22, padding: "36px 32px 40px", maxWidth: 480, margin: "40px auto 0", backdropFilter: "blur(12px)", position: "relative", zIndex: 2 },
   backBtn:       { background: "none", border: "none", color: "rgba(255,255,255,.3)", fontSize: 12, cursor: "pointer", padding: 0, marginBottom: 20, fontFamily: "inherit" },
   fieldLabel:    { display: "block", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,.5)", textTransform: "uppercase", letterSpacing: 1, margin: "16px 0 6px" },
   field:         { width: "100%", padding: "12px 14px", background: "#1e293b", border: "2px solid rgba(255,255,255,.15)", borderRadius: 10, color: "#fff", fontSize: 15, fontFamily: "inherit", outline: "none", boxSizing: "border-box", caretColor: "#fff" },
   consentRow:    { display: "flex", gap: 10, alignItems: "flex-start", marginTop: 20, fontSize: 12, color: "rgba(255,255,255,.5)", lineHeight: 1.6, cursor: "pointer" },
   errorBox:      { background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.28)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#fca5a5", lineHeight: 1.6 },
+  noticeBox:     { background: "rgba(26,127,224,.12)", border: "1px solid rgba(26,127,224,.3)", borderRadius: 10, padding: "12px 16px", fontSize: 13, color: "#9ccbf7", lineHeight: 1.6, marginTop: 8 },
 
-  // Access banner (when registered)
+  // Access banner (when signed in)
   accessBanner: { background: "#0f172a", borderBottom: "1px solid rgba(255,255,255,.07)", padding: "8px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "inherit", position: "sticky", top: 0, zIndex: 100 },
   bannerLeft:   { display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "rgba(255,255,255,.6)", fontWeight: 500 },
   bannerDot:    { width: 7, height: 7, borderRadius: "50%", background: LIME, boxShadow: `0 0 6px ${LIME}` },
   logoutBtn:    { background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)", color: "rgba(255,255,255,.45)", fontSize: 12, padding: "5px 14px", borderRadius: 8, cursor: "pointer", fontFamily: "inherit" },
+  pinBtn:       { background: "rgba(232,147,10,.15)", border: "1px solid rgba(232,147,10,.4)", color: "#f6b84a", fontSize: 12, fontWeight: 700, padding: "5px 14px", borderRadius: 8, cursor: "pointer", fontFamily: "inherit" },
+
+  // Add-PIN modal
+  modalBackdrop: { position: "fixed", inset: 0, background: "rgba(0,0,0,.65)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 },
+  modal:         { background: "#111a2e", border: "1px solid rgba(255,255,255,.12)", borderRadius: 18, padding: "28px 24px", width: "100%", maxWidth: 400, fontFamily: "'DM Sans','Segoe UI',sans-serif", boxSizing: "border-box" },
 };
 
 // Inject spin keyframe once

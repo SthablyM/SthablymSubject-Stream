@@ -11,7 +11,7 @@
 //   trackActivity("aps_calculated", user, { aps: 34 });
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TRACKER_URL = "https://script.google.com/macros/s/AKfycbwOW4iGtiFxP-f8nMJWFY7hEzIbvVsNYvjDkAHG9xm7FsiHP_FUEX7G7Ky0Y-MUK2XF/exec";
+export const TRACKER_URL = "https://script.google.com/macros/s/AKfycbxQktIkPF-_cmJxcHllKfFwdGHs5ilRkU2RX9lp258yjAz-T6e32KtJKfp7VH5X8w6g1g/exec";
 
 export function trackActivity(event, user = {}, detail = null) {
   if (!TRACKER_URL) return;

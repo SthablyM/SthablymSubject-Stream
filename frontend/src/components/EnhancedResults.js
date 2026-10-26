@@ -5,6 +5,7 @@ import APSCalculator, { calcAPS, markToAPS, markToSymbol, mathsLabel } from "./A
 import PastPapersQuiz from "./PastPapersQuiz";
 import StablymLogo from "./StablymLogoComponent";
 import TeacherDashboard from "./TeacherDashboard"; // ← replaces the inline stub
+import GapYearPage from "./GapYearPage";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // STREAM DATA
@@ -18,6 +19,8 @@ const SA_STREAMS = {
 
 const DIFF_COLOR = { easy:"#16a34a", medium:"#d97706", hard:"#dc2626" };
 
+const GAP_COLOR = "#0e7490";
+
 const SUB_LABELS = {
   english:"English", afrikaans:"Afrikaans", isizulu:"isiZulu/Sesotho/Xhosa",
   puremaths:"Mathematics (Pure)", techmaths:"Technical Maths", mathslit:"Maths Literacy",
@@ -29,27 +32,131 @@ const SUB_LABELS = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GAP YEAR HELPERS (module-level so inputs keep focus while typing)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Field-of-interest picker + "enter your marks" prompt, shown above the
+// university / bursary / deadline tabs for gap year learners.
+function GapYearPickers({ stream, setStream, aps, onGoAPS }) {
+  return (
+    <div>
+      <div style={s.card}>
+        <h3 style={s.cardTitle}>🧭 Which area interests you?</h3>
+        <p style={{ fontSize:13, color:"#6b7280", margin:"0 0 12px", lineHeight:1.6 }}>
+          You skipped the stream quiz, so tell us the field you are drawn to. The programmes below update to match.
+        </p>
+        <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+          {Object.entries(SA_STREAMS).map(([name, st]) => {
+            const active = name === stream;
+            return (
+              <button
+                key={name}
+                onClick={() => setStream(name)}
+                style={{
+                  padding:"9px 14px", borderRadius:99, fontSize:13, fontWeight:700, cursor:"pointer",
+                  border:`2px solid ${st.color}`,
+                  background: active ? st.color : "#fff",
+                  color:      active ? "#fff"   : st.color,
+                }}
+              >
+                {st.icon} {name.replace(" Stream", "")}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {aps === 0 && (
+        <div style={{ ...s.infoBox, display:"flex", gap:12, alignItems:"center", flexWrap:"wrap" }}>
+          <span style={{ flex:1, minWidth:200 }}>
+            💡 Enter your final matric marks to see which programmes you qualify for.
+          </span>
+          <button
+            onClick={onGoAPS}
+            style={{ padding:"9px 16px", background:GAP_COLOR, color:"#fff", border:"none", borderRadius:10, fontWeight:700, fontSize:13, cursor:"pointer" }}
+          >
+            Enter my marks →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Target-APS card: how far is the learner from the programme they want?
+function TargetAPSCard({ aps }) {
+  const [raw, setRaw] = useState("");
+  const target = parseInt(raw, 10);
+  const valid  = !isNaN(target) && target >= 1 && target <= 42;
+  const gap    = valid ? target - aps : 0;
+
+  return (
+    <div style={s.card}>
+      <h3 style={s.cardTitle}>🎯 How far am I from my programme?</h3>
+      <p style={{ fontSize:13, color:"#6b7280", margin:"0 0 12px", lineHeight:1.6 }}>
+        Type the APS your dream programme asks for (you'll find it in the "What Can I Study?" tab or on the university website).
+      </p>
+      <div style={{ display:"flex", alignItems:"center", gap:12, flexWrap:"wrap" }}>
+        <input
+          type="text"
+          inputMode="numeric"
+          maxLength={2}
+          placeholder="e.g. 30"
+          value={raw}
+          onChange={(e) => setRaw(e.target.value.replace(/[^0-9]/g, ""))}
+          style={{ width:90, padding:"10px 12px", border:"2px solid #e2e8f0", borderRadius:10, fontSize:15, textAlign:"center", outline:"none", fontFamily:"inherit" }}
+        />
+        <span style={{ fontSize:13, color:"#6b7280" }}>Your APS: <b style={{ color:"#1e293b" }}>{aps}</b> / 42</span>
+      </div>
+
+      {valid && aps === 0 && (
+        <p style={{ fontSize:13, color:"#9a3412", margin:"12px 0 0" }}>Enter your marks above first so we can compare.</p>
+      )}
+      {valid && aps > 0 && gap <= 0 && (
+        <p style={{ fontSize:13, color:"#166534", margin:"12px 0 0", lineHeight:1.6 }}>
+          ✅ You already meet an APS of {target}. Check the subject requirements too. Many programmes ask for a minimum mark in Maths or Science as well.
+        </p>
+      )}
+      {valid && aps > 0 && gap > 0 && (
+        <p style={{ fontSize:13, color:"#92400e", margin:"12px 0 0", lineHeight:1.6 }}>
+          📈 You need <b>{gap} more APS point{gap > 1 ? "s" : ""}</b>. Raising a subject by one symbol (for example C to B) adds 1 point, so improving about <b>{gap} of your best subjects by one symbol</b> would get you there. Use the <b>Rewrite Prep</b> tab to practise.
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 export default function EnhancedResults({ streamScores, mathResults, student }) {
-  const grade = parseInt(student?.grade) || 10;
+  // Gap year learners have already finished matric: no stream quiz, no marks page.
+  const isGapYear =
+    student?.userType === "gapyear" ||
+    String(student?.grade || "").toLowerCase().includes("gap");
 
-  // Grade 8: land directly on Past Papers tab
-  // Grade 9: land on results but Past Papers tab is visible
+  const grade = isGapYear ? 12 : (parseInt(student?.grade) || 10);
+
+  // Gap year:  land on the Gap Year Plan
+  // Grade 8:   land directly on Past Papers tab
+  // Grade 9:   land on results but Past Papers tab is visible
   // Grade 10+: standard behaviour
-  const defaultSection = student?.goToPastPapers || grade === 8 ? "pastpapers" : "results";
+  const defaultSection = isGapYear
+    ? "gapyear"
+    : (student?.goToPastPapers || grade === 8) ? "pastpapers" : "results";
 
   const [activeSection, setActiveSection] = useState(defaultSection);
   const [downloading,   setDownloading]   = useState(false);
   const [dlError,       setDlError]       = useState("");
   const [liveMarks,     setLiveMarks]     = useState(student?.marks || {});
+  const [gapStream,     setGapStream]     = useState("Science Stream");
 
   // Grade 8: show Past Papers directly — no stream quiz results needed
-  const isGrade8 = grade === 8;
+  const isGrade8 = grade === 8 && !isGapYear;
   const isGrade9 = grade === 9;
 
-  // For grade 8, streamScores may be empty — that's fine, we route them to Past Papers
-  if (!isGrade8 && (!streamScores || Object.keys(streamScores).length === 0)) {
+  // Grade 8 and gap year have no stream scores — that's fine
+  if (!isGrade8 && !isGapYear && (!streamScores || Object.keys(streamScores).length === 0)) {
     return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'Segoe UI',sans-serif", background:"#e0f2fe" }}>
         <div style={{ background:"#fff", borderRadius:20, padding:"40px", maxWidth:480, textAlign:"center", boxShadow:"0 8px 40px rgba(0,0,0,.1)" }}>
@@ -62,9 +169,9 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
     );
   }
 
-  // Safe defaults for grade 8 (no stream scores)
+  // Safe defaults for grade 8 / gap year (no stream scores)
   const sorted    = streamScores ? Object.entries(streamScores).sort((a,b) => b[1]-a[1]) : [];
-  const topStream = sorted[0]?.[0] || "Science Stream";
+  const topStream = isGapYear ? gapStream : (sorted[0]?.[0] || "Science Stream");
   const topScore  = sorted[0]?.[1] || 0;
   const second    = sorted[1];
   const info      = SA_STREAMS[topStream] || SA_STREAMS["Science Stream"];
@@ -96,7 +203,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
       const doc = new jsPDF({ orientation:"portrait", unit:"mm", format:"a4" });
       const W = 210;
       const STREAM_HEX = { "Science Stream":[37,99,235], "Commerce Stream":[22,163,74], "Humanities Stream":[147,51,234], "Engineering / Technical Stream":[234,88,12] };
-      const [r,g,b] = STREAM_HEX[topStream] || [37,99,235];
+      const [r,g,b] = isGapYear ? [14,116,144] : (STREAM_HEX[topStream] || [37,99,235]);
       let y = 0;
 
       doc.setFillColor(15,23,42); doc.roundedRect(0,0,W,36,0,0,"F");
@@ -112,7 +219,8 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
 
       doc.setFillColor(248,250,252); doc.roundedRect(10,y,W-20,28,3,3,"F");
       doc.setDrawColor(226,232,240); doc.roundedRect(10,y,W-20,28,3,3,"S");
-      const info2 = [["Name",`${student?.name||""} ${student?.surname||""}`],["School",student?.school||"—"],["Grade",`Grade ${student?.grade||"—"}`],["Province",student?.province||"—"],["APS Score",displayAPS?`${displayAPS} / 42`:"—"],["Maths Level",mathsLabel(activeMarks)]];
+      const gradeText = isGapYear ? "Gap year" : `Grade ${student?.grade||"—"}`;
+      const info2 = [["Name",`${student?.name||""} ${student?.surname||""}`],["School",student?.school||"—"],["Grade",gradeText],["Province",student?.province||"—"],["APS Score",displayAPS?`${displayAPS} / 42`:"—"],["Maths Level",mathsLabel(activeMarks)]];
       info2.forEach(([label,val],i) => {
         const col = i<3?14:115; const row = i<3?y+7+(i*7):y+7+((i-3)*7);
         doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(148,163,184);
@@ -122,7 +230,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
       });
       y += 36;
 
-      if (!isGrade8) {
+      if (!isGrade8 && !isGapYear) {
         doc.setFillColor(r,g,b); doc.roundedRect(10,y,W-20,20,4,4,"F");
         doc.setFont("helvetica","bold"); doc.setFontSize(14); doc.setTextColor(255,255,255);
         doc.text(topStream, W/2, y+9, { align:"center" });
@@ -152,7 +260,17 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
   // ── Navigation ─────────────────────────────────────────────────────────────
   const isHighSchool = grade >= 10;
 
-  const NAV = isGrade8
+  const NAV = isGapYear
+    ? [
+        { id:"gapyear",      label:"🌍 Gap Year Plan"     },
+        { id:"aps",          label:"📐 My Matric APS"     },
+        { id:"universities", label:"🏫 What Can I Study?" },
+        { id:"bursaries",    label:"💰 Bursaries"         },
+        { id:"deadlines",    label:"📅 Deadlines"         },
+        { id:"pastpapers",   label:"📝 Rewrite Prep"      },
+        { id:"advice",       label:"💡 Advice"            },
+      ]
+    : isGrade8
     ? [
         { id:"pastpapers", label:"📝 Practice Questions" },
         { id:"advice",     label:"💡 Advice"             },
@@ -175,14 +293,18 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
       ];
 
   // ── Banner colour & label ─────────────────────────────────────────────────
-  const bannerColor = isGrade8 ? "#0f766e" : isGrade9 ? "#7c3aed" : info.color;
-  const bannerIcon  = isGrade8 ? "🌱" : isGrade9 ? "🌿" : info.icon;
-  const bannerTitle = isGrade8
+  const bannerColor = isGapYear ? GAP_COLOR : isGrade8 ? "#0f766e" : isGrade9 ? "#7c3aed" : info.color;
+  const bannerIcon  = isGapYear ? "🌍"      : isGrade8 ? "🌱"      : isGrade9 ? "🌿"      : info.icon;
+  const bannerTitle = isGapYear
+    ? "Gap Year Hub"
+    : isGrade8
     ? "Grade 8 Practice Questions"
     : isGrade9
     ? `${student?.name ? student.name + "'s" : "Your"} Stream Match`
     : topStream;
-  const bannerLabel = isGrade8
+  const bannerLabel = isGapYear
+    ? `${student?.name || "Student"} · Matric complete`
+    : isGrade8
     ? `${student?.name || "Student"} · ${student?.school || ""}`
     : isGrade9
     ? `Grade 9 — Choose your Grade 10 subjects`
@@ -224,6 +346,15 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
 
       <div style={{ ...s.content, maxWidth: activeSection === "teacher" ? 1100 : 800 }}>
 
+        {/* ══ GAP YEAR HUB ══ */}
+        {activeSection === "gapyear" && isGapYear && (
+          <GapYearPage
+            embedded
+            user={student}
+            onOpenAPS={() => setActiveSection("aps")}
+          />
+        )}
+
         {/* ══ GRADE 8 WELCOME ══ */}
         {activeSection === "pastpapers" && isGrade8 && (
           <div style={{ background:"#f0fdfa", border:"1px solid #99f6e4", borderRadius:12, padding:"14px 16px", marginBottom:16, display:"flex", gap:12, alignItems:"flex-start" }}>
@@ -250,8 +381,21 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
           </div>
         )}
 
+        {/* ══ GAP YEAR REWRITE PREP INFO ══ */}
+        {activeSection === "pastpapers" && isGapYear && (
+          <div style={{ background:"#ecfeff", border:"1px solid #a5f3fc", borderRadius:12, padding:"14px 16px", marginBottom:16, display:"flex", gap:12, alignItems:"flex-start" }}>
+            <span style={{ fontSize:24, flexShrink:0 }}>📝</span>
+            <div>
+              <b style={{ fontSize:14, color:GAP_COLOR }}>Rewrite Prep</b>
+              <p style={{ margin:"4px 0 0", fontSize:13, color:"#155e75", lineHeight:1.6 }}>
+                Planning to rewrite or improve a subject? Practise Grade 12 exam-style questions here, find your weak topics, and track how you improve before the exam.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* ══ RESULTS ══ */}
-        {activeSection === "results" && !isGrade8 && (
+        {activeSection === "results" && !isGrade8 && !isGapYear && (
           <div>
             {isHighSchool && (
               <div style={{ background:"#eff6ff", border:"1px solid #bfdbfe", borderRadius:12, padding:"12px 16px", marginBottom:16, display:"flex", gap:12, alignItems:"flex-start" }}>
@@ -355,21 +499,38 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
           <div>
             <div style={{ ...s.card, marginBottom:16, background:"#eff6ff", border:"1px solid #bfdbfe" }}>
               <p style={{ fontSize:13, color:"#1e40af", margin:0, lineHeight:1.7 }}>
-                💡 Update your marks here and they will automatically update your university eligibility in the <b>"What Can I Study?"</b> tab.
+                {isGapYear
+                  ? <>💡 Enter your <b>final matric marks</b> here. They update your university eligibility in the <b>"What Can I Study?"</b> tab, and you can see how far you are from your target programme below.</>
+                  : <>💡 Update your marks here and they will automatically update your university eligibility in the <b>"What Can I Study?"</b> tab.</>}
               </p>
             </div>
             <APSCalculator onChange={setLiveMarks}/>
+            {isGapYear && (
+              <div style={{ marginTop:16 }}>
+                <TargetAPSCard aps={displayAPS} />
+              </div>
+            )}
           </div>
         )}
 
         {/* ══ UNIVERSITIES ══ */}
         {activeSection === "universities" && isHighSchool && (
-          <UniversityFinder stream={topStream} aps={displayAPS} marks={activeMarks}/>
+          <div>
+            {isGapYear && (
+              <GapYearPickers stream={gapStream} setStream={setGapStream} aps={displayAPS} onGoAPS={() => setActiveSection("aps")} />
+            )}
+            <UniversityFinder stream={topStream} aps={displayAPS} marks={activeMarks}/>
+          </div>
         )}
 
         {/* ══ DEADLINES ══ */}
         {activeSection === "deadlines" && isHighSchool && (
-          <UniversityFinder stream={topStream} aps={displayAPS} marks={activeMarks}/>
+          <div>
+            {isGapYear && (
+              <GapYearPickers stream={gapStream} setStream={setGapStream} aps={displayAPS} onGoAPS={() => setActiveSection("aps")} />
+            )}
+            <UniversityFinder stream={topStream} aps={displayAPS} marks={activeMarks}/>
+          </div>
         )}
 
         {/* ══ BURSARIES ══ */}
@@ -384,6 +545,9 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
                 </p>
               </div>
             </div>
+            {isGapYear && (
+              <GapYearPickers stream={gapStream} setStream={setGapStream} aps={displayAPS} onGoAPS={() => setActiveSection("aps")} />
+            )}
             <UniversityFinder stream={topStream} aps={displayAPS} marks={activeMarks}/>
           </div>
         )}
@@ -391,13 +555,13 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
         {/* ══ PAST PAPERS ══ */}
         {activeSection === "pastpapers" && (
           <PastPapersQuiz
-            student={{ ...student, marks:activeMarks, aps:displayAPS }}
-            onBack={() => setActiveSection(isGrade8 ? "pastpapers" : "results")}
+            student={{ ...student, grade: isGapYear ? 12 : student?.grade, marks:activeMarks, aps:displayAPS }}
+            onBack={() => setActiveSection(isGrade8 ? "pastpapers" : isGapYear ? "gapyear" : "results")}
           />
         )}
 
         {/* ══ TEACHER PORTAL ══ */}
-        {activeSection === "teacher" && isHighSchool && (
+        {activeSection === "teacher" && isHighSchool && !isGapYear && (
           <TeacherDashboard
             student={{ ...student, marks: activeMarks, aps: displayAPS }}
             streamColor={info.color}
@@ -408,6 +572,17 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
         {/* ══ ADVICE ══ */}
         {activeSection === "advice" && (
           <div>
+            {isGapYear && (
+              <div style={{ ...s.card, borderLeft:`4px solid ${GAP_COLOR}` }}>
+                <h3 style={s.cardTitle}>🌍 Making Your Gap Year Count</h3>
+                <p style={{ fontSize:13, color:"#374151", margin:"0 0 10px", lineHeight:1.7 }}>
+                  A gap year works best when it has a plan. Choose one main goal in the <b>Gap Year Plan</b> tab, enter your final marks in <b>My Matric APS</b>, and check the closing dates for the programmes and bursaries you want.
+                </p>
+                <p style={{ fontSize:13, color:"#374151", margin:0, lineHeight:1.7 }}>
+                  Apply early, keep certified copies of your ID and results ready, and confirm every requirement on the official website. Requirements and dates change from year to year.
+                </p>
+              </div>
+            )}
             {isGrade8 && (
               <div style={{ ...s.card, borderLeft:"4px solid #0f766e" }}>
                 <h3 style={s.cardTitle}>🌱 Grade 8 Advice</h3>
@@ -434,7 +609,7 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
                 </p>
               </div>
             )}
-            {!isGrade8 && (
+            {!isGrade8 && !isGapYear && (
               <div style={s.card}>
                 <h3 style={s.cardTitle}>🗺️ Your Roadmap {!isGrade9 && `for ${topStream}`}</h3>
                 <div style={s.roadmap}>
@@ -452,21 +627,23 @@ export default function EnhancedResults({ streamScores, mathResults, student }) 
             )}
             <div style={s.card}>
               <h3 style={s.cardTitle}>📚 Study Tips</h3>
-              {getStudyTips(isGrade8 ? null : topStream, student).map((tip, i) => (
+              {getStudyTips(isGrade8 || isGapYear ? null : topStream, student).map((tip, i) => (
                 <div key={i} style={s.tipRow}>
                   <span style={{ fontSize:18 }}>{tip.emoji}</span>
                   <span style={s.tipText}>{tip.text}</span>
                 </div>
               ))}
             </div>
-            <div style={{ ...s.card, background:`linear-gradient(135deg,${isGrade8?"#f0fdfa":isGrade9?"#faf5ff":info.bg},#fff)`, border:`1px solid ${bannerColor}40` }}>
+            <div style={{ ...s.card, background:`linear-gradient(135deg,${isGapYear?"#ecfeff":isGrade8?"#f0fdfa":isGrade9?"#faf5ff":info.bg},#fff)`, border:`1px solid ${bannerColor}40` }}>
               <p style={{ fontSize:18, textAlign:"center", margin:0, lineHeight:1.8, color:"#1e293b" }}>✨ <em>"The path to success starts with knowing yourself.<br/>You've taken that first step today."</em></p>
               <p style={{ textAlign:"center", color:bannerColor, fontWeight:700, marginTop:8, fontSize:13 }}>— Stablym</p>
             </div>
           </div>
         )}
 
-        <button style={s.retakeBtn} onClick={() => window.location.reload()}>🔄 {isGrade8 || isGrade9 ? "Start Over" : "Retake Quiz"}</button>
+        {!isGapYear && (
+          <button style={s.retakeBtn} onClick={() => window.location.reload()}>🔄 {isGrade8 || isGrade9 ? "Start Over" : "Retake Quiz"}</button>
+        )}
       </div>
     </div>
   );
